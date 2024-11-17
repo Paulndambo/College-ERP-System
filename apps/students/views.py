@@ -4,13 +4,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
 
-from apps.students.models import Student, StudentDocument, MealCard
+from apps.students.models import Student, StudentDocument, MealCard, StudentEducationHistory
 from apps.users.models import User
 from apps.core.models import UserRole
 from apps.schools.models import Programme
 
 
 # Create your views here.
+EDUCATION_LEVELS = ["Primary School", "Secondary School", "College", "University"]
+GRADUATION_STATUSES = ["Graduated", "Not Graduated"]
 def students(request):
     students = Student.objects.all().order_by("-created_on")
 
@@ -35,7 +37,10 @@ def students(request):
 
 def student_details(request, student_id):
     student = Student.objects.get(id=student_id)
-    context = {"student": student}
+    
+    education_history = StudentEducationHistory.objects.filter(student_id=student_id).order_by("-created_on")
+    context = {"student": student, "education_history": education_history, "levels": EDUCATION_LEVELS, "statuses": GRADUATION_STATUSES}
+    
     return render(request, "students/student_details.html", context)
 
 
@@ -145,3 +150,54 @@ def meal_cards(request):
 
     context = {"page_obj": page_obj}
     return render(request, "mealcards/mealcards.html", context)
+
+
+# Education History
+def create_education_history(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id")
+        institution = request.POST.get("institution")
+        level = request.POST.get("level")
+        graduated = request.POST.get("graduated")
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        StudentEducationHistory.objects.create(
+            student_id=student_id,
+            institution=institution,
+            level=level,
+            start_date=start_date,
+            end_date=end_date,
+            graduated=True if graduated == "Graduated" else False,
+        )
+        return redirect(f"/students/{student_id}/details/")
+    return render(request, "education_history/create_education_history.html")
+
+def edit_education_history(request):
+    if request.method == "POST":
+        education_history_id = request.POST.get("education_history_id")
+        institution = request.POST.get("institution")
+        level = request.POST.get("level")
+        graduated = request.POST.get("graduated")
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        education_history = StudentEducationHistory.objects.get(id=education_history_id)
+        education_history.institution = institution
+        education_history.level = level
+        education_history.start_date = start_date
+        education_history.end_date = end_date
+        education_history.graduated = True if graduated == "Graduated" else False
+
+        education_history.save()
+        return redirect(f"/students/{education_history.student.id}/details/")
+    return render(request, "education_history/edit_education_history.html")
+
+
+def delete_education_history(request):
+    if request.method == "POST":
+        education_history_id = request.POST.get("education_history_id")
+        education_history = StudentEducationHistory.objects.get(id=education_history_id)
+        education_history.delete()
+        return redirect(f"/students/{education_history.student.id}/details/")
+    return render(request, "education_history/delete_education_history.html")

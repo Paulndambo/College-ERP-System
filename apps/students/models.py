@@ -28,6 +28,12 @@ months = [
     ("December", "December"),
 ]
 
+EDUCATION_LEVEL_CHOICES = (
+    ("Primary School", "Primary School"),
+    ("Secondary School", "Secondary School"),
+    ("College", "College"),
+    ("University", "University"),
+)
 
 date_today = datetime.now().date()
 month_name = calendar.month_name[date_today.month]
@@ -47,6 +53,17 @@ class Student(AbsoluteBaseModel):
         return (
             f"{self.user.first_name} {self.user.last_name}: {self.registration_number}"
         )
+        
+class StudentEducationHistory(AbsoluteBaseModel):
+    student = models.ForeignKey("students.Student", on_delete=models.CASCADE, related_name="educationhistory")
+    institution = models.CharField(max_length=255)
+    level = models.CharField(max_length=255, choices=EDUCATION_LEVEL_CHOICES)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True)
+    graduated = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.student.user.first_name} {self.student.user.last_name}: {self.name}"
 
 
 class StudentDocument(AbsoluteBaseModel):
@@ -67,3 +84,15 @@ class MealCard(AbsoluteBaseModel):
 
     def __str__(self):
         return f"{self.student.user.username}: {self.card_number}"
+
+
+class StudentProgramme(AbsoluteBaseModel):
+    student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
+    programme = models.ForeignKey("schools.Programme", on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField(null=True)
+    current_year = models.CharField(max_length=255, null=True)
+    current_semester = models.CharField(max_length=255, null=True)
+
+    def __str__(self):
+        return f"{self.student.user.username}: {self.programme.name}"

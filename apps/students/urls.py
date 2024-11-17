@@ -6,6 +6,10 @@ from apps.students.views import (
     new_student,
     meal_cards,
     delete_student,
+    
+    create_education_history,
+    delete_education_history,
+    edit_education_history,
 )
 
 from apps.students.uploads.views import upload_students
@@ -18,4 +22,8 @@ urlpatterns = [
     path("meal-cards/", meal_cards, name="meal-cards"),
     path("delete-student/", delete_student, name="delete-student"),
     path("upload-students/", upload_students, name="upload-students"),
+
+    path("create-education-history/", create_education_history, name="create-education-history"),
+    path("edit-education-history/", edit_education_history, name="edit-education-history"),
+    path("delete-education-history/", delete_education_history, name="delete-education-history"),
 ]
