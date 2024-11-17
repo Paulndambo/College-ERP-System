@@ -1,0 +1,44 @@
+<div class="modal fade" id="newCourseModal{{programme.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Course</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'new-course' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" id="programme_id" name="programme_id" value="{{programme.id}}" hidden readonly />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    required
+                  />
+                </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Code</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="course_code"
+                      name="course_code"
+                      required
+                    />
+                  </div>
+                </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Create Course</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

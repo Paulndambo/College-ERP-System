@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+{% endblock additional_css %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h3>Room: {{room.room_number}} Students</h3>
+    </div>
+</div>
+      <div class="table-responsive small">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Reg. Number</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Email</th>
+              <th scope="col">Gender</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+            <tr>
+              <td>{{student.id}}</td>
+              <td>{{student.user.name}}</td>
+              <td>{{student.registration_number}}</td>
+              <td>{{student.user.phone_number}}</td>
+              <td>{{student.user.email}}</td>
+              <td>{{student.user.gender}}</td>
+              <td>
+                <a href="{% url 'student-details' student.id %}" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i></a>
+              </td>
+            </tr>
+            
+            {% endfor %}
+
+          </tbody>
+        </table>
+       
+      </div>
+{% endblock content %}

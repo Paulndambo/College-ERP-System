@@ -1,0 +1,96 @@
+<div class="modal fade" id="editHostelModal{{hostel.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Hostel</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-hostel' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <input type="number" id="hostel_id" name="hostel_id" value="{{hostel.id}}" hidden readonly required />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    value="{{hostel.name}}"
+                    required
+                  />
+                </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">No. of Rooms</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="rooms"
+                      name="rooms"
+                      value="{{hostel.rooms}}"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Capacity</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="capacity"
+                      name="capacity"
+                      value="{{hostel.capacity}}"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Charge Per Room</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="room_cost"
+                        name="room_cost"
+                        value="{{hostel.room_cost}}"
+                        required
+                      />
+                    </div>
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Gender</label>
+                      <select class="form-select" id="gender" name="gender" required>
+                        <option value="{{hostel.gender}}">{{hostel.gender}}</option>
+                        {% for gender in gender_choices %}  
+                            {% if gender != hostel.gender %}
+                                <option value="{{ gender }}">{{ gender }}</option>
+                            {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Campus</label>
+                      <select class="form-select" id="campus" name="campus" required>
+                        <option value="{{hostel.campus.id}}">{{hostel.campus.name}}</option>
+                        {% for campus in campuses %}
+                            {% if campus.id != hostel.campus.id %}
+                                <option value="{{ campus.id }}">{{ campus.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                    
+                  </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Create Hostel</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

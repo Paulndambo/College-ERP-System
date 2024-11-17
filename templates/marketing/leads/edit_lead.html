@@ -1,0 +1,137 @@
+<div class="modal fade" id="editLeadModal{{lead.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Lead</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-lead' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <input type="number" id="lead_id" name="lead_id" value="{{lead.id}}" hidden readonly required />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    value="{{lead.name}}"
+                    required
+                  />
+                </div>
+
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Phone Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="phone"
+                      name="phone"
+                      value="{{lead.phone_number}}"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      value="{{lead.email}}"
+                      required
+                    />
+                  </div>
+                </div>
+               
+                <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Gender</label>
+                  <select class="form-select" id="gender" name="gender">
+                      <option value="{{lead.name}}">{{lead.gender}}</option>
+                      {% for gender in gender_choices %}
+                        {% if gender != lead.gender %}
+                            <option value="{{gender}}">{{gender}}</option>
+                        {% endif %}
+                      {% endfor %}
+                  </select>
+                </div>
+                <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Lead Source</label>
+                    <select class="form-select" id="source" name="source">
+                        <option value="{{lead.source}}">{{lead.source}}</option>
+                        {% for source in sources %}
+                            {% if source != lead.source %}
+                                <option value="{{source}}">{{source}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                <div class="col">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Programme Interested</label>
+                    <select class="form-select" id="programme" name="programme">
+                        <option value="{{lead.programme.id}}">{{lead.programme}}</option>
+                        {% for programme in programmes %}
+                            {% if programme.id != lead.programme.id %}
+                                <option value="{{programme.id}}">{{programme}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">City</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="city"
+                      name="city"
+                      value="{{lead.city}}"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Country</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="country"
+                      name="country"
+                      value="{{lead.country}}"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label class="form-label fw-bold">Lead Owner</label>
+                    <select class="form-select" id="assigned_to" name="assigned_to">
+                      <option></option>
+                      {% for user in users %}
+                        {% if user.id != lead.assigned_to.id %}
+                          <option value="{{user.id}}">{{user.name}}</option>
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                              
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Lead</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

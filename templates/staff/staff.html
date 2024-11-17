@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+{% endblock additional_css %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h3>Staff</h3>
+    </div>
+    <div class="col">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <div class="col">
+              <input type="text" class="form-control" name="search_text" id="search_text" placeholder="ID Number ...">
+            </div>
+            <input type="submit" hidden />
+          </div>
+      </form>
+    </div>
+    <div class="col">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newStaffModal">New Staff</button>
+    </div>
+</div>
+      <div class="table-responsive small">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Staff Number</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Email</th>
+              <th scope="col">Gender</th>
+              <th scope="col" colspan="3"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for staff in page_obj %}
+            <tr>
+              <td>{{staff.id}}</td>
+              <td>{{staff.user.name}}</td>
+              <td>{{staff.staff_number}}</td>
+              <td>{{staff.user.phone_number}}</td>
+              <td>{{staff.user.email}}</td>
+              <td>{{staff.user.gender}}</td>
+              <td>
+                <a href="" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i></a>
+              </td>
+              <td><a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStaffModal{{ staff.id }}">
+                <i class="bi bi-pencil-square"></i>
+              </a></td>
+              <td><a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteStaffModal{{ staff.id }}">
+                <i class="bi bi-trash"></i>
+              </a></td>
+             {% include "staff/edit_staff.html" %}
+             {% include "staff/delete_staff.html" %}
+            
+            </tr>
+            
+            {% endfor %}
+
+          </tbody>
+        </table>
+        <div>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+              {% if page_obj.has_previous %}   
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+              {% endif %}
+              <a class="page-link" href="#">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+              {% if page_obj.has_next %}    
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+              {% endif %}   
+            </ul>
+          </nav>
+        </div>
+      </div>
+{% endblock content %}

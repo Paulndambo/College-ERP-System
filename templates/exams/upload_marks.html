@@ -1,0 +1,45 @@
+<div class="modal fade" id="uploadMarksModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Upload Marks</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'upload-marks' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Marks Data File</label>
+                    <input type="file" accept=".csv, .xlsx" class="form-control" id="marks_file" name="marks_file" />
+                </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Semester</label>
+                      <select class="form-select" id="semester_id" name="semester_id">
+                          {% for semester in semesters %}
+                          <option value="{{ semester.id }}">{{ semester }} - {{ semester.academic_year }}</option>
+                          {% endfor %}
+                      </select>
+                    </div>
+                </div>  
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Course</label>
+                    <select class="form-select" id="course_id" name="course_id">
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course }}</option>
+                        {% endfor %}
+                    </select>
+                  </div>
+              </div>     
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Upload Marks</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,217 @@
+from datetime import datetime, timedelta
+import calendar
+
+from django.shortcuts import render, redirect
+from django.db.models import Q
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.db.models import Case, When, Value, IntegerField
+from django.db import transaction
+
+
+from apps.marketing.models import Lead, Interaction, Task, LeadStage
+from apps.schools.models import Department, Programme, Course
+from apps.users.models import User
+from apps.core.models import UserRole
+
+
+from apps.core.constants import GENDER_CHOICES, SOURCES, INTERACTION_TYPES, LEAD_STAGES
+
+
+@login_required
+def leads(request):
+    leads = Lead.objects.all().order_by("-created_on")
+
+    paginator = Paginator(leads, 8)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    programmes = Programme.objects.all()
+    users_role = UserRole.objects.get(name="Student")
+    users = User.objects.exclude(role=users_role)
+
+    context = {
+        "page_obj": page_obj,
+        "programmes": programmes,
+        "gender_choices": GENDER_CHOICES,
+        "sources": SOURCES,
+        "users": users,
+    }
+    return render(request, "marketing/leads/leads.html", context)
+
+
+@login_required
+def lead_details(request, lead_id):
+    lead = Lead.objects.get(id=lead_id)
+
+    interactions = Interaction.objects.filter(lead=lead).order_by("created_on")
+    users_role = UserRole.objects.get(name="Student")
+    users = User.objects.exclude(role=users_role)
+    tasks = Task.objects.filter(lead=lead).order_by("-created_on")
+
+    lead_stages = LeadStage.objects.filter(lead=lead).order_by("-created_on")
+
+    print(users)
+
+    context = {
+        "lead": lead,
+        "interaction_types": INTERACTION_TYPES,
+        "interactions": interactions,
+        "users": users,
+        "tasks": tasks,
+        "stages": LEAD_STAGES,
+        "lead_stages": lead_stages,
+    }
+    return render(request, "marketing/leads/lead_details.html", context)
+
+
+@login_required
+def capture_lead(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone_number = request.POST.get("phone")
+        gender = request.POST.get("gender")
+        source = request.POST.get("source")
+        programme = request.POST.get("programme")
+        city = request.POST.get("city")
+        country = request.POST.get("country")
+
+        lead = Lead.objects.create(
+            name=name,
+            email=email,
+            phone_number=phone_number,
+            gender=gender,
+            source=source,
+            programme_id=programme,
+            city=city,
+            country=country,
+        )
+
+        LeadStage.objects.create(
+            lead=lead, user=request.user, stage="New", added_by=request.user
+        )
+
+        return redirect("leads")
+
+    return render(request, "marketing/leads/capture_lead.html")
+
+
+@login_required
+def edit_lead(request):
+    if request.method == "POST":
+        lead_id = request.POST.get("lead_id")
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone_number = request.POST.get("phone")
+        gender = request.POST.get("gender")
+        source = request.POST.get("source")
+        programme = request.POST.get("programme")
+        city = request.POST.get("city")
+        country = request.POST.get("country")
+        assigned_to = request.POST.get("assigned_to")
+
+        lead = Lead.objects.get(id=lead_id)
+        lead.name = name
+        lead.email = email
+        lead.phone_number = phone_number
+        lead.gender = gender
+        lead.source = source
+        lead.programme_id = programme
+        lead.assigned_to_id = assigned_to
+        lead.city = city
+        lead.country = country
+        lead.save()
+
+        return redirect("leads")
+    return render(request, "marketing/leads/edit_lead.html")
+
+
+@login_required
+def new_lead_interaction(request):
+    if request.method == "POST":
+        lead_id = request.POST.get("lead_id")
+        interaction_type = request.POST.get("interaction_type")
+        notes = request.POST.get("notes")
+
+        Interaction.objects.create(
+            interaction_type=interaction_type,
+            notes=notes,
+            lead_id=lead_id,
+            added_by=request.user,
+        )
+        return redirect("lead-details", lead_id=lead_id)
+    return render(request, "marketing/leads/new_lead_interaction.html")
+
+
+@login_required
+def add_lead_stage(request):
+    if request.method == "POST":
+        lead_id = request.POST.get("lead_id")
+        stage = request.POST.get("stage")
+
+        lead_stage = LeadStage.objects.create(
+            lead_id=lead_id, added_by=request.user, stage=stage
+        )
+        lead_stage.lead.status = lead_stage.stage
+        lead_stage.lead.save()
+        return redirect("lead-details", lead_id=lead_id)
+    return render(request, "marketing/leads/new_lead_stage.html")
+
+
+@login_required
+def tasks(request):
+    tasks = Task.objects.all().order_by("-created_on")
+
+    if request.method == "POST":
+        search_text = request.POST.get("search_text")
+        tasks = Task.objects.filter(Q(title__icontains=search_text))
+
+    paginator = Paginator(tasks, 8)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"page_obj": page_obj}
+    return render(request, "marketing/leads/tasks/tasks.html", context)
+
+
+@login_required
+def add_lead_task(request):
+    if request.method == "POST":
+        lead_id = request.POST.get("lead_id")
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        due_date = request.POST.get("due_date")
+
+        Task.objects.create(
+            lead_id=lead_id,
+            user=request.user,
+            title=title,
+            description=description,
+            due_date=due_date,
+        )
+
+        return redirect("lead-details", lead_id=lead_id)
+    return render(request, "marketing/leads/new_lead_task.html")
+
+
+@login_required
+def mark_task_as_complete(request):
+    if request.method == "POST":
+        task_id = request.POST.get("task_id")
+        task = Task.objects.get(id=task_id)
+        task.completed = True
+        task.save()
+        return redirect("lead-details", lead_id=task.lead.id)
+    return render(request, "marketing/leads/mark_as_complete.html")
+
+
+@login_required
+def delete_lead_task(request):
+    if request.method == "POST":
+        task_id = request.POST.get("task_id")
+        task = Task.objects.get(id=task_id)
+        task.delete()
+        return redirect("lead-details", lead_id=task.lead.id)
+    return render(request, "marketing/leads/delete_task.html")

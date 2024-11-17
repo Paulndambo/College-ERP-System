@@ -1,0 +1,95 @@
+<div class="modal fade" id="editCampusModal{{campus.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Campus</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-campus' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" name="campus_id" id="campus_id" value="{{campus.id}}" hidden readonly />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Campus Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    value="{{campus.name}}"
+                    required
+                  />
+                </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Phone Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="phone_number"
+                      name="phone_number"
+                      value="{{campus.phone_number}}"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      value="{{campus.email}}"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Address</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="address"
+                        name="address"
+                        value="{{campus.address}}"
+                        required
+                      />
+                    </div>
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">City/Town</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="city"
+                        name="city"
+                        value="{{campus.city}}"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Campus Population</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="population"
+                        name="population"
+                        value="{{campus.population}}"
+                        required
+                      />
+                    </div>
+                  </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Edit Campus</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

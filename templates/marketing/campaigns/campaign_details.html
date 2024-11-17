@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+<style>
+    .metric-card {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .progress {
+        height: 8px;
+    }
+    
+    .campaign-status {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    
+    .sparkline {
+        width: 100px;
+        height: 30px;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,0,0,.075);
+        cursor: pointer;
+    }
+    
+    .conversion-chart {
+        height: 300px;
+        width: 100%;
+        background: #f8f9fa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px 0;
+    }
+    
+    .custom-legend {
+        display: flex;
+        gap: 20px;
+        margin-top: 10px;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+    }
+</style>
+{% endblock additional_css %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-1">{{campaign.name}}</h4>
+                        <div class="d-flex align-items-center">
+                            <span class="campaign-status bg-success"></span>
+                            <span class="text-muted">{{campaign.status}}</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-muted">Started: {{campaign.start_date}}</span>
+                            <span class="mx-2">•</span>
+                            <span class="text-muted">Ends: {{campaign.end_date}}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-primary me-2">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-download"></i> Export Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Metrics Overview -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-2">Total Leads</h6>
+                        <h3 class="mb-0">{{leads_count}}</h3>
+                        <span class="text-success">
+                            <i class="fas fa-arrow-up"></i> 12.5%
+                        </span>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-2">Conversion Rate</h6>
+                        <h3 class="mb-0">{{campaign.conversion_rate}}%</h3>
+                        <span class="text-success">
+                            <i class="fas fa-arrow-up"></i> 2.1%
+                        </span>
+                    </div>
+                    <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                        <i class="fas fa-chart-line text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-2">Views</h6>
+                        <h3 class="mb-0">{{campaign.views}}</h3>
+                        <span class="text-primary">
+                            <i class="fas fa-arrow-up"></i> 0.8h
+                        </span>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                        <i class="fas fa-eye text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card metric-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="text-muted mb-2">Budget Spent</h6>
+                        <h3 class="mb-0">${{campaign.budget}}</h3>
+                        <span class="text-muted">of ${{campaign.budget}}</span>
+                    </div>
+                    <div class="bg-info bg-opacity-10 rounded-circle p-3">
+                        <i class="fas fa-dollar-sign text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conversion Chart -->
+ <!--
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Lead Conversion Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="conversion-chart" id="conversionChart"></div>
+                <div class="custom-legend">
+                    <div class="legend-item">
+                        <div class="legend-color bg-primary"></div>
+                        <span>Total Visits</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-success"></div>
+                        <span>Converted Leads</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color bg-warning"></div>
+                        <span>Qualified Leads</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+-->
+
+<!-- Campaign Leads Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Campaign Leads</h5>
+                    <div class="d-flex gap-2">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search leads...">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Source</th>
+                                <th>Status</th>
+                                <th>Owner</th>
+                                <th>Created On</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lead in page_obj %}
+                            <tr>
+                                <td>{{lead.id}}</td>
+                                <td>{{lead.name}}</td>
+                                <td>{{lead.email}}</td>
+                                <td>{{lead.source}}</td>
+                                <td><span class="badge bg-success">{{lead.status}}</span></td>
+                                <td>{{lead.assigned_to}}</td>
+                                <td>{{lead.created_on}}</td>
+                                <td>
+                                    <a href="{% url 'lead-details' lead.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                          
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <nav aria-label="Page navigation example">
+                      <ul class="pagination justify-content-end">
+                        {% if page_obj.has_previous %}   
+                          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                        {% endif %}
+                        <a class="page-link" href="#">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+                        {% if page_obj.has_next %}    
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        {% endif %}   
+                      </ul>
+                    </nav>
+                  </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+
+
+{% block additional_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
+
+{% endblock additional_scripts %}

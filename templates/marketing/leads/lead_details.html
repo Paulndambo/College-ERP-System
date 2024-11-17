@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block additional_css %}
+    <style>
+        .timeline {
+            border-left: 3px solid #727cf5;
+            margin: 0 10px;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -13px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: #727cf5;
+            border-radius: 50%;
+        }
+        
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 5px 15px;
+        }
+        
+        .card {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .lead-status {
+            transition: all 0.3s ease;
+        }
+        
+        .lead-status:hover {
+            transform: translateY(-2px);
+        }
+
+        .task-item {
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.task-item:hover {
+    background-color: #f8f9fa;
+}
+
+.task-actions .btn-link {
+    padding: 0;
+    margin: 0 4px;
+}
+
+.task-actions .btn-link:hover {
+    opacity: 0.8;
+}
+    </style>
+{% endblock additional_css %}
+
+{% block content %}
+        <div class="row">
+            <!-- Lead Information -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Lead Details</h5>
+                        <span class="badge bg-success">{{lead.status}}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Full Name</label>
+                                    <h6>{{lead.name}}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Email</label>
+                                    <h6>{{lead.email}}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Phone</label>
+                                    <h6>{{lead.phone_number}}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Interested In</label>
+                                    <h6>{{lead.programme}}</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Source</label>
+                                    <h6>{{lead.source}}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Created Date</label>
+                                    <h6>{{lead.created_on}}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Lead Owner</label>
+                                    <h6>{{lead.assigned_to.name}}</h6>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-muted">Lead Status</label>
+                                    <h6>{{lead.status}}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Lead Progress</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="card lead-status bg-light-success border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-plus mb-2 text-success"></i>
+                                        <h6>New Lead</h6>
+                                        <span class="badge bg-success status-badge">Completed</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card lead-status bg-light border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-phone mb-2 text-primary"></i>
+                                        <h6>Contact Made</h6>
+                                        <span class="badge bg-primary status-badge">In Progress</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card lead-status bg-light border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-file-contract mb-2 text-secondary"></i>
+                                        <h6>Proposal</h6>
+                                        <span class="badge bg-secondary status-badge">Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card lead-status bg-light border-0">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-check-circle mb-2 text-secondary"></i>
+                                        <h6>Closed</h6>
+                                        <span class="badge bg-secondary status-badge">Pending</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            -->
+                <!-- Notes Section -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Notes</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newLeadInteractionModal{{lead.id}}">
+                            <i class="fas fa-plus"></i> Add Note
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            {% for interaction in interactions %}
+                            <div class="timeline-item">
+                                <small class="text-muted">{{interaction.interaction_type}}, {{interaction.date}}</small>
+                                <p class="mb-0 mt-1">{{interaction.notes}}</p>
+                                <small class="text-muted">- {{interaction.added_by.name}}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <div class="col-lg-4">
+                <!-- Tasks -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Tasks</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addTaskModal{{lead.id}}">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% for task in tasks %}
+                        <div class="task-item mb-3 d-flex align-items-center justify-content-between">
+                            <p>{{task.id}}. {{task.title}}<br>
+                                <small class="text-muted">Due: {{task.due_date}}</p>
+                            <div class="task-actions">
+                                <button class="btn btn-link text-info" data-bs-toggle="modal" data-bs-target="#leadTaskDetailsModal{{task.id}}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% if task.completed %}
+                                {% else %}
+                                <button class="btn btn-link text-success" data-bs-toggle="modal" data-bs-target="#completeLeadTaskModal{{task.id}}">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-link text-danger" data-bs-toggle="modal" data-bs-target="#deleteLeadTaskModal{{task.id}}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% include "marketing/leads/tasks/task_details.html" %}
+                        {% include "marketing/leads/tasks/delete_task.html" %}
+                        {% include "marketing/leads/tasks/mark_as_complete.html" %}
+
+                        {% endfor %}        
+                    </div>
+                </div>
+
+                <!-- Activity Feed -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Lead Progress</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addLeadStageModal{{lead.id}}">
+                            <i class="fas fa-plus"></i> New Stage
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            {% for lead_stage in lead_stages %}
+                            <div class="timeline-item">
+                                <small class="text-muted">{{lead_stage.date_reached}}</small>
+                                <p class="mb-0 mt-1">{{lead_stage.stage}}</p>
+                                <small class="text-muted">Added by: {{lead_stage.added_by.name}}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% include "marketing/leads/new_lead_interaction.html" %}
+{% include "marketing/leads/new_lead_task.html" %}
+{% include "marketing/leads/new_lead_stage.html" %}
+    <!-- Add Note Modal -->
+    <div class="modal fade" id="addNoteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="noteForm">
+                        <div class="mb-3">
+                            <label class="form-label">Note Content</label>
+                            <textarea class="form-control" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save Note</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Task Modal -->
+   
+
+{% endblock content %}

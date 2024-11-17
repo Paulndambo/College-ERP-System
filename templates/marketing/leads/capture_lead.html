@@ -1,0 +1,116 @@
+<div class="modal fade" id="captureLeadModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Record Lead</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'capture-lead' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    required
+                  />
+                </div>
+
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Phone Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="phone"
+                      name="phone"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      required
+                    />
+                  </div>
+                </div>
+               
+                <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Gender</label>
+                  <select class="form-select" id="gender" name="gender">
+                      <option value=""></option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                  </select>
+                </div>
+                <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Lead Source</label>
+                    <select class="form-select" id="source" name="source">
+                        <option value=""></option>
+                        <option value="Website">Website</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Instagram">Instagram</option>
+                        <option value="Twitter">Twitter</option>
+                        <option value="Linkedin">Linkedin</option>
+                        <option value="Referral">Referral</option>
+                        <option value="Event">Event</option>
+                        <option value="Webinar">Webinar</option>
+                        <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                <div class="col">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Programme Interested</label>
+                    <select class="form-select" id="programme" name="programme">
+                        <option value=""></option>
+                        {% for programme in programmes %}
+                            <option value="{{programme.id}}">{{programme}}</option>
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">City</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="city"
+                      name="city"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Country</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="country"
+                      name="country"
+                      required
+                    />
+                  </div>
+                </div>
+                              
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Lead</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

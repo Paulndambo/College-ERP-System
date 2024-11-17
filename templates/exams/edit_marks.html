@@ -1,0 +1,84 @@
+<div class="modal fade" id="editMarksModal{{mark.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Marks</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-marks' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                 <input type="number" id="marks_id" name="marks_id" value="{{mark.id}}" hidden readonly required /> 
+
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Semester</label>
+                      <select class="form-select" id="semester_id" name="semester_id">
+                        <option value="{{mark.semester_id}}">{{mark.semester}}-{{mark.semester.academic_year}}</option>
+                          {% for semester in semesters %}
+                            {% if semester.id != mark.semester_id %}
+                                <option value="{{ semester.id }}">{{ semester }}-{{semester.academic_year}}</option>
+                            {% endif %}
+                          {% endfor %}
+                      </select>
+                    </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Course</label>
+                    <select class="form-select" id="course_id" name="course_id">
+                        <option value="{{mark.course_id}}">{{mark.course}}</option>
+                        {% for course in courses %}
+                            {% if course.id != mark.course_id %}
+                                <option value="{{ course.id }}">{{ course }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Cat 1</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="cat_one"
+                      name="cat_one"
+                      value="{{mark.cat_one}}"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Cat 2</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="cat_two"
+                      name="cat_two"
+                      value="{{mark.cat_two}}"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Main Exam Marks</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="main_exam"
+                      name="main_exam"
+                      value="{{mark.exam_marks}}"
+                      required
+                    />
+                  </div>
+                </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Edit Marks</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

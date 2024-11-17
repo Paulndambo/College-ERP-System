@@ -1,0 +1,31 @@
+<div class="modal fade" id="addLeadStageModal{{lead.id}}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Transition Lead Stages</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm" method="POST" action="{% url 'add-lead-stage' %}">
+                    {% csrf_token %}
+                    <input type="number" id="lead_id" name="lead_id" value="{{lead.id}}" hidden readonly required />
+                    <div class="mb-3">
+                        <label class="form-label">Stage</label>
+                        <select class="form-select" id="stage" name="stage" required>
+                            <option></option>
+                            {% for stage in stages %}
+                                <option value="{{stage}}">{{stage}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Stage</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>

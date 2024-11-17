@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Room Booking</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Arial', sans-serif;
+    }
+    .booking-container {
+      margin-top: 50px;
+      padding: 40px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+    .search-form {
+      margin-bottom: 30px;
+    }
+    .btn-new-booking {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="booking-container">
+      <h3>Room Booking</h3>
+      <p class="lead">Already have an existing booking?.</p>
+      {% if booking %}
+      <div class="search-result" style="background-color: azure;">
+        <p><strong>Name:</strong> {{ booking.first_name }} {{booking.last_name}}</p>
+        <p><strong>Booking Date:</strong> {{booking.created_on}}</p>
+        <p><strong>Status:</strong> <span class="text-success">{{booking.status}}</span></p>
+      </div>
+      {% else %}
+      <form method="post" class="search-form">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="bookingReference" class="form-label">Enter Reg/Admission Number</label>
+          <input type="text" class="form-control" id="search_text" name="search_text" placeholder="Reg/Admission Number" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Search Booking</button>
+      </form>
+      {% endif %}
+
+      {% if can_book %}
+      <!-- New Booking Button -->
+      <p class="mt-4">Don't have an existing booking?</p>
+      <a href="{% url 'book-hostel' %}" class="btn btn-secondary btn-new-booking w-100">Place a New Booking</a>
+      {% else %}
+      <div class="alert alert-danger" role="alert">
+        <strong>Info: Our hostels are fully booked, you cannot reserve a room at the moment!.</strong>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

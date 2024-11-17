@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+{% endblock additional_css %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h3>Semester Transcripts</h3>
+    </div>
+    <div class="col">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <div class="col">
+              <input type="text" class="form-control" name="search_text" id="search_text" placeholder="Name/Year ...">
+            </div>
+            <input type="submit" hidden />
+          </div>
+      </form>
+    </div>
+
+</div>
+      <div class="table-responsive small">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Semester</th>
+              <th scope="col">Academic Year</th>
+              <th scope="col">Created On</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for semester in page_obj %}
+            <tr>
+              <td>{{semester.id}}</td>
+              <td>{{semester.name}}</td>
+              <td>{{semester.academic_year}}</td>
+              <td>{{semester.created_on}}</td>
+              <td><a href="{% url 'semester-transcripts-details' semester.id %}" target="_blank" class="btn btn-info btn-sm">
+                <i class="bi bi-eye-fill"></i>
+              </a></td>
+            </tr>
+            
+            {% endfor %}
+
+          </tbody>
+        </table>
+        <div>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+              {% if page_obj.has_previous %}   
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+              {% endif %}
+              <a class="page-link" href="#">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+              {% if page_obj.has_next %}    
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+              {% endif %}   
+            </ul>
+          </nav>
+        </div>
+      </div>
+{% endblock content %}

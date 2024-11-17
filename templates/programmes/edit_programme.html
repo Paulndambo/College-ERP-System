@@ -1,0 +1,58 @@
+<div class="modal fade" id="editProgrammeModal{{programme.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Programme</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-programme' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" id="programme_id" name="programme_id" value="{{programme.id}}" hidden readonly />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    value="{{programme.name}}"
+                    required
+                  />
+                </div>
+
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Code</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="code"
+                      name="code"
+                      value="{{programme.code}}"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Level</label>
+                    <select class="form-select" id="level" name="level">
+                        <option value="{{programme.level}}">{{programme.level}}</option>
+                      {% for level in levels %}
+                        {% if level == programme.level %}
+                            <option value="{{ level }}">{{ level }}</option>
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Edit Programme</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

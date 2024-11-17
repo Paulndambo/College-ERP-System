@@ -1,0 +1,18 @@
+<div class="modal fade" id="leadTaskDetailsModal{{task.id}}" tabindex="-1" aria-labelledby="newTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newTransactionModalLabel">Lead Task Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><b>Title:</b> {{task.title}}</p>
+                <p><b>Description:</b> {{task.description}}</p>
+                <p><b>Lead:</b> {{task.lead}}</p>
+                <p><b>Added By:</b> {{task.user.name}}</p>
+                <p><b>Due Date:</b> {{task.due_date}}</p>
+                <p><b>Created On:</b> {{task.created_on}}</p>
+            </div>
+        </div>
+    </div>
+</div>

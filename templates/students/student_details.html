@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <!-- Student Personal Details -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-title mb-0">Personal Details</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-3">
+          <img src="https://via.placeholder.com/150" alt="Student Photo" class="img-fluid rounded mb-3">
+        </div>
+        <div class="col-md-9">
+          <p><strong>Name:</strong> {{student.user.name}}</p>
+          <p><strong>Reg. Number:</strong> {{student.registration_number}}</p>
+          <p><strong>Date of Birth:</strong> {{student.user.date_of_birth}}</p>
+          <p><strong>Gender:</strong> {{student.user.gender}}</p>
+          <p><strong>Email:</strong> {{student.user.email}}</p>
+          <p><strong>Phone:</strong> {{student.user.phone_number}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Details -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-title mb-0">Course Details</h5>
+    </div>
+    <div class="card-body">
+      <p><strong>Course:</strong> Bachelor of Science in Computer Science</p>
+      <p><strong>Year:</strong> 3rd Year</p>
+      <p><strong>Semester:</strong> 2nd Semester</p>
+      <p><strong>Department:</strong> Department of Computer Science</p>
+    </div>
+  </div>
+
+  <!-- Contact Information -->
+ <div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Contact Information</h5>
+            </div>
+            <div class="card-body">
+              <p><strong>Address:</strong> 123 Main Street, Springfield, USA</p>
+              <p><strong>City:</strong> Springfield</p>
+              <p><strong>Postal Code:</strong> 12345</p>
+              <p><strong>State:</strong> Illinois</p>
+            </div>
+          </div>
+    </div>
+    <div class="col-md-6">
+        <!-- Guardian Information -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Guardian Information</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Name:</strong> Jane Doe</p>
+          <p><strong>Relationship:</strong> Mother</p>
+          <p><strong>Phone:</strong> +1 987 654 3210</p>
+          <p><strong>Email:</strong> jane.doe@example.com</p>
+        </div>
+      </div>
+    </div>
+ </div>
+
+  <!-- Past Education History -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-title mb-0">Education History</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-sm table-responsive mb-0">
+            <thead class="">
+              <tr>
+                <th>#</th>
+                <th scope="col">School</th>
+                <th scope="col">Level</th>
+                <th scope="col">Start Year</th>
+                <th scope="col">End Year</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>Kaumoni Pri. School</td>
+                <td>Primary School</td>
+                <td>2005</td>
+                <td>2013</td>
+                <td>Graduated</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Ndalani High School</td>
+                <td>Secondary School</td>
+                <td>2014</td>
+                <td>2016</td>
+                <td>Graduated</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Kithendu Secondary School</td>
+                <td>Secondary School</td>
+                <td>2016</td>
+                <td>2017</td>
+                <td>Graduated</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Masinde Muliro University</td>
+                <td>University</td>
+                <td>2018</td>
+                <td>2023</td>
+                <td>Graduated</td>
+              </tr>
+              
+            </tbody>
+          </table>
+    </div>
+  </div>
+
+  <!-- Next of Kin -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-title mb-0">Next of Kin</h5>
+    </div>
+    <div class="card-body">
+      <p><strong>Name:</strong> Michael Doe</p>
+      <p><strong>Relationship:</strong> Brother</p>
+      <p><strong>Phone:</strong> +1 654 321 0987</p>
+      <p><strong>Address:</strong> 456 Another Street, Springfield, USA</p>
+    </div>
+  </div>
+
+  <!-- Academic Performance -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="card-title mb-0">Academic Performance</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-sm table-responsive mb-0">
+        <thead class="">
+          <tr>
+            <th>#</th>
+            <th scope="col">Academic Year</th>
+            <th scope="col">Semester</th>
+            <th scope="col">GPA</th>
+            <th scope="col">Credits Earned</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>2020-2021</td>
+            <td>Semester 1</td>
+            <td>3.8</td>
+            <td>20</td>
+            <td><span class="badge badge-success">Passed</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>2020-2021</td>
+            <td>Semester 2</td>
+            <td>3.7</td>
+            <td>18</td>
+            <td><span class="badge badge-success">Passed</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>2020-2021</td>
+            <td>Semester 3</td>
+            <td>3.9</td>
+            <td>22</td>
+            <td><span class="badge badge-success">Passed</span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>2020-2021</td>
+            <td>Semester 4</td>
+            <td>3.6</td>
+            <td>19</td>
+            <td><span class="badge badge-warning">Ongoing</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endblock content %}

@@ -1,0 +1,319 @@
+from django.shortcuts import render, redirect
+from django.db.models import Q, F
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.contrib import messages
+from django.db.models import Case, When, Value, IntegerField
+from django.db import transaction
+
+from apps.schools.models import School, Department, Programme, Course
+
+# Create your views here.
+PROGRAMME_TYPES = ["Artisan", "Certificate", "Diploma", "Bachelor", "Masters", "PhD"]
+
+
+### Schools
+def schools(request):
+    schools = School.objects.all().order_by("-created_on")
+
+    if request.method == "POST":
+        search_text = request.POST.get("search_text")
+        schools = School.objects.filter(Q(name__icontains=search_text))
+
+    paginator = Paginator(schools, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"page_obj": page_obj}
+    return render(request, "schools/schools.html", context)
+
+
+def school_details(request, id):
+    school = School.objects.get(id=id)
+
+    departments = Department.objects.filter(school=school)
+
+    paginator = Paginator(departments, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"school": school, "page_obj": page_obj}
+    return render(request, "schools/school_details.html", context)
+
+
+def new_school(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        location = request.POST.get("location")
+
+        School.objects.create(name=name, email=email, phone=phone, location=location)
+
+        return redirect("schools")
+
+    return render(request, "schools/new_school.html")
+
+
+def edit_school(request):
+    if request.method == "POST":
+        school_id = request.POST.get("school_id")
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        phone = request.POST.get("phone")
+        location = request.POST.get("location")
+
+        school = School.objects.get(id=school_id)
+
+        school.name = name
+        school.email = email
+        school.phone = phone
+        school.location = location
+        school.save()
+
+        return redirect("schools")
+    return render(request, "schools/edit_school.html")
+
+
+def delete_school(request):
+    if request.method == "POST":
+        school_id = request.POST.get("school_id")
+        school = School.objects.get(id=school_id)
+        school.delete()
+
+        return redirect("schools")
+    return render(request, "schools/delete_school.html")
+
+
+### Departments
+def departments(request):
+    departments = Department.objects.all().order_by("-created_on")
+
+    if request.method == "POST":
+        search_text = request.POST.get("search_text")
+        departments = Department.objects.filter(
+            Q(name__icontains=search_text) | Q(school__name__icontains=search_text)
+        )
+
+    paginator = Paginator(departments, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"page_obj": page_obj}
+    return render(request, "departments/departments.html", context)
+
+
+def department_details(request, id):
+    department = Department.objects.get(id=id)
+
+    programmes = Programme.objects.filter(department=department).order_by("-created_on")
+
+    if request.method == "POST":
+        search_text = request.POST.get("search_text")
+        programmes = Programme.objects.filter(Q(name__icontains=search_text))
+
+    paginator = Paginator(programmes, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "department": department,
+        "levels": PROGRAMME_TYPES,
+        "page_obj": page_obj,
+    }
+    return render(request, "departments/department_details.html", context)
+
+
+def new_department(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        school_id = request.POST.get("school_id")
+        office = request.POST.get("office")
+
+        Department.objects.create(name=name, school_id=school_id, office=office)
+
+        return redirect(f"/schools/{school_id}")
+
+    return render(request, "departments/new_department.html")
+
+
+def edit_department(request):
+    if request.method == "POST":
+        department_id = request.POST.get("department_id")
+        name = request.POST.get("name")
+        school_id = request.POST.get("school_id")
+        office = request.POST.get("office")
+
+        department = Department.objects.get(id=department_id)
+
+        department.name = name
+        department.school_id = school_id
+        department.office = office
+        department.save()
+
+        return redirect("departments")
+    return render(request, "departments/edit_department.html")
+
+
+def delete_department(request):
+    if request.method == "POST":
+        department_id = request.POST.get("department_id")
+        department = Department.objects.get(id=department_id)
+        department.delete()
+
+        return redirect("departments")
+    return render(request, "departments/delete_department.html")
+
+
+### Programmes
+def programmes(request):
+    programmes = Programme.objects.all().order_by("-created_on")
+
+    if request.method == "POST":
+        search_text = request.POST.get("search_text")
+        programmes = Programme.objects.filter(
+            Q(name__icontains=search_text)
+            | Q(department__name__icontains=search_text)
+            | Q(code__icontains=search_text)
+            | Q(school__name__icontains=search_text)
+        )
+
+    paginator = Paginator(programmes, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"page_obj": page_obj, "levels": PROGRAMME_TYPES}
+    return render(request, "programmes/programmes.html", context)
+
+
+def programme_details(request, id):
+    programme = Programme.objects.get(id=id)
+
+    courses = Course.objects.filter(programme=programme).order_by("-created_on")
+
+    paginator = Paginator(courses, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"programme": programme, "page_obj": page_obj}
+    return render(request, "programmes/programme_details.html", context)
+
+
+def new_programme(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        department_id = request.POST.get("department_id")
+        level = request.POST.get("level")
+        code = request.POST.get("code")
+
+        department = Department.objects.get(id=department_id)
+        Programme.objects.create(
+            name=name,
+            department=department,
+            school=department.school,
+            level=level,
+            code=code,
+        )
+        return redirect(f"/schools/departments/{department_id}/details")
+
+    return render(request, "programmes/new_programme.html")
+
+
+def edit_programme(request):
+    if request.method == "POST":
+        programme_id = request.POST.get("programme_id")
+        name = request.POST.get("name")
+        level = request.POST.get("level")
+        code = request.POST.get("code")
+
+        programme = Programme.objects.get(id=programme_id)
+
+        programme.name = name
+        programme.department = programme.department
+        programme.school = programme.department.school
+        programme.level = level
+        programme.code = code
+        programme.save()
+
+        return redirect("programmes")
+    return render(request, "programmes/edit_programme.html")
+
+
+def delete_programme(request):
+    if request.method == "POST":
+        programme_id = request.POST.get("programme_id")
+        programme = Programme.objects.get(id=programme_id)
+        programme.delete()
+
+        return redirect("programmes")
+    return render(request, "programmes/delete_programme.html")
+
+
+### Courses
+def courses(request):
+    courses = Course.objects.all().order_by("-created_on")
+
+    if request.method == "POST":
+        search_text = request.POST.get("search_text")
+        courses = Course.objects.filter(
+            Q(name__icontains=search_text)
+            | Q(course_code__icontains=search_text)
+            | Q(programme__name__icontains=search_text)
+        )
+
+    paginator = Paginator(courses, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"page_obj": page_obj}
+    return render(request, "courses/courses.html", context)
+
+
+def new_course(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        course_code = request.POST.get("course_code")
+        programme_id = request.POST.get("programme_id")
+
+        programme = Programme.objects.get(id=programme_id)
+        Course.objects.create(
+            name=name,
+            department=programme.department,
+            programme=programme,
+            school=programme.department.school,
+            course_code=course_code,
+        )
+        return redirect(f"/schools/programmes/{programme_id}/details")
+
+    return render(request, "courses/new_course.html")
+
+
+def edit_course(request):
+    if request.method == "POST":
+        course_id = request.POST.get("course_id")
+        name = request.POST.get("name")
+        course_code = request.POST.get("course_code")
+        programme_id = request.POST.get("programme_id")
+
+        programme = Programme.objects.get(id=programme_id)
+        course = Course.objects.get(id=course_id)
+
+        course.name = name
+        course.department = programme.department
+        course.school = programme.department.school
+        course.programme = programme
+        course.code = course_code
+        course.save()
+
+        return redirect("courses")
+    return render(request, "courses/edit_course.html")
+
+
+def delete_course(request):
+    if request.method == "POST":
+        course_id = request.POST.get("course_id")
+        course = Course.objects.get(id=course_id)
+        course.delete()
+
+        return redirect("courses")
+    return render(request, "courses/delete_course.html")

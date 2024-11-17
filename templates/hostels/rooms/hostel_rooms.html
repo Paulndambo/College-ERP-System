@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+{% endblock additional_css %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h3>Hostel Rooms</h3>
+    </div>
+    <div class="col">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <div class="col">
+              <input type="text" class="form-control" name="search_text" id="search_text" placeholder="Name ...">
+            </div>
+            <input type="submit" hidden />
+          </div>
+      </form>
+    </div>
+    <div class="col">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newHostelRoomModal">New Hostel Room</button>
+      </div>
+</div>
+<div class="table-responsive small">
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Hostel</th>
+        <th scope="col">Room No.</th>
+        <th scope="col">Capacity</th>
+        <th scope="col">Occupancy</th>
+        <th scope="col">Status</th>
+        <th scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for room in page_obj %}
+      <tr>
+        <td>{{room.id}}</td>
+        <td>{{room.hostel}}</td>
+        <td>{{room.room_number}}</td>
+        <td>{{room.room_capacity}}</td>
+        <td>{{room.students_assigned}}</td>
+        <td>{% if room.fully_booked %}<span class="badge text-bg-danger">Fully Booked</span>{% else %}<span class="badge text-bg-success">Available</span>{% endif %}</td>
+        <td><a href="{% url 'room-occupants' room.id %}" class="btn btn-secondary btn-sm"><i class="fas fa-user-graduate"></i></a></td>
+       
+      </tr>
+      
+      {% endfor %}
+
+    </tbody>
+  </table>
+  <div>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-end">
+        {% if page_obj.has_previous %}   
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <a class="page-link" href="#">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+        {% if page_obj.has_next %}    
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}   
+      </ul>
+    </nav>
+  </div>
+</div>
+{% endblock content %}

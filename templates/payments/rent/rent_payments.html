@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block additional_css %}
+{% endblock additional_css %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h3>Rent Payments</h3>
+    </div>
+    <div class="col">
+      <form method="POST">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <div class="col">
+              <input type="text" class="form-control" name="search_text" id="search_text" placeholder="ID Number ...">
+            </div>
+            <input type="submit" hidden />
+          </div>
+      </form>
+    </div>
+    <div class="col">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newRentPaymentModal">New Payment</button>
+    </div>
+</div>
+      <div class="table-responsive small">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Student</th>
+              <th scope="col">Month</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Paid Date</th>
+              <th scope="col" colspan="2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for rent in page_obj %}
+            <tr>
+              <td>{{rent.id}}</td>
+              <td>{{rent.student}}</td>
+              <td>{{rent.month}} {{rent.year}}</td>
+              <td>{{rent.amount}}</td>
+              <td>{{rent.payment_date}}</td>
+              <td><a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editRentPaymentModal{{ rent.id }}">
+                <i class="bi bi-pencil-square"></i>
+              </a></td>
+              <td><a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRentPaymentModal{{ rent.id }}">
+                <i class="bi bi-trash"></i>
+              </a></td>
+             {% include "payments/rent/edit_rent_payment.html" %}
+             {% include "payments/rent/delete_rent_payment.html" %}
+            
+            </tr>
+            
+            {% endfor %}
+
+          </tbody>
+        </table>
+        <div>
+          <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-end">
+              {% if page_obj.has_previous %}   
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+              {% endif %}
+              <a class="page-link" href="#">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+              {% if page_obj.has_next %}    
+              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+              {% endif %}   
+            </ul>
+          </nav>
+        </div>
+      </div>
+ 
+{% endblock content %}

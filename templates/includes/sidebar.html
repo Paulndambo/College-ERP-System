@@ -1,0 +1,270 @@
+<div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+    <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarMenuLabel">CollegeERP</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+        <ul class="nav flex-column">
+          
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page" href="/">
+              <i class="fas fa-chart-pie"></i>
+              Dashboard
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'staff' %}">
+              <i class="fas fa-user-tie"></i>
+              Staff
+            </a>
+          </li>
+        
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'students' %}">
+              <i class="fas fa-user-graduate"></i>
+              Students
+            </a>
+          </li>
+ 
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'meal-cards' %}">
+              <i class="fas fa-utensils"></i>
+              Meal Cards
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#facultiesGroup" role="button" aria-expanded="false" aria-controls="facultiesGroup">
+              <i class="fas fa-university"></i>
+              Faculties
+            </a>
+            <div class="collapse" id="facultiesGroup">
+              <ul class="nav flex-column ms-3">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'campuses' %}">
+                    <i class="fas fa-university"></i>
+                    Campuses
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'schools' %}">
+                    <i class="fas fa-school"></i>
+                    Schools
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'departments' %}">
+                    <i class="fas fa-building"></i>
+                    Departments
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'programmes' %}">
+                    <i class="fas fa-graduation-cap"></i>
+                    Programmes
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'courses' %}">
+                    <i class="fas fa-book"></i>
+                    Courses
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#examsGroup" role="button" aria-expanded="false" aria-controls="reportsGroup">
+              <i class="fas fa-pencil-alt"></i>
+              Exams
+            </a>
+            
+            <div class="collapse" id="examsGroup">
+              <ul class="nav flex-column ms-3">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'students-marks' %}">
+                    <i class="fas fa-star"></i>
+                    Students Marks
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="{% url 'transcripts' %}">
+                    <i class="fas fa-folder-open"></i>
+                    Transcripts
+                  </a>
+                </li>
+               
+              </ul>
+            </div>
+
+          </li>
+          
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#paymentsGroup" role="button" aria-expanded="false" aria-controls="paymentsGroup">
+            <i class="fas fa-piggy-bank"></i>
+            Finance
+          </a>
+          <div class="collapse" id="paymentsGroup">
+            <ul class="nav flex-column ms-3">
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'rent-payments' %}">
+                  <i class="fas fa-user-tie"></i>
+                  Payroll
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'rent-payments' %}">
+                  <i class="fas fa-receipt"></i>
+                  Fees Payments
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'rent-payments' %}">
+                  <i class="fas fa-file-alt"></i>
+                  Fees Statements
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'rent-payments' %}">
+                  <i class="fas fa-wallet"></i>
+                  Hostel Payments
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'meal-card-payments' %}">
+                  <i class="fas fa-money-bill-wave"></i>
+                  Meal Payments
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#accomodationGroup" role="button" aria-expanded="false" aria-controls="accomodationGroup">
+            <i class="fas fa-building"></i>
+            Hostels
+          </a>
+          <div class="collapse" id="accomodationGroup">
+            <ul class="nav flex-column ms-3">
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'hostels' %}">
+                  <i class="fas fa-house-user"></i>
+                  Hostels
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'hostel-rooms' %}">
+                  <i class="fas fa-bed"></i>
+                  Rooms
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'bookings' %}">
+                  <i class="fas fa-calendar-check"></i>
+                  Bookings
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#marketingsGroup" role="button" aria-expanded="false" aria-controls="accomodationGroup">
+            <i class="fas fa-ad"></i>
+            Marketing
+          </a>
+          <div class="collapse" id="marketingsGroup">
+            <ul class="nav flex-column ms-3">
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'leads' %}">
+                  <i class="fas fa-magnifying-glass"></i>
+                  Leads
+                </a>
+              </li>
+             
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'tasks' %}">
+                  <i class="fas fa-tasks"></i>
+                  Lead Tasks
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'campaigns' %}">
+                  <i class="fas fa-bullhorn"></i>
+                  Campaigns
+                </a>
+              </li>
+              
+            </ul>
+          </div>
+        </li>
+  
+  
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#reportsGroup" role="button" aria-expanded="false" aria-controls="reportsGroup">
+            <i class="fas fa-chart-line"></i>
+            Reports
+          </a>
+          <div class="collapse" id="reportsGroup">
+            <ul class="nav flex-column ms-3">
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" data-bs-toggle="collapse" href="#deliveryReportsGroup" role="button" aria-expanded="false" aria-controls="deliveryReportsGroup">
+                  <i class="fas fa-chart-line"></i>
+                  Deliveries
+                </a>
+                <div class="collapse" id="deliveryReportsGroup">
+                  <ul class="nav flex-column ms-3">
+                    <li class="nav-item">
+                      <a class="nav-link d-flex align-items-center gap-2" href="#">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-down" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm14.817 11.887a.5.5 0 0 0 .07-.704l-4.5-5.5a.5.5 0 0 0-.74-.037L7.06 8.233 3.404 3.206a.5.5 0 0 0-.808.588l4 5.5a.5.5 0 0 0 .758.06l2.609-2.61 4.15 5.073a.5.5 0 0 0 .704.07"/>
+                        </svg>
+                        Product Sales
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+  
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm14.817 3.113a.5.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61 4.15-5.073a.5.5 0 0 1 .704-.07"/>
+                  </svg>
+                  Daily Sales
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-flex align-items-center gap-2" href="#">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-graph-up-arrow" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
+                  </svg>
+                  Month Sales
+                </a>
+              </li> 
+             
+            </ul>
+          </div>
+        </li>
+          
+        </ul>
+        <hr class="my-3">
+        <ul class="nav flex-column mb-auto">
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{% url 'logout' %}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-in-right" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M6 3.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 0-1 0v2A1.5 1.5 0 0 0 6.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2h-8A1.5 1.5 0 0 0 5 3.5v2a.5.5 0 0 0 1 0z"/>
+                <path fill-rule="evenodd" d="M11.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H1.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z"/>
+              </svg>
+              Sign out
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
