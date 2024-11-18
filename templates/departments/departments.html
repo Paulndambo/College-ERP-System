@@ -2,25 +2,20 @@
 
 
 {% block content %}
-<div class="row">
-    <div class="col">
-        <h3>Departments</h3>
-    </div>
-    <div class="col">
-      <form method="POST">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-            <div class="col">
-              <input type="text" class="form-control" name="search_text" id="search_text" placeholder="Name ...">
-            </div>
-            <input type="submit" hidden />
-          </div>
-      </form>
-    </div>
+<div class="table-card">
+    <div class="row py-2 px-2">
+      <div class="col">
+          <h3>Departments</h3>
+      </div>
+      <div class="col">
+          <input type="text" class="form-control" placeholder="Search..." 
+          id="searchInput" value="{{ search_query }}">
+      </div>
+      
+  </div>
     
-</div>
-      <div class="table-responsive small">
-        <table class="table table-sm">
+      <div class="table-container px-2">
+        <table class="table data-table table-sm">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -33,7 +28,7 @@
           <tbody>
             {% for department in page_obj %}
             <tr>
-              <td>{{department.id}}</td>
+              <td>{{forloop.counter}}</td>
               <td>{{department.name}}</td>
               <td>{{department.school}}</td>
               <td>{{department.office}}</td>
@@ -55,7 +50,7 @@
 
           </tbody>
         </table>
-        <div>
+        <div class="mt-2">
           <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-end">
               {% if page_obj.has_previous %}   

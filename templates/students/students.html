@@ -187,7 +187,7 @@
             <tbody id="tableBody">
                 {% for student in students %}
                 <tr>
-                    <td>{{ student.id }}</td>
+                    <td>{{ forloop.counter }}</td>
                     <td>{{ student.user.name }}</td>
                     <td>{{ student.registration_number }}</td>
                     <td>{{ student.user.phone_number }}</td>
@@ -207,6 +207,7 @@
                             </button>
                         </div>
                     </td>
+                    {% include "students/delete_student.html" %}
                 </tr>
                 {% empty %}
                 <tr>

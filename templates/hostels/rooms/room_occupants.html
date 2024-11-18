@@ -1,16 +1,13 @@
-{% extends "base.html" %}
-
-{% block additional_css %}
-{% endblock additional_css %}
+{% extends "base1.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col">
+<div class="table-card">
+    <div class="col p-3">
         <h3>Room: {{room.room_number}} Students</h3>
     </div>
-</div>
-      <div class="table-responsive small">
-        <table class="table table-sm">
+
+      <div class="table-container p-3">
+        <table class="table data-table table-sm">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -32,7 +29,7 @@
               <td>{{student.user.email}}</td>
               <td>{{student.user.gender}}</td>
               <td>
-                <a href="{% url 'student-details' student.id %}" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i></a>
+                <a href="{% url 'student-details' student.id %}" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>
               </td>
             </tr>
             

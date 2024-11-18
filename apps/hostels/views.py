@@ -9,6 +9,9 @@ from django.contrib import messages
 from django.db.models import Case, When, Value, IntegerField
 from django.db import transaction
 
+from django.views.generic import ListView
+from django.http import JsonResponse
+
 from apps.hostels.models import Booking, Hostel, HostelRoom
 from apps.core.models import Campus
 from apps.students.models import Student
@@ -54,7 +57,6 @@ def hostel_details(request, hostel_id):
     
     context = {"hostel": hostel, "page_obj": page_obj}
     return render(request, "hostels/hostel_details.html", context)
-
 
 
 def new_hostel(request):
@@ -109,25 +111,32 @@ def delete_hostel(request):
         return redirect("hostels")
     return render(request, "hostels/delete_hostel.html")
 
-
-def hostel_rooms(request):
-    rooms = HostelRoom.objects.all().order_by("-created_on")
-
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        rooms = HostelRoom.objects.filter(Q(room_number__icontains=search_text))
-
-    paginator = Paginator(rooms, 8)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+hostels_list = Hostel.objects.all()
+class HostelRoomsListView(ListView):
+    model = HostelRoom
+    template_name = 'hostels/rooms/hostel_rooms.html'
+    context_object_name = 'hostel-rooms'
+    paginate_by = 8
     
-    hostels = Hostel.objects.all()
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(room_number__icontains=search_query) |
+                Q(hostel__name__icontains=search_query) 
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
 
-    context = {
-        "page_obj": page_obj,
-        "hostels": hostels
-    }
-    return render(request, "hostels/rooms/hostel_rooms.html", context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        context["hostels"] = hostels_list
+        return context
 
 
 def room_occupants(request, room_id):
@@ -195,9 +204,25 @@ def delete_room(request):
     return render(request, "hostels/rooms/delete_hostel_room.html")
 
 
-def hostel_bookings(request):
-    bookings = Booking.objects.annotate(
-        is_pending=Case(
+class BookingsListView(ListView):
+    model = Booking
+    template_name = 'hostels/bookings/bookings.html'
+    context_object_name = 'bookings'
+    paginate_by = 8
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(student__registration_number__icontains=search_query) 
+            )
+        
+        # Get sort parameter
+        return queryset.annotate(
+            is_pending=Case(
             When(
                 status="Pending", then=Value(0)
             ),  # Pending bookings are given a value of 0
@@ -206,22 +231,10 @@ def hostel_bookings(request):
         )
     ).order_by("-created_on")
 
-    if request.method == "POST":
-        search = request.POST.get("search")
-        if search:
-            bookings = bookings.filter(
-                Q(first_name__icontains=search)
-                | Q(last_name__icontains=search)
-                | Q(email__icontains=search)
-                | Q(registration_number__icontains=search)
-            )
-
-    paginator = Paginator(bookings, 10)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"page_obj": page_obj}
-    return render(request, "hostels/bookings/bookings.html", context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
 
 
 def bookings_home(request):

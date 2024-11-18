@@ -32,7 +32,7 @@
           <tbody>
             {% for task in page_obj %}
             <tr>
-              <td>{{task.id}}</td>
+              <td>{{forloop.counter}}</td>
               <td>{{task.title}}</td>
               <td>{{task.user.name}}</td>
               <td>{{task.due_date}}</td>

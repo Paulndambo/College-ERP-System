@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.exams.views import student_marks, record_marks, edit_marks, delete_marks
+from apps.exams.views import ExamMarksListView, record_marks, edit_marks, delete_marks
 
 from apps.exams.uploads.views import upload_students_marks
 from apps.exams.transcripts.views import (
@@ -8,12 +8,12 @@ from apps.exams.transcripts.views import (
     semester_transcripts,
     semester_transcripts_details,
     department_transcripts,
-    student_transcripts,
+    StudentsTranscriptsListView,
     student_transcripts_details,
 )
 
 urlpatterns = [
-    path("students-marks/", student_marks, name="students-marks"),
+    path("students-marks/", ExamMarksListView.as_view(), name="students-marks"),
     path("record-marks/", record_marks, name="record-marks"),
     path("edit-marks/", edit_marks, name="edit-marks"),
     path("delete-marks/", delete_marks, name="delete-marks"),
@@ -28,7 +28,7 @@ urlpatterns = [
     path(
         "department-transcripts/", department_transcripts, name="department-transcripts"
     ),
-    path("student-transcripts/", student_transcripts, name="student-transcripts"),
+    path("student-transcripts/", StudentsTranscriptsListView.as_view(), name="student-transcripts"),
     path(
         "student-transcripts/<int:student_id>/",
         student_transcripts_details,

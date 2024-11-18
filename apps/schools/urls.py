@@ -19,6 +19,10 @@ from apps.schools.views import (
     new_department,
     edit_department,
     delete_department,
+    SemestersListView,
+    new_semester,
+    edit_semester,
+    delete_semester,
 )
 
 
@@ -44,4 +48,9 @@ urlpatterns = [
     path("new-department/", new_department, name="new-department"),
     path("edit-department/", edit_department, name="edit-department"),
     path("delete-department/", delete_department, name="delete-department"),
+    
+    path("semesters/", SemestersListView.as_view(), name="semesters"),
+    path("new-semester/", new_semester, name="new-semester"),
+    path("edit-semester/", edit_semester, name="edit-semester"),
+    path("delete-semester/", delete_semester, name="delete-semester"),   
 ]

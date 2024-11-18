@@ -9,12 +9,12 @@ from django.db import transaction
 from django.views.generic import ListView
 from django.http import JsonResponse
 
-from apps.schools.models import School, Department, Programme, Course
+from apps.schools.models import School, Department, Programme, Course, Semester
 
 # Create your views here.
 PROGRAMME_TYPES = ["Artisan", "Certificate", "Diploma", "Bachelor", "Masters", "PhD"]
 
-
+SEMESTER_STATUSES = ["Active", "Closed"]
 ### Schools
 def schools(request):
     schools = School.objects.all().order_by("-created_on")
@@ -336,3 +336,76 @@ def delete_course(request):
 
         return redirect("courses")
     return render(request, "courses/delete_course.html")
+
+# Semesters
+class SemestersListView(ListView):
+    model = Semester
+    template_name = 'semesters/semesters.html'
+    context_object_name = 'semesters'
+    paginate_by = 8
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(name__icontains=search_query) 
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
+
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        context["semester_statuses"] = SEMESTER_STATUSES
+        return context
+    
+    
+def new_semester(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        academic_year = request.POST.get("academic_year")
+        status = request.POST.get("status")
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        Semester.objects.create(name=name, academic_year=academic_year, status=status, start_date=start_date, end_date=end_date)
+        return redirect("semesters")
+
+    return render(request, "semesters/new_semester.html")
+
+
+def edit_semester(request):
+    if request.method == "POST":
+        semester_id = request.POST.get("semester_id")
+        name = request.POST.get("name")
+        academic_year = request.POST.get("academic_year")
+        status = request.POST.get("status")
+        start_date = request.POST.get("start_date")
+        end_date = request.POST.get("end_date")
+
+        semester = Semester.objects.get(id=semester_id)
+
+        semester.name = name
+        semester.academic_year = academic_year
+        semester.status = status
+        semester.start_date = start_date
+        semester.end_date = end_date
+        semester.save()
+
+        return redirect("semesters")
+    return render(request, "semesters/edit_semester.html")
+
+
+def delete_semester(request):
+    if request.method == "POST":
+        semester_id = request.POST.get("semester_id")
+        semester = Semester.objects.get(id=semester_id)
+        semester.delete()
+
+        return redirect("semesters")
+    return render(request, "semesters/delete_semester.html")

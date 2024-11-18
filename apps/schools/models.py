@@ -64,6 +64,9 @@ SEMESTER_TYPES = (
 class Semester(AbsoluteBaseModel):
     name = models.CharField(max_length=255, choices=SEMESTER_TYPES, null=True)
     academic_year = models.CharField(max_length=255)
+    start_date = models.DateField(null=True)
+    end_date = models.DateField(null=True)
+    status = models.CharField(max_length=255, choices=[("Active", "Active"), ("Closed", "Closed")], null=True)
 
     def __str__(self):
         return self.name

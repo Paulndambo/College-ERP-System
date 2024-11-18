@@ -10,32 +10,43 @@ from django.contrib import messages
 from django.db.models import Case, When, Value, IntegerField
 from django.db import transaction
 
+from django.views.generic import ListView
+from django.http import JsonResponse
 
 from apps.exams.models import ExamData
 from apps.schools.models import Semester, Course
 from apps.students.models import Student
 
+students_list = Student.objects.all()
+semesters_list = Semester.objects.all()
+courses_list = Course.objects.all()
+class ExamMarksListView(ListView):
+    model = ExamData
+    template_name = 'exams/student_marks.html'
+    context_object_name = 'students-marks'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(student__registration_number__icontains=search_query) |
+                Q(student__user__first_name__icontains=search_query) 
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
 
-# Create your views here.
-def student_marks(request):
-    exam_data = ExamData.objects.all().order_by("-created_on")
-
-    paginator = Paginator(exam_data, 8)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    students = Student.objects.all()
-    semesters = Semester.objects.all()
-    courses = Course.objects.all()
-
-    context = {
-        "page_obj": page_obj,
-        "students": students,
-        "semesters": semesters,
-        "courses": courses,
-    }
-
-    return render(request, "exams/student_marks.html", context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        context["students"] = students_list
+        context["semesters"] = semesters_list
+        context["courses"] = courses_list
+        return context
 
 
 @login_required(login_url="/users/login")

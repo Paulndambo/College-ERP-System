@@ -34,18 +34,42 @@
                     <li class="nav-item"><a href="{% url 'courses' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-book"></i> Courses</a></li>
                 </ul>
             </li>
+
+            <li>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-clipboard icon"></i>
+                    <span class="link-text">Admissions</span>
+                </a>
+                <ul class="collapse submenu">
+                    <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-envelope"></i> Applications</a></li>
+                    <li class="nav-item"><a href="{% url 'semesters' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-layer-group"></i> Semesters</a></li>
+
+                </ul>
+            </li>
             
             <li>
-                <a href="#exams">
-                    <i class="fas fa-file-alt icon"></i>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-pencil-alt icon"></i>
                     <span class="link-text">Exams</span>
                 </a>
+                <ul class="collapse submenu">
+                    <li class="nav-item"><a href="{% url 'students-marks' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-star"></i> Students Marks</a></li>
+                    <li class="nav-item"><a href="{% url 'transcripts' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-folder-open"></i> Transcripts</a></li>
+
+                </ul>
             </li>
+            
+    
             <li>
-                <a href="#results">
-                    <i class="fas fa-chart-bar icon"></i>
-                    <span class="link-text">Results</span>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-building icon"></i>
+                    <span class="link-text">Hostels</span>
                 </a>
+                <ul class="collapse submenu">
+                    <li class="nav-item"><a href="{% url 'hostels' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-house-user"></i> Hostels</a></li>
+                    <li class="nav-item"><a href="{% url 'hostel-rooms' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-bed"></i> Rooms</a></li>
+                    <li class="nav-item"><a href="{% url 'bookings' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-calendar-check"></i> Bookings</a></li>
+                </ul>
             </li>
             <li>
                 <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
@@ -56,7 +80,6 @@
                     <li class="nav-item"><a href="{% url 'leads' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-magnifying-glass"></i> Leads</a></li>
                     <li class="nav-item"><a href="{% url 'tasks' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-tasks"></i> Lead Tasks</a></li>
                     <li class="nav-item"><a href="{% url 'campaigns' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-bullhorn"></i> Campaigns</a></li>
-
                 </ul>
             </li>
             <li>

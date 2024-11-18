@@ -1,0 +1,64 @@
+<div class="modal fade" id="newSemesterModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Semester</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'new-semester' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    required
+                  />
+                </div>
+                <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Academic Year</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="academic_year"
+                      name="academic_year"
+                      required
+                    />
+                  </div>
+                </div>
+
+               
+                <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Start Date</label>
+                  <input type="date" class="form-control" id="start_date" name="start_date" />
+                </div>
+                <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Status</label>
+                      <select class="form-select" id="status" name="status">
+                          <option value=""></option>
+                          <option value="Active">Active</option>
+                          <option value="Closed">Closed</option>
+                      </select>
+                  </div>
+                  </div>              
+                               
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Semester Data</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

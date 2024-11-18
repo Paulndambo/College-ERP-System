@@ -1,0 +1,70 @@
+<div class="modal fade" id="editSemesterModal{{semester.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Semester</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-semester' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" id="semester_id" name="semester_id" value="{{semester.id}}" hidden readonly />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    value="{{semester.name}}"
+                    required
+                  />
+                </div>
+                <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Academic Year</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="academic_year"
+                      name="academic_year"
+                      value="{{semester.academic_year}}"
+                      required
+                    />
+                  </div>
+                </div>
+
+               
+                <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Start Date</label>
+                  <input type="date" class="form-control" id="start_date" name="start_date" value="{{semester.start_date| date:'Y-m-d'}}" />
+                </div>
+                <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{semester.end_date| date:'Y-m-d'}}" />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Status</label>
+                      <select class="form-select" id="status" name="status">
+                          <option value="{{semester.status}}">{{semester.status}}</option>
+                          {% for status in semester_statuses %}
+                            {% if status != semester.status %}
+                                <option value="{{status}}">{{status}}</option>
+                            {% endif %}
+                          {% endfor %}
+                      </select>
+                  </div>
+                  </div>              
+                              
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Semester Data</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

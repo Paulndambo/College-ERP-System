@@ -10,6 +10,9 @@ from django.contrib import messages
 from django.db.models import Case, When, Value, IntegerField, Sum
 from django.db import transaction
 
+from django.views.generic import ListView
+from django.http import JsonResponse
+
 
 from apps.exams.models import ExamData
 from apps.schools.models import Semester
@@ -19,20 +22,30 @@ from apps.students.models import Student
 def transcripts(request):
     return render(request, "exams/transcripts/home.html")
 
+class StudentsTranscriptsListView(ListView):
+    model = Student
+    template_name = 'exams/transcripts/students/student_transcripts.html'
+    context_object_name = 'student-transcripts'
+    paginate_by = 10
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(registration_number__icontains=search_query) |
+                Q(user__first_name__icontains=search_query) 
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
 
-def student_transcripts(request):
-    students = Student.objects.all().order_by("-created_on")
-
-    paginator = Paginator(students, 8)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    print(students)
-
-    context = {"page_obj": page_obj}
-    return render(
-        request, "exams/transcripts/students/student_transcripts.html", context
-    )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
 
 
 def student_transcripts_details(request, student_id=None):

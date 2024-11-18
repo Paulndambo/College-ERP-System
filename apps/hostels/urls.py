@@ -1,6 +1,6 @@
 from django.urls import path
 from apps.hostels.views import (
-    hostel_bookings,
+    BookingsListView,
     book_hostel,
     bookings_home,
     hostels,
@@ -8,7 +8,7 @@ from apps.hostels.views import (
     new_hostel,
     edit_hostel,
     delete_hostel,
-    hostel_rooms,
+    HostelRoomsListView,
     new_room,
     new_hostel_room,
     edit_room,
@@ -22,11 +22,11 @@ urlpatterns = [
     path("new-hostel/", new_hostel, name="new-hostel"),
     path("edit-hostel/", edit_hostel, name="edit-hostel"),
     path("delete-hostel/", delete_hostel, name="delete-hostel"),
-    path("bookings/", hostel_bookings, name="bookings"),
+    path("bookings/", BookingsListView.as_view(), name="bookings"),
     path("hostel-booking/", bookings_home, name="hostel-booking"),
     path("book-hostel/", book_hostel, name="book-hostel"),
    
-    path("hostel-rooms/", hostel_rooms, name="hostel-rooms"),
+    path("hostel-rooms/", HostelRoomsListView.as_view(), name="hostel-rooms"),
     path("new-hostel-room/", new_room, name="new-hostel-room"),
     path("create-hostel-room/", new_hostel_room, name="create-hostel-room"),
     path("edit-hostel-room/", edit_room, name="edit-hostel-room"),
