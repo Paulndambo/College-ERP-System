@@ -1,7 +1,4 @@
-{% extends "base.html" %}
-
-{% block additional_css %}
-{% endblock additional_css %}
+{% extends "base1.html" %}
 
 {% block content %}
 <div class="row">
@@ -24,7 +21,7 @@
       </div>
 </div>
       <div class="table-responsive small">
-        <table class="table table-sm">
+        <table class="table">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -46,10 +43,10 @@
               <td>{{campus.address}}, {{campus.city}}</td>
               <td>{{campus.population}}</td>
               <td><a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editCampusModal{{ campus.id }}">
-                <i class="bi bi-pencil-square"></i>
+                <i class="fas fa-pencil"></i>
               </a></td>
               <td><a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCampusModal{{ campus.id }}">
-                <i class="bi bi-trash"></i>
+                <i class="fas fa-trash"></i>
               </a></td>
              {% include "campuses/edit_campus.html" %}
              {% include "campuses/delete_campus.html" %}

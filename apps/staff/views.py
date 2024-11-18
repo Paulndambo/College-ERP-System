@@ -28,6 +28,11 @@ def staff(request):
     return render(request, "staff/staff.html", context)
 
 
+def staff_details(request, id):
+    staff = Staff.objects.get(id=id)
+    context = {"staff": staff}
+    return render(request, "staff/staff_details.html", context)
+
 def new_staff(request):
     if request.method == "POST":
         first_name = request.POST.get("first_name")
@@ -40,10 +45,11 @@ def new_staff(request):
         country = request.POST.get("country")
         department = request.POST.get("department")
         role = request.POST.get("role")
+        position = request.POST.get("position")
+        state = request.POST.get("state")
+        postal_code = request.POST.get("postal_code")
 
         user_role = UserRole.objects.get(id=role)
-
-        print(f"Gender: {gender}")
 
         user = User.objects.create(
             first_name=first_name,
@@ -53,13 +59,18 @@ def new_staff(request):
             role=user_role,
             phone_number=phone_number,
             address=address,
+            postal_code=postal_code,
             city=city,
+            state=state,
             country=country,
             gender=gender,
         )
 
         staff = Staff.objects.create(
-            user=user, staff_number=phone_number, department_id=department
+            user=user, 
+            staff_number=phone_number, 
+            department_id=department, 
+            position=position
         )
         return redirect("staff")
     return render(request, "staff/new_staff.html")

@@ -10,12 +10,14 @@ from apps.students.views import (
     create_education_history,
     delete_education_history,
     edit_education_history,
+    
+    StudentListView
 )
 
 from apps.students.uploads.views import upload_students
 
 urlpatterns = [
-    path("", students, name="students"),
+    path("", StudentListView.as_view(), name="students"),
     path("<int:student_id>/details/", student_details, name="student-details"),
     path("new-student/", new_student, name="new-student"),
     path("edit-student/", edit_student, name="edit-student"),

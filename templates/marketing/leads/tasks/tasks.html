@@ -1,28 +1,23 @@
-{% extends "base.html" %}
+{% extends "base1.html" %}
 
 {% block additional_css %}
 {% endblock additional_css %}
 
 {% block content %}
-<div class="row">
-    <div class="col">
-        <h3>Leads Tasks</h3>
+<div class="table-card">
+    <div class="row py-2 px-2">
+      <div class="col">
+          <h3>Leads Tasks</h3>
+      </div>
+      <div class="col">
+          <input type="text" class="form-control" placeholder="Search..." 
+          id="searchInput" value="{{ search_query }}">
+      </div>
     </div>
-    <div class="col">
-      <form method="POST">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-            <div class="col">
-              <input type="text" class="form-control" name="search_text" id="search_text" placeholder="Title ...">
-            </div>
-            <input type="submit" hidden />
-          </div>
-      </form>
-    </div>
+    <div class="loader" id="loader"></div>
 
-</div>
-      <div class="table-responsive small">
-        <table class="table table-sm">
+      <div class="table-container px-2">
+        <table class="table data-table table-sm">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -46,7 +41,7 @@
               </td>
               <td>{{task.created_on}}</td>
               <td>
-                <a data-bs-toggle="modal" data-bs-target="#leadTaskDetailsModal{{task.id}}" class="btn btn-info btn-sm"><i class="bi bi-eye-fill"></i></a>
+                <a data-bs-toggle="modal" data-bs-target="#leadTaskDetailsModal{{task.id}}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
               </td> 
               {% include "marketing/leads/tasks/task_details.html" %}
             </tr>
@@ -54,18 +49,102 @@
 
           </tbody>
         </table>
-        <div>
-          <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-end">
-              {% if page_obj.has_previous %}   
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
-              {% endif %}
-              <a class="page-link" href="#">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
-              {% if page_obj.has_next %}    
-              <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
-              {% endif %}   
-            </ul>
+        <div class="table-footer">
+          <div class="page-info">
+              Showing 
+              {{ page_obj.start_index }} 
+              to 
+              {{ page_obj.end_index }} 
+              of 
+              {{ paginator.count }} 
+              entries
+          </div>
+          {% if is_paginated %}
+          <nav>
+              <ul class="pagination mb-0">
+                  {% if page_obj.has_previous %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          Previous
+                      </a>
+                  </li>
+                  {% else %}
+                  <li class="page-item disabled">
+                      <span class="page-link">Previous</span>
+                  </li>
+                  {% endif %}
+  
+                  {% for num in paginator.page_range %}
+                  <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                      <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          {{ num }}
+                      </a>
+                  </li>
+                  {% endfor %}
+  
+                  {% if page_obj.has_next %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          Next
+                      </a>
+                  </li>
+                  {% else %}
+                  <li class="page-item disabled">
+                      <span class="page-link">Next</span>
+                  </li>
+                  {% endif %}
+              </ul>
           </nav>
-        </div>
+          {% endif %}
+      </div>
       </div>
 {% endblock content %}
+{% block additional_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const loader = document.getElementById('loader');
+        let searchTimeout;
+
+        // Search functionality
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            loader.classList.add('active');
+
+            searchTimeout = setTimeout(() => {
+                const searchQuery = this.value;
+                window.location.href = `?search=${encodeURIComponent(searchQuery)}`;
+            }, 500);
+        });
+
+        // Sort functionality
+        document.querySelectorAll('th[data-sort]').forEach(header => {
+            header.addEventListener('click', function() {
+                const sortField = this.dataset.sort;
+                const currentIcon = this.querySelector('i');
+                let direction = 'asc';
+
+                if (currentIcon.classList.contains('fa-sort-up')) {
+                    direction = 'desc';
+                }
+
+                window.location.href = `?sort=${sortField}&direction=${direction}`;
+            });
+        });
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock additional_scripts %}

@@ -9,7 +9,7 @@
                 {% csrf_token %}
                 <div class="modal-body">
                 <input type="number" id="student_id" name="student_id" value="{{student.id}}" hidden readonly required />
-                  <div class="row mb-2">
+                  <div class="row mb-3">
                 <div class="col">
                   <label for="exampleInputPassword1" class="form-label fw-bold">First Name</label>
                   <input
@@ -33,7 +33,7 @@
                     />
                   </div>
                 </div>
-                <div class="row mb-2">
+                <div class="row mb-3">
                   <div class="col">
                     <label for="exampleInputPassword1" class="form-label fw-bold">Phone Number</label>
                     <input
@@ -58,7 +58,7 @@
                   </div>
                 </div>
                
-                <div class="row mb-2">
+                <div class="row mb-3">
                   <div class="col">
                     <label class="form-label fw-bold">Gender</label>
                     <select class="form-select" id="gender" name="gender">
@@ -83,7 +83,7 @@
                   </div>  
                 </div>
 
-                <div class="row mb-2">
+                <div class="row mb-3">
                     <div class="col">
                       <label for="exampleInputPassword1" class="form-label fw-bold">Guardian Name</label>
                       <input
@@ -94,6 +94,17 @@
                         value="{{ student.guardian_name }}"
                         required
                       />
+                    </div>
+                    <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Guardian Relationship</label>
+                        <select class="form-select" id="guardian_relationship" name="guardian_relationship">
+                            <option value="{{student.guardian_relationship}}">{{student.guardian_relationship}}</option>
+                            {% for relationship in relationship_choices %}
+                                {% if relationship != student.guardian_relationship %}
+                                    <option value="{{relationship}}">{{relationship}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col">
                         <label for="exampleInputPassword1" class="form-label fw-bold">Guardian Phone Number</label>
@@ -108,7 +119,18 @@
                       </div>
                     </div>
 
-                <div class="row mb-2">
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Guardian Email</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="guardian_email"
+                      name="guardian_email"
+                      value="{{ student.guardian_email }}"
+                      required
+                    />
+                  </div>
                   <div class="col">
                     <label for="exampleInputPassword1" class="form-label fw-bold">Address</label>
                     <input
@@ -120,6 +142,20 @@
                       required
                     />
                 </div>
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Postal Code</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="postal_code"
+                    name="postal_code"
+                    value="{{ student.user.postal_code }}"
+                    required
+                  />
+              </div>
+                  
+                </div>
+                <div class="row mb-3">
                   <div class="col">
                     <label for="exampleInputPassword1" class="form-label fw-bold">City/Town</label>
                     <input
@@ -132,6 +168,17 @@
                     />
                   </div>
                   <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">County/State</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="state"
+                      name="state"
+                      value="{{ student.user.state }}"
+                      required
+                    />
+                </div>
+                  <div class="col">
                     <label for="exampleInputPassword1" class="form-label fw-bold">Country</label>
                     <input
                       type="text"
@@ -143,7 +190,7 @@
                     />
                   </div>
                 </div>
-                <div class="row mb-2">
+                <div class="row mb-3">
                   <div class="col">
                     <label for="exampleInputPassword1" class="form-label fw-bold">Registration Number</label>
                     <input
@@ -168,7 +215,7 @@
                   </div>
                 </div>
                 <div class="text-center mt-2">
-                  <button type="submit" class="btn btn-primary">Submit Data</button>
+                  <button type="submit" class="btn btn-primary">Edit Student Data</button>
                 </div>
               </div>
               </form>

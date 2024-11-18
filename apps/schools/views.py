@@ -6,6 +6,9 @@ from django.contrib import messages
 from django.db.models import Case, When, Value, IntegerField
 from django.db import transaction
 
+from django.views.generic import ListView
+from django.http import JsonResponse
+
 from apps.schools.models import School, Department, Programme, Course
 
 # Create your views here.
@@ -166,24 +169,31 @@ def delete_department(request):
 
 
 ### Programmes
-def programmes(request):
-    programmes = Programme.objects.all().order_by("-created_on")
+class ProgrammesListView(ListView):
+    model = Programme
+    template_name = 'programmes/programmes.html'
+    context_object_name = 'programmes'
+    paginate_by = 8
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(name__icontains=search_query) 
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
 
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        programmes = Programme.objects.filter(
-            Q(name__icontains=search_text)
-            | Q(department__name__icontains=search_text)
-            | Q(code__icontains=search_text)
-            | Q(school__name__icontains=search_text)
-        )
-
-    paginator = Paginator(programmes, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"page_obj": page_obj, "levels": PROGRAMME_TYPES}
-    return render(request, "programmes/programmes.html", context)
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        context["levels"] = PROGRAMME_TYPES
+        return context
 
 
 def programme_details(request, id):
@@ -250,24 +260,33 @@ def delete_programme(request):
 
 
 ### Courses
-def courses(request):
-    courses = Course.objects.all().order_by("-created_on")
+class CoursesListView(ListView):
+    model = Course
+    template_name = 'courses/courses.html'
+    context_object_name = 'courses'
+    paginate_by = 8
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(name__icontains=search_query) |
+                Q(course_code__icontains=search_query) |
+                Q(programme__name__icontains=search_query)
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
 
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        courses = Course.objects.filter(
-            Q(name__icontains=search_text)
-            | Q(course_code__icontains=search_text)
-            | Q(programme__name__icontains=search_text)
-        )
-
-    paginator = Paginator(courses, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"page_obj": page_obj}
-    return render(request, "courses/courses.html", context)
-
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
+    
 
 def new_course(request):
     if request.method == "POST":

@@ -1,0 +1,70 @@
+<nav id="sidebar">
+    <div class="sidebar-header d-flex justify-content-between align-items-center">
+        <span class="text-white link-text">College ERP</span>
+        <button class="hamburger">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-nav">
+        <ul class="list-unstyled">
+            <li>
+                <a href="/">
+                    <i class="fas fa-home icon"></i>
+                    <span class="link-text">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'students' %}">
+                    <i class="fas fa-user-graduate icon"></i>
+                    <span class="link-text">Students</span>
+                </a>
+            </li>
+           
+            <li>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-chalkboard-teacher icon"></i>
+                    <span class="link-text">Faculties</span>
+                </a>
+                <ul class="collapse submenu">
+                    <li class="nav-item"><a href="{% url 'campuses' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-university"></i> Campuses</a></li>
+                    <li class="nav-item"><a href="{% url 'schools' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-school"></i> Schools</a></li>
+                    <li class="nav-item"><a href="{% url 'departments' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-building"></i> Departments</a></li>
+                    <li class="nav-item"><a href="{% url 'programmes' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-graduation-cap"></i> Programmes</a></li>
+                    <li class="nav-item"><a href="{% url 'courses' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-book"></i> Courses</a></li>
+                </ul>
+            </li>
+            
+            <li>
+                <a href="#exams">
+                    <i class="fas fa-file-alt icon"></i>
+                    <span class="link-text">Exams</span>
+                </a>
+            </li>
+            <li>
+                <a href="#results">
+                    <i class="fas fa-chart-bar icon"></i>
+                    <span class="link-text">Results</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-ad icon"></i>
+                    <span class="link-text">Marketing</span>
+                </a>
+                <ul class="collapse submenu">
+                    <li class="nav-item"><a href="{% url 'leads' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-magnifying-glass"></i> Leads</a></li>
+                    <li class="nav-item"><a href="{% url 'tasks' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-tasks"></i> Lead Tasks</a></li>
+                    <li class="nav-item"><a href="{% url 'campaigns' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-bullhorn"></i> Campaigns</a></li>
+
+                </ul>
+            </li>
+            <li>
+                <a href="#settings">
+                    <i class="fas fa-cog icon"></i>
+                    <span class="link-text">Settings</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

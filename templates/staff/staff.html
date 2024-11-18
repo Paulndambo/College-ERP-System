@@ -29,10 +29,11 @@
             <tr>
               <th scope="col">#</th>
               <th scope="col">Name</th>
-              <th scope="col">Staff Number</th>
               <th scope="col">Phone</th>
               <th scope="col">Email</th>
               <th scope="col">Gender</th>
+              <th scope="col">Position</th>
+              <th scope="col">Role</th>
               <th scope="col" colspan="3"></th>
             </tr>
           </thead>
@@ -41,16 +42,15 @@
             <tr>
               <td>{{staff.id}}</td>
               <td>{{staff.user.name}}</td>
-              <td>{{staff.staff_number}}</td>
               <td>{{staff.user.phone_number}}</td>
               <td>{{staff.user.email}}</td>
               <td>{{staff.user.gender}}</td>
+              <td>{{staff.position}}</td>
+              <td>{{staff.user.role}}</td>
               <td>
-                <a href="" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i></a>
+                <a href="{% url 'staff-details' staff.id %}" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i></a>
               </td>
-              <td><a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStaffModal{{ staff.id }}">
-                <i class="bi bi-pencil-square"></i>
-              </a></td>
+              
               <td><a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteStaffModal{{ staff.id }}">
                 <i class="bi bi-trash"></i>
               </a></td>

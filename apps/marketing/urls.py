@@ -1,7 +1,7 @@
 from django.urls import path
 
 from apps.marketing.views import (
-    leads,
+    LeadsListView,
     lead_details,
     capture_lead,
     edit_lead,
@@ -10,7 +10,7 @@ from apps.marketing.views import (
     add_lead_stage,
     mark_task_as_complete,
     delete_lead_task,
-    tasks,
+    TasksListView,
 )
 
 from apps.marketing.campaigns.views import (
@@ -28,13 +28,13 @@ from apps.marketing.campaigns.views import (
 from apps.marketing.uploads.views import upload_leads
 
 urlpatterns = [
-    path("leads/", leads, name="leads"),
+    path("leads/", LeadsListView.as_view(), name="leads"),
     path("leads/<int:lead_id>/details", lead_details, name="lead-details"),
     path("capture-lead/", capture_lead, name="capture-lead"),
     path("edit-lead/", edit_lead, name="edit-lead"),
     path("upload-leads/", upload_leads, name="upload-leads"),
     path("add-lead-interaction/", new_lead_interaction, name="add-lead-interaction"),
-    path("tasks/", tasks, name="tasks"),
+    path("tasks/", TasksListView.as_view(), name="tasks"),
     path("add-lead-task/", add_lead_task, name="add-lead-task"),
     path("add-lead-stage/", add_lead_stage, name="add-lead-stage"),
     path("mark-task-as-complete/", mark_task_as_complete, name="mark-task-as-complete"),

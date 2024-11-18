@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="mb-4">Staff Member Details</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                Personal Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Name:</strong> John Doe
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Gender:</strong> Male
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Date of Birth:</strong> 01/01/1980
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                Contact Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Email:</strong> johndoe@example.com
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Phone:</strong> +123 456 7890
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <strong>Address:</strong> 123 Main Street, City, Country
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-white">
+                Professional Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Department:</strong> Computer Science
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Designation:</strong> Lecturer
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Employee ID:</strong> EMP12345
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <strong>Date of Joining:</strong> 01/01/2010
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong> Active
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock content %}

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base1.html" %}
 
 {% block additional_css %}
 {% endblock additional_css %}
@@ -44,14 +44,17 @@
               <td>{{school.phone}}</td>
               <td>{{school.location}}</td>
               <td>
-                <a href="{% url 'school-details' school.id %}" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i></a>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'school-details' school.id %}" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>
+                  <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editSchoolModal{{ school.id }}">
+                    <i class="fas fa-pencil"></i>
+                  </a>
+                  <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSchoolModal{{ school.id }}">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </div>
               </td>
-              <td><a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editSchoolModal{{ school.id }}">
-                <i class="bi bi-pencil-square"></i>
-              </a></td>
-              <td><a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteSchoolModal{{ school.id }}">
-                <i class="bi bi-trash"></i>
-              </a></td>
+             
              {% include "schools/edit_school.html" %}
              {% include "schools/delete_school.html" %}
             </tr>

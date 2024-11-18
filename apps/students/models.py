@@ -44,6 +44,8 @@ class Student(AbsoluteBaseModel):
     registration_number = models.CharField(max_length=255)
     guardian_name = models.CharField(max_length=255, null=True)
     guardian_phone_number = models.CharField(max_length=255, null=True)
+    guardian_relationship = models.CharField(max_length=255, null=True)
+    guardian_email = models.EmailField(null=True)
     status = models.CharField(max_length=255, choices=STUDENT_STATUS_CHOICES)
     programme = models.ForeignKey(
         "schools.Programme", on_delete=models.SET_NULL, null=True

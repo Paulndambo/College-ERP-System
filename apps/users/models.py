@@ -15,7 +15,9 @@ class User(AbstractUser, AbsoluteBaseModel):
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     phone_number = models.CharField(max_length=255)
     address = models.CharField(max_length=255, null=True)
+    postal_code = models.CharField(max_length=255, null=True)
     city = models.CharField(max_length=255, null=True)
+    state = models.CharField(max_length=255, null=True)
     country = models.CharField(max_length=255, null=True)
     date_of_birth = models.DateField(null=True)
 

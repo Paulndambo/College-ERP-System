@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    {% block additional_css %}
+    {% endblock additional_css %}
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+        }
+
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+        }
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        #sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary-color);
+            transition: all 0.3s;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background: var(--hover-color);
+            flex-shrink: 0; /* Prevents header from shrinking */
+        }
+
+        /* Make the navigation container scrollable */
+        #sidebar .sidebar-nav {
+            flex-grow: 1;
+            overflow-y: auto;
+            /* Custom scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        /* Webkit scrollbar styling */
+        #sidebar .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #sidebar .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #sidebar .sidebar-nav::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        #sidebar ul {
+            padding: 0;
+            list-style: none;
+        }
+
+        #sidebar ul li a {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        #sidebar ul li a:hover {
+            background: var(--hover-color);
+        }
+
+        #sidebar .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        #sidebar.collapsed .link-text {
+            display: none;
+        }
+
+        #sidebar .submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        #sidebar .submenu a {
+            padding-left: 50px;
+        }
+
+        #sidebar.collapsed .submenu a {
+            padding-left: 20px;
+        }
+
+        .dropdown-toggle::after {
+            display: none !important;
+        }
+
+        #content {
+            margin-left: var(--sidebar-width);
+            width: 100%;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        #content.collapsed {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card-stat {
+            border-left: 4px solid;
+        }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                margin-left: calc(-1 * var(--sidebar-width));
+            }
+            
+            #sidebar.active {
+                margin-left: 0;
+            }
+
+            #content {
+                margin-left: 0;
+            }
+            
+            #content.active {
+                margin-left: var(--sidebar-width);
+            }
+        }
+
+        .hamburger {
+            background: none;
+            border: none;
+            color: white;
+            padding: 15px;
+            cursor: pointer;
+        }
+        .table-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        margin: 5px 0;
+    }
+
+    .table-toolbar {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        border-bottom: 1px solid #e3e6f0;
+    }
+
+    .search-input {
+        position: relative;
+        max-width: 300px;
+    }
+
+    .search-input i {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #858796;
+    }
+
+    .search-input input {
+        padding-left: 35px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        margin-bottom: 0;
+    }
+
+    .data-table th {
+        background-color: #f8f9fc;
+        border-top: none;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .data-table th i {
+        margin-left: 5px;
+        color: #858796;
+    }
+
+    .data-table tbody tr:hover {
+        background-color: #f8f9fc;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background-color: #e3fcef;
+        color: #1cc88a;
+    }
+
+    .status-inactive {
+        background-color: #fff5f5;
+        color: #e74a3b;
+    }
+
+    .status-pending {
+        background-color: #fff8ec;
+        color: #f6c23e;
+    }
+
+    .table-footer {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        border-top: 1px solid #e3e6f0;
+    }
+
+    .page-info {
+        color: #858796;
+    }
+
+    .action-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+        .table-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-input {
+            max-width: 100%;
+        }
+
+        .table-footer {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .pagination {
+            margin-top: 1rem;
+        }
+    }
+
+    .loader {
+        width: 100%;
+        height: 3px;
+        background-color: #f8f9fc;
+        overflow: hidden;
+        display: none;
+    }
+
+    .loader.active {
+        display: block;
+    }
+
+    .loader::after {
+        content: '';
+        display: block;
+        width: 40%;
+        height: 100%;
+        background-color: #4e73df;
+        animation: loading 1s infinite ease-in-out;
+    }
+
+    @keyframes loading {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
+    }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        {% include "includes/new_sidebar.html" %}
+
+        <div id="content">
+            {% block content %}
+            {% endblock content %}
+            {% include "students/new_student.html" %}
+      {% include "students/upload_students.html" %}
+
+      {% include "staff/new_staff.html" %}
+      {% include "payments/rent/new_rent_payment.html" %}
+      {% include "payments/mealcards/new_mealcard_payment.html" %}
+
+      {% include "schools/new_school.html" %}
+
+      {% include "exams/record_marks.html" %}
+      {% include "exams/upload_marks.html" %}
+
+      {% include "marketing/leads/capture_lead.html" %}
+      {% include "marketing/campaigns/new_campaign.html" %}
+
+      {% include "campuses/new_campus.html" %}
+      {% include "hostels/new_hostel.html" %}
+      {% include "hostels/rooms/new_hostel_room.html" %}
+        </div>
+    </div>
+
+    {% block additional_scripts %}
+    {% endblock additional_scripts %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            const hamburger = document.querySelector('.hamburger');
+            const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+
+            // Toggle sidebar
+            hamburger.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                content.classList.toggle('collapsed');
+            });
+
+            // Handle submenu toggles
+            dropdownToggles.forEach(toggle => {
+                toggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const submenu = this.nextElementSibling;
+                    submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+                });
+            });
+
+            // Handle responsive behavior
+            function checkWidth() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.add('collapsed');
+                    content.classList.add('collapsed');
+                }
+            }
+
+            // Check on load
+            checkWidth();
+
+            // Check on resize
+            window.addEventListener('resize', checkWidth);
+        });
+    </script>
+</body>
+</html>

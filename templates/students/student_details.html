@@ -5,7 +5,14 @@
   <!-- Student Personal Details -->
   <div class="card mb-4">
     <div class="card-header">
-      <h5 class="card-title mb-0">Personal Details</h5>
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="card-title mb-0">Personal Details</h5>
+        </div>
+        <div class="col d-flex justify-content-end">
+          <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudentModal{{student.id}}"><i class="fas fa-edit"></i></a>
+        </div>
+      </div>
     </div>
     <div class="card-body">
       <div class="row">
@@ -24,6 +31,7 @@
     </div>
   </div>
 
+  {% include "students/edit_student.html" %}
   <!-- Course Details -->
   <div class="card mb-4">
     <div class="card-header">
@@ -42,13 +50,13 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
-              <h5 class="card-title mb-0">Contact Information</h5>
+              <h5 class="card-title mb-0">Address Information</h5>
             </div>
             <div class="card-body">
-              <p><strong>Address:</strong> 123 Main Street, Springfield, USA</p>
-              <p><strong>City:</strong> Springfield</p>
-              <p><strong>Postal Code:</strong> 12345</p>
-              <p><strong>State:</strong> Illinois</p>
+              <p><strong>Address:</strong> {{student.user.address}}</p>
+              <p><strong>City:</strong> {{student.user.city}}</p>
+              <p><strong>Postal Code:</strong> {{student.user.postal_code}}</p>
+              <p><strong>State:</strong> {{student.user.state}}, {{student.user.country}}</p>
             </div>
           </div>
     </div>
@@ -59,10 +67,10 @@
           <h5 class="card-title mb-0">Guardian Information</h5>
         </div>
         <div class="card-body">
-          <p><strong>Name:</strong> Jane Doe</p>
-          <p><strong>Relationship:</strong> Mother</p>
-          <p><strong>Phone:</strong> +1 987 654 3210</p>
-          <p><strong>Email:</strong> jane.doe@example.com</p>
+          <p><strong>Name:</strong> {{student.guardian_name}}</p>
+          <p><strong>Relationship:</strong> {{student.guardian_relationship}}</p>
+          <p><strong>Phone:</strong> {{student.guardian_phone_number}}</p>
+          <p><strong>Email:</strong> {{student.guardian_email}}</p>
         </div>
       </div>
     </div>

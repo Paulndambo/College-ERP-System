@@ -1,5 +1,5 @@
 <div class="modal fade" id="editLeadModal{{lead.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5 text-center">Edit Lead</h1>
@@ -21,7 +21,6 @@
                     required
                   />
                 </div>
-
                 </div>
                 <div class="row mb-3">
                   <div class="col">
@@ -72,22 +71,7 @@
                     </select>
                   </div>
                 </div>
-                <div class="row mb-3">
-                <div class="col">
-                  <div class="col">
-                    <label for="exampleInputPassword1" class="form-label fw-bold">Programme Interested</label>
-                    <select class="form-select" id="programme" name="programme">
-                        <option value="{{lead.programme.id}}">{{lead.programme}}</option>
-                        {% for programme in programmes %}
-                            {% if programme.id != lead.programme.id %}
-                                <option value="{{programme.id}}">{{programme}}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                  </div>
-                </div>
-                </div>
-
+                
                 <div class="row mb-3">
                   <div class="col">
                     <label for="exampleInputPassword1" class="form-label fw-bold">City</label>
@@ -114,6 +98,17 @@
                 </div>
 
                 <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Programme Interested</label>
+                    <select class="form-select" id="programme" name="programme">
+                        <option value="{{lead.programme.id}}">{{lead.programme}}</option>
+                        {% for programme in programmes %}
+                            {% if programme.id != lead.programme.id %}
+                                <option value="{{programme.id}}">{{programme}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                  </div>
                   <div class="col">
                     <label class="form-label fw-bold">Lead Owner</label>
                     <select class="form-select" id="assigned_to" name="assigned_to">

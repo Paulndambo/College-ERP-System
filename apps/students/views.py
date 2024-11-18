@@ -4,6 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
 
+from django.views.generic import ListView
+from django.http import JsonResponse
+from django.db.models import Q
+
+
 from apps.students.models import Student, StudentDocument, MealCard, StudentEducationHistory
 from apps.users.models import User
 from apps.core.models import UserRole
@@ -13,6 +18,7 @@ from apps.schools.models import Programme
 # Create your views here.
 EDUCATION_LEVELS = ["Primary School", "Secondary School", "College", "University"]
 GRADUATION_STATUSES = ["Graduated", "Not Graduated"]
+GUARDIAN_RELATIONSHIPS = ["Parent", "Grand Parent", "Sibling", "Aunt/Uncle", "Other"]
 def students(request):
     students = Student.objects.all().order_by("-created_on")
 
@@ -31,9 +37,38 @@ def students(request):
 
     programmes = Programme.objects.all().order_by("-created_on")
 
-    context = {"page_obj": page_obj, "programmes": programmes}
+    context = {"page_obj": page_obj, "programmes": programmes, "relationship_choices": GUARDIAN_RELATIONSHIPS}
     return render(request, "students/students.html", context)
 
+programmes = Programme.objects.all().order_by("-created_on")
+class StudentListView(ListView):
+    model = Student
+    template_name = 'students/students.html'
+    context_object_name = 'students'
+    paginate_by = 8
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(registration_number__icontains=search_query) |
+                Q(user__first_name__icontains=search_query)
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
+
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        context["relationship_choices"] = GUARDIAN_RELATIONSHIPS
+        context["programmes"] = programmes
+        return context
+    
 
 def student_details(request, student_id):
     student = Student.objects.get(id=student_id)
@@ -98,12 +133,36 @@ def edit_student(request):
         gender = request.POST.get("gender")
         phone_number = request.POST.get("phone_number")
         address = request.POST.get("address")
+        postal_code = request.POST.get("postal_code")
         city = request.POST.get("city")
+        state = request.POST.get("state")
         country = request.POST.get("country")
 
         registration_number = request.POST.get("registration_number")
         guardian_name = request.POST.get("guardian_name")
         guardian_phone_number = request.POST.get("guardian_phone_number")
+        guardian_email = request.POST.get("guardian_email")
+        guardian_relationship = request.POST.get("guardian_relationship")
+        
+        new_data = {
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "gender": gender,
+            "phone_number": phone_number,
+            "address": address,
+            "postal_code": postal_code,
+            "city": city,
+            "state": state,
+            "country": country,
+            "registration_number": registration_number,
+            "guardian_name": guardian_name,
+            "guardian_phone_number": guardian_phone_number,
+            "guardian_email": guardian_email,
+            "guardian_relationship": guardian_relationship,
+            
+        }
+        print(new_data)
 
         programme_id = request.POST.get("programme_id")
 
@@ -117,6 +176,8 @@ def edit_student(request):
         student.user.city = city
         student.user.country = country
         student.user.gender = gender
+        student.user.postal_code = postal_code
+        student.user.state = state
 
         student.user.save()
 
@@ -124,6 +185,9 @@ def edit_student(request):
         student.guardian_name = guardian_name
         student.guardian_phone_number = guardian_phone_number
         student.programme_id = programme_id
+        student.guardian_email = guardian_email
+        student.guardian_relationship = guardian_relationship
+        
         student.save()
 
         return redirect("students")

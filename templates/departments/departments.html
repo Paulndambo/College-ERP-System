@@ -1,7 +1,5 @@
-{% extends "base.html" %}
+{% extends "base1.html" %}
 
-{% block additional_css %}
-{% endblock additional_css %}
 
 {% block content %}
 <div class="row">
@@ -39,14 +37,15 @@
               <td>{{department.name}}</td>
               <td>{{department.school}}</td>
               <td>{{department.office}}</td>
+              
               <td>
-                <a href="{% url 'department-details' department.id %}" class="btn btn-primary btn-sm"><i class="bi bi-eye-fill"></i></a>
+                <a href="{% url 'department-details' department.id %}" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>
               </td>
               <td><a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editDepartmentModal{{ department.id }}">
-                <i class="bi bi-pencil-square"></i>
+                <i class="fas fa-pencil"></i>
               </a></td>
               <td><a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteDepartmentModal{{ department.id }}">
-                <i class="bi bi-trash"></i>
+                <i class="fas fa-trash"></i>
               </a></td>
              {% include "departments/edit_department.html" %}
              {% include "departments/delete_department.html" %}

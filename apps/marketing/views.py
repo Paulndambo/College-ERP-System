@@ -15,32 +15,47 @@ from apps.schools.models import Department, Programme, Course
 from apps.users.models import User
 from apps.core.models import UserRole
 
+from django.views.generic import ListView
+from django.http import JsonResponse
 
 from apps.core.constants import GENDER_CHOICES, SOURCES, INTERACTION_TYPES, LEAD_STAGES
 
-
-@login_required
-def leads(request):
-    leads = Lead.objects.all().order_by("-created_on")
-
-    paginator = Paginator(leads, 8)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    programmes = Programme.objects.all()
-    users_role = UserRole.objects.get(name="Student")
-    users = User.objects.exclude(role=users_role)
-
-    context = {
-        "page_obj": page_obj,
-        "programmes": programmes,
-        "gender_choices": GENDER_CHOICES,
-        "sources": SOURCES,
-        "users": users,
-    }
-    return render(request, "marketing/leads/leads.html", context)
+programmes = Programme.objects.all()
+users_role = UserRole.objects.get(name="Student")
+users = User.objects.exclude(role=users_role)
 
 
+class LeadsListView(ListView):
+    model = Lead
+    template_name = 'marketing/leads/leads.html'
+    context_object_name = 'leads'
+    paginate_by = 8
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(phone_number__icontains=search_query) |
+                Q(name__icontains=search_query) | 
+                Q(email__icontains=search_query)
+            )
+        
+        # Get sort parameter
+        return queryset.order_by("-created_on")
+
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        context["users"] = users
+        context["sources"] = SOURCES
+        context["gender_choices"] = GENDER_CHOICES
+        context["programmes"] = programmes
+        return context
+    
 @login_required
 def lead_details(request, lead_id):
     lead = Lead.objects.get(id=lead_id)
@@ -160,20 +175,31 @@ def add_lead_stage(request):
     return render(request, "marketing/leads/new_lead_stage.html")
 
 
-@login_required
-def tasks(request):
-    tasks = Task.objects.all().order_by("-created_on")
+class TasksListView(ListView):
+    model = Task
+    template_name = 'marketing/leads/tasks/tasks.html'
+    context_object_name = 'tasks'
+    paginate_by = 8
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(title__icontains=search_query) 
+            )
 
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        tasks = Task.objects.filter(Q(title__icontains=search_text))
+        # Get sort parameter
+        return queryset.order_by("-created_on")
 
-    paginator = Paginator(tasks, 8)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"page_obj": page_obj}
-    return render(request, "marketing/leads/tasks/tasks.html", context)
+    def get_context_data(self, **kwargs):
+        
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        return context
+    
 
 
 @login_required
