@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.schools.models import School, Department, Course, Programme, Semester
+from apps.schools.models import School, Department, Course, Programme, Semester, ProgrammeCohort, CourseSession
 
 # Register your models here.
 
@@ -13,3 +13,15 @@ admin.site.register(Programme)
 @admin.register(Semester)
 class SemesterAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "academic_year", "created_on")
+
+
+@admin.register(ProgrammeCohort)
+class ProgrammeCohortAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "programme", "current_year", "current_semester", "created_on")
+    list_filter = ("programme", "current_year", "current_semester")
+    
+    
+@admin.register(CourseSession)
+class CourseSessionAdmin(admin.ModelAdmin):
+    list_display = ("id", "cohort", "course", "start_time", "period", "created_on")
+    list_filter = ("course", "cohort")

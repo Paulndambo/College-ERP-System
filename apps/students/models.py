@@ -35,6 +35,11 @@ EDUCATION_LEVEL_CHOICES = (
     ("University", "University"),
 )
 
+ATTENDANCE_STATUS_CHOICES = (
+    ("Present", "Present"),
+    ("Absent", "Absent"),
+)
+
 date_today = datetime.now().date()
 month_name = calendar.month_name[date_today.month]
 
@@ -98,3 +103,14 @@ class StudentProgramme(AbsoluteBaseModel):
 
     def __str__(self):
         return f"{self.student.user.username}: {self.programme.name}"
+    
+    
+class StudentAttendance(AbsoluteBaseModel):
+    student = models.ForeignKey("students.Student", on_delete=models.CASCADE, related_name="studentattendances")
+    session = models.ForeignKey("schools.CourseSession", on_delete=models.CASCADE, null=True)
+    date = models.DateField()
+    status = models.CharField(max_length=255, choices=ATTENDANCE_STATUS_CHOICES, null=True)
+    reason = models.CharField(max_length=255, null=True)
+
+    def __str__(self):
+        return f"{self.student.user.username}: {self.date}"

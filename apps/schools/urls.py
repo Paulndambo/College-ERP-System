@@ -25,6 +25,7 @@ from apps.schools.views import (
     delete_semester,
 )
 
+from apps.schools.courses.views import CourseSessionsListView, CohortsListView
 
 urlpatterns = [
     path("", schools, name="schools"),
@@ -42,9 +43,7 @@ urlpatterns = [
     path("new-programme/", new_programme, name="new-programme"),
     path("delete-programme/", delete_programme, name="delete-programme"),
     path("departments/", departments, name="departments"),
-    path(
-        "departments/<int:id>/details/", department_details, name="department-details"
-    ),
+    path("departments/<int:id>/details/", department_details, name="department-details"),
     path("new-department/", new_department, name="new-department"),
     path("edit-department/", edit_department, name="edit-department"),
     path("delete-department/", delete_department, name="delete-department"),
@@ -53,4 +52,7 @@ urlpatterns = [
     path("new-semester/", new_semester, name="new-semester"),
     path("edit-semester/", edit_semester, name="edit-semester"),
     path("delete-semester/", delete_semester, name="delete-semester"),   
+    
+    path("sessions/", CourseSessionsListView.as_view(), name="sessions"),
+    path("cohorts/", CohortsListView.as_view(), name="cohorts"),
 ]
