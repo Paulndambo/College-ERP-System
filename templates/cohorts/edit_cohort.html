@@ -1,0 +1,86 @@
+<div class="modal fade" id="editCohortModal{{cohort.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Cohort</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-cohort' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                <input type="number" id="cohort_id" name="cohort_id" value="{{cohort.id}}" hidden readonly required />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Cohort Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    value="{{cohort.name}}"
+                    required
+                  />
+                </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Programme</label>
+                    <select class="form-select" id="programme" name="programme">
+                        <option value="{{cohort.programme.id}}">{{cohort.programme}}</option>
+                        {% for programme in programmes %}
+                            {% if programme.id != cohort.programme.id %}
+                                <option value="{{programme.id}}">{{programme}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Cohort Current Year</label>
+                        <select class="form-select" id="current_year" name="current_year">
+                            <option value="{{cohort.current_year}}">{{cohort.current_year}}</option>
+                            {% for year in cohort_years %}
+                                {% if year != cohort.current_year %}
+                                    <option value="{{year}}">{{year}}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                      </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Current Semester</label>
+                      <select class="form-select" id="current_semester" name="current_semester">
+                        <option value="{{cohort.current_semester.id}}">{{cohort.current_semester}}: {{cohort.current_semester.academic_year}}</option>
+                        {% for semester in semesters %}
+                            {% if semester.id != cohort.current_semester.id %}
+                                <option value="{{semester.id}}">{{semester}}: {{semester.academic_year}}</option>
+                            {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Cohort Status</label>
+                      <select class="form-select" id="status" name="status">
+                        <option value="{{cohort.status}}">{{cohort.status}}</option>
+                        {% for status in cohort_statuses %}
+                            {% if status != cohort.status %}
+                                <option value="{{status}}">{{status}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    </div>
+                  </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Edit Cohort Details</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

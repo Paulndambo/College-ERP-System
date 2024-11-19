@@ -22,6 +22,12 @@ COHORT_YEAR_CHOICES = (
     ("Seventh Year", "Seventh Year"),
 )
 
+SEMESTER_TYPES = (
+    ("Semester One", "Semester One"),
+    ("Semester Two", "Semester Two"),
+    ("Semester Three", "Semester Three"),
+)
+
 class School(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     email = models.EmailField()
@@ -63,13 +69,6 @@ class Course(AbsoluteBaseModel):
         return self.name
 
 
-SEMESTER_TYPES = (
-    ("Semester One", "Semester One"),
-    ("Semester Two", "Semester Two"),
-    ("Semester Three", "Semester Three"),
-)
-
-
 class Semester(AbsoluteBaseModel):
     name = models.CharField(max_length=255, choices=SEMESTER_TYPES, null=True)
     academic_year = models.CharField(max_length=255)
@@ -85,7 +84,7 @@ class ProgrammeCohort(AbsoluteBaseModel):
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
     current_year = models.CharField(max_length=255, choices=COHORT_YEAR_CHOICES)
     current_semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
-    status = models.CharField(max_length=255, choices=[("Active", "Active"), ("Closed", "Closed")], default="Active")
+    status = models.CharField(max_length=255, choices=[("Active", "Active"), ("Graduated", "Graduated")], default="Active")
     
     def __str__(self):
         return self.name
@@ -95,7 +94,7 @@ class CourseSession(AbsoluteBaseModel):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True)
     period = models.FloatField(default=2)
-    status = models.CharField(max_length=255, choices=[("Active", "Active"), ("Closed", "Closed")], default="Active")
+    status = models.CharField(max_length=255, choices=[("Future", "Future"), ("Active", "Active"), ("Completed", "Completed"), ("Cancelled", "Cancelled"), ("Rescheduled", "Rescheduled")], default="Active")
     
     def __str__(self):
         return self.course.name

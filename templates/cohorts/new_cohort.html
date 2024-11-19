@@ -1,0 +1,75 @@
+<div class="modal fade" id="newCohortModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Cohort</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'new-cohort' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Cohort Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    required
+                  />
+                </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Programme</label>
+                    <select class="form-select" id="programme" name="programme">
+                        <option></option>
+                        {% for programme in programmes %}
+                            <option value="{{programme.id}}">{{programme}}</option>
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Cohort Current Year</label>
+                        <select class="form-select" id="current_year" name="current_year">
+                            <option></option>
+                            {% for year in cohort_years %}
+                                <option value="{{year}}">{{year}}</option>
+                            {% endfor %}
+                        </select>
+                      </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Current Semester</label>
+                      <select class="form-select" id="current_semester" name="current_semester">
+                        <option></option>
+                        {% for semester in semesters %}
+                            <option value="{{semester.id}}">{{semester}}-{{semester.academic_year}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Cohort Status</label>
+                      <select class="form-select" id="status" name="status">
+                        <option value="Active">Active</option>
+                        <option value="Graduated">Graduated</option>
+                    </select>
+                    </div>
+                    
+                  </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Create Cohort</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

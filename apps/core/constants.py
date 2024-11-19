@@ -28,3 +28,7 @@ LEAD_STAGES = [
     "Converted",
     "Lost",
 ]
+
+SEMESTER_TYPES = ["Semester One", "Semester Two",  "Semester Three"]
+ACADEMIC_YEARS = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year", "Sixth Year", "Seventh Year"]
+SESSION_STATUSES = ["Future", "Active", "Cancelled", "Completed", "Rescheduled"]

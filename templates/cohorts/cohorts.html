@@ -13,6 +13,7 @@
         </div>
         <div class="col">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newCohortModal">New Cohort</button>
+            <button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#uploadCohortsModal">Upload Cohorts</button>
           </div>
     </div>
     <!-- Table Toolbar --> 
@@ -49,7 +50,10 @@
                     
                     <td>
                         <div class="d-flex gap-1">
-                            <a href="#" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>
+                            <a href="#" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                            <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editCohortModal{{ cohort.id }}">
+                                <i class="fas fa-pencil"></i>
+                              </a>
                             <button class="btn btn-sm btn-outline-danger action-btn delete-btn" 
                             data-bs-toggle="modal" data-bs-target="#deleteCohortModal{{ cohort.id }}">
                                 <i class="fas fa-trash"></i>
@@ -57,6 +61,7 @@
                         </div>
                     </td>
                     {% include "cohorts/delete_cohort.html" %}
+                    {% include "cohorts/edit_cohort.html" %}
                 </tr>
                 {% empty %}
                 <tr>
