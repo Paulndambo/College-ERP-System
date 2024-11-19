@@ -233,6 +233,15 @@
         background-color: #e3fcef;
         color: #1cc88a;
     }
+    .status-absent {
+        background-color: #da1737;
+        color: #d7afac;
+    }
+
+    .status-present {
+        background-color: #e3fcef;
+        color: #1cc88a;
+    }
 
     .status-inactive {
         background-color: #fff5f5;
@@ -242,6 +251,15 @@
     .status-pending {
         background-color: #fff8ec;
         color: #f6c23e;
+    }
+    .status-lost {
+        background-color: #fff5f5;
+        color: #e74a3b;
+    }
+
+    .status-returned {
+        background-color: #e3fcef;
+        color: #1cc88a;
     }
 
     .table-footer {
@@ -342,6 +360,9 @@
         {% include "cohorts/upload_cohorts.html" %}
 
       {% include "sessions/new_session.html" %}
+
+      {% include "library/books/new_book.html" %}
+      {% include "library/members/new_member.html" %}
       
         </div>
     </div>

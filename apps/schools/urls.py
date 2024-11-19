@@ -30,6 +30,10 @@ from apps.schools.courses.views import (
     new_session,
     edit_session,
     delete_session,
+    session_attendance,
+    CourseSessionAttendancesListView,
+    mark_student_absent,
+    mark_student_present,
     
     CohortsListView,
     new_cohort,
@@ -66,6 +70,9 @@ urlpatterns = [
     path("delete-semester/", delete_semester, name="delete-semester"),   
     
     path("sessions/", CourseSessionsListView.as_view(), name="sessions"),
+    path("sessions/<int:id>/attendances/", CourseSessionAttendancesListView.as_view(), name="session-attendance"),
+    path("mark-student-absent/", mark_student_absent, name="mark-student-absent"),
+    path("mark-student-present/", mark_student_present, name="mark-student-present"),
     path("new-session/", new_session, name="new-session"),
     path("edit-session/", edit_session, name="edit-session"),
     path("delete-session/", delete_session, name="delete-session"),

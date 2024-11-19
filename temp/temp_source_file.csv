@@ -1,9 +1,101 @@
-name,programme_code,current_year,semester_name,status
-MAY MIT 2010,MIT,Second Year,Semester Two,Graduated
-MAY MCOM 2010,MCOM,Second Year,Semester Two,Graduated
-MAY BIT 2010,BIT,Fourth Year,Semester Two,Graduated
-MAY COM 2010,COM,Fourth Year,Semester Two,Graduated
-AUG MIT 2010,MIT,Second Year,Semester Two,Graduated
-AUG MCOM 2010,MCOM,Second Year,Semester Two,Graduated
-AUG BIT 2010,BIT,Fourth Year,Semester Two,Graduated
-AUG COM 2010,COM,Fourth Year,Semester Two,Graduated
+first_name,last_name,email,gender,phone_number,guardian_name,guardian_phone_number,guardian_relationship,guardian_email,registration_number,address,postal_code,city,country,date_of_birth,cohort_name
+Lori,Boucher,lboucher0@imdb.com,Female,818-829-6915,Lori Boucher,284-946-2421,Parent,lboucher0@technorati.com,968837765384,443 Lake View Point,,Iganga,Uganda,12/27/1909,SEP COM 2020
+Sergei,Trett,strett1@indiegogo.com,Male,139-784-7274,Sergei Trett,478-381-3246,Aunt/Uncle,strett1@who.int,983560716463,73 Annamark Lane,,Pan de Azúcar,Uruguay,4/14/1953,SEP IT 2020
+Seline,Hicks,shicks2@netvibes.com,Female,839-376-8564,Seline Hicks,997-223-2703,Grand Parent,shicks2@amazon.com,988199711182,97 Loeprich Road,,Aguas Corrientes,Uruguay,7/19/1937,SEP IT 2020
+Bertie,Quinet,bquinet3@fema.gov,Male,828-439-0283,Bertie Quinet,774-919-1469,Aunt/Uncle,bquinet3@deviantart.com,536725149016,30319 Green Ridge Plaza,,Dolores,Uruguay,6/3/1998,SEP IT 2019
+Wilt,Kellett,wkellett4@ask.com,Male,947-994-2968,Wilt Kellett,624-325-1576,Sibling,wkellett4@marriott.com,712231276590,36 Sunfield Terrace,,Maralal,Kenya,4/23/1968,SEP COM 2020
+Harland,O'Garmen,hogarmen5@alibaba.com,Male,390-431-0268,Harland O'Garmen,777-678-6571,Sibling,hogarmen5@constantcontact.com,695177078721,8 Mcbride Alley,,Bridgetown,Barbados,9/16/1918,SEP IT 2018
+Irina,Baggot,ibaggot6@google.ca,Female,449-561-4394,Irina Baggot,563-955-7421,Sibling,ibaggot6@blinklist.com,563778433342,25796 Brentwood Street,,Dokolo,Uganda,7/1/1905,SEP COM 2019
+Kippie,Cordeux,kcordeux7@yale.edu,Male,210-702-5019,Kippie Cordeux,963-933-8460,Sibling,kcordeux7@issuu.com,608990848570,91 2nd Trail,,Pumwani,Kenya,5/25/1994,SEP IT 2020
+Morly,McNelly,mmcnelly8@paypal.com,Male,112-341-9839,Morly McNelly,783-810-8574,Sibling,mmcnelly8@walmart.com,561504633537,76 Prairieview Lane,,Garissa,Kenya,12/3/2000,SEP IT 2018
+Eleen,Beecraft,ebeecraft9@reddit.com,Female,997-355-7047,Eleen Beecraft,840-340-2105,Parent,ebeecraft9@plala.or.jp,397197423430,64064 Truax Parkway,,Quebracho,Uruguay,3/4/1963,SEP IT 2019
+Dore,Chipman,dchipmana@wikimedia.org,Male,580-963-0808,Dore Chipman,578-604-4628,Sibling,dchipmana@cornell.edu,72157587570,67 Ilene Lane,,Voi,Kenya,9/13/2001,SEP COM 2020
+Isahella,Garnson,igarnsonb@cafepress.com,Female,720-865-7968,Isahella Garnson,356-685-8216,Grand Parent,igarnsonb@smh.com.au,929174572734,4 Service Avenue,,Homa Bay,Kenya,4/9/2019,SEP IT 2019
+Shaun,Wisedale,swisedalec@indiatimes.com,Female,418-249-1871,Shaun Wisedale,311-958-3428,Sibling,swisedalec@msu.edu,191730493245,6502 Farmco Crossing,,Adjumani,Uganda,7/27/1932,SEP COM 2019
+Carlotta,Staddon,cstaddond@auda.org.au,Female,514-776-2149,Carlotta Staddon,275-889-3126,Sibling,cstaddond@about.com,310082682669,546 Orin Trail,,Mityana,Uganda,2/11/1949,SEP COM 2019
+Zorina,Studdeard,zstuddearde@clickbank.net,Female,672-117-7172,Zorina Studdeard,935-584-6237,Sibling,zstuddearde@smugmug.com,578204028975,4335 Kennedy Court,,Kilifi,Kenya,6/18/2017,SEP COM 2020
+Erhard,Verrico,everricof@twitter.com,Male,774-330-4428,Erhard Verrico,636-456-0713,Sibling,everricof@opensource.org,892223969319,62 Village Green Avenue,,Lodwar,Kenya,11/4/1974,SEP IT 2020
+Dore,Menat,dmenatg@smh.com.au,Female,313-438-2866,Dore Menat,656-574-1457,Other,dmenatg@tinyurl.com,87433959176,51 Chive Road,,Kyenjojo,Uganda,4/16/1902,SEP COM 2019
+Bess,Stapells,bstapellsh@technorati.com,Female,736-413-7105,Bess Stapells,872-666-0643,Parent,bstapellsh@pagesperso-orange.fr,535473599369,21942 Rutledge Drive,,Kole,Uganda,9/4/1993,SEP IT 2020
+Aileen,Goricke,agorickei@rediff.com,Female,754-851-8217,Aileen Goricke,951-110-1990,Other,agorickei@alexa.com,763475908850,5548 Dakota Center,,Garissa,Kenya,5/27/1958,SEP IT 2020
+Wheeler,Minto,wmintoj@theatlantic.com,Male,889-240-0942,Wheeler Minto,565-963-4786,Grand Parent,wmintoj@upenn.edu,259398128988,1864 Westend Drive,,Otuke,Uganda,10/19/1976,SEP IT 2019
+Hercule,Davioud,hdavioudk@msu.edu,Male,706-199-5911,Hercule Davioud,529-478-5165,Sibling,hdavioudk@whitehouse.gov,106490371168,05 Westridge Place,,Welchman Hall,Barbados,7/16/1988,SEP IT 2019
+Chris,Corkill,ccorkilll@guardian.co.uk,Female,917-739-9723,Chris Corkill,991-127-8121,Aunt/Uncle,ccorkilll@geocities.jp,504565154025,44716 Old Gate Street,,Baltasar Brum,Uruguay,2/27/2001,SEP COM 2019
+Boycie,Crux,bcruxm@opensource.org,Male,408-658-6708,Boycie Crux,888-112-7944,Sibling,bcruxm@sina.com.cn,409681592824,501 Dottie Parkway,,Nakasongola,Uganda,9/9/1922,SEP IT 2020
+Priscella,Ragat,pragatn@walmart.com,Female,734-299-6037,Priscella Ragat,763-197-0189,Grand Parent,pragatn@wiley.com,973359598798,9 Morning Plaza,,Santa Rosa,Uruguay,11/21/1943,SEP IT 2019
+Haslett,Downe,hdowneo@last.fm,Male,283-947-7180,Haslett Downe,435-155-5510,Sibling,hdowneo@aol.com,402752067168,98 Lakewood Gardens Court,,Mumias,Kenya,8/4/1924,SEP COM 2020
+Nani,Vaissiere,nvaissierep@opensource.org,Female,878-874-6128,Nani Vaissiere,595-445-5895,Parent,nvaissierep@slideshare.net,334232371233,4305 Delaware Junction,,Speightstown,Barbados,8/9/1932,SEP IT 2020
+Coralie,Glasheen,cglasheenq@mozilla.org,Female,428-330-2760,Coralie Glasheen,945-719-2208,Parent,cglasheenq@skyrock.com,436859259597,320 Superior Trail,,Kotido,Uganda,12/19/1987,SEP IT 2020
+Ethelind,Arminger,earmingerr@reddit.com,Female,806-771-5736,Ethelind Arminger,436-376-7457,Grand Parent,earmingerr@cam.ac.uk,250268950014,12466 Dakota Terrace,,Otuke,Uganda,3/20/1957,SEP IT 2020
+Dick,O'Crevan,docrevans@time.com,Male,633-939-2706,Dick O'Crevan,562-764-3031,Sibling,docrevans@sogou.com,532252128796,54875 Monica Pass,,Kaliro,Uganda,9/14/1996,SEP IT 2019
+Marris,Bransom,mbransomt@chronoengine.com,Female,535-917-5640,Marris Bransom,749-218-3975,Sibling,mbransomt@admin.ch,103518137527,1583 Calypso Lane,,Cardal,Uruguay,11/26/1957,SEP COM 2019
+Nataniel,Edgeson,nedgesonu@oaic.gov.au,Male,121-879-3334,Nataniel Edgeson,737-655-1929,Grand Parent,nedgesonu@arizona.edu,639101451844,82 Buhler Point,,Tupambaé,Uruguay,9/2/1946,SEP COM 2019
+Mersey,Dulwitch,mdulwitchv@g.co,Female,873-948-4322,Mersey Dulwitch,817-147-2869,Grand Parent,mdulwitchv@theatlantic.com,326195657310,314 Laurel Lane,,Kajansi,Uganda,6/6/1900,SEP IT 2019
+Devonna,Shucksmith,dshucksmithw@cargocollective.com,Female,402-606-8342,Devonna Shucksmith,972-105-8249,Sibling,dshucksmithw@senate.gov,255449519636,80040 La Follette Trail,,Katakwi,Uganda,10/4/1959,SEP COM 2019
+Rubie,Witham,rwithamx@blogs.com,Female,456-214-0394,Rubie Witham,415-842-6096,Sibling,rwithamx@un.org,934452314419,6249 Fair Oaks Pass,,Kayunga,Uganda,7/20/1995,SEP IT 2019
+Maurice,Race,mracey@forbes.com,Male,431-192-1291,Maurice Race,796-988-2785,Sibling,mracey@europa.eu,907761038128,113 Caliangt Plaza,,Amuru,Uganda,9/27/1995,SEP IT 2018
+Kale,Betancourt,kbetancourtz@unblog.fr,Male,948-251-4211,Kale Betancourt,686-404-3372,Other,kbetancourtz@lycos.com,167715674937,0610 Florence Point,,Keruguya,Kenya,6/27/1991,SEP IT 2020
+Daven,Gozney,dgozney10@state.gov,Male,238-205-9505,Daven Gozney,707-750-7996,Sibling,dgozney10@indiatimes.com,117386913471,810 Straubel Circle,,Belén,Uruguay,7/6/1926,SEP IT 2019
+Lazaro,Worsom,lworsom11@dedecms.com,Male,588-245-4156,Lazaro Worsom,260-900-9413,Parent,lworsom11@yandex.ru,614213555012,5151 Fordem Circle,,Speightstown,Barbados,3/22/1922,SEP IT 2019
+Demetrius,Cremen,dcremen12@stanford.edu,Male,209-724-4644,Demetrius Cremen,948-786-3865,Aunt/Uncle,dcremen12@behance.net,92088037659,0 Graceland Center,,Nyachera,Uganda,4/4/1940,SEP IT 2019
+Hayley,Foggo,hfoggo13@myspace.com,Female,503-831-3684,Hayley Foggo,161-288-1212,Other,hfoggo13@163.com,659907689317,7632 Old Shore Way,,Nueva Helvecia,Uruguay,9/2/1982,SEP IT 2018
+Derron,Clemmen,dclemmen14@t-online.de,Male,125-802-6277,Derron Clemmen,421-433-2606,Sibling,dclemmen14@cbc.ca,487474231334,5 Warner Crossing,,Adjumani,Uganda,8/20/1974,SEP IT 2020
+Domenic,Clarkin,dclarkin15@japanpost.jp,Male,355-177-7750,Domenic Clarkin,530-587-3923,Other,dclarkin15@instagram.com,624498194734,17 Karstens Road,,Tala,Uruguay,7/20/2004,SEP IT 2019
+Reidar,Caile,rcaile16@salon.com,Male,189-363-4831,Reidar Caile,458-241-7474,Grand Parent,rcaile16@reuters.com,68102767652,545 Heffernan Avenue,,Pando,Uruguay,7/5/1902,SEP COM 2020
+Avigdor,Dudson,adudson17@yahoo.co.jp,Male,778-722-9956,Avigdor Dudson,438-651-8167,Sibling,adudson17@pbs.org,946161426736,6033 Carioca Park,,Karuri,Kenya,4/28/1959,SEP COM 2019
+Jaimie,Penwell,jpenwell18@washingtonpost.com,Female,324-369-1129,Jaimie Penwell,746-526-0956,Aunt/Uncle,jpenwell18@oaic.gov.au,273389963748,2254 East Center,,Nuevo Berlín,Uruguay,3/3/1926,SEP COM 2020
+Rosemonde,Karpychev,rkarpychev19@themeforest.net,Female,302-109-6100,Rosemonde Karpychev,518-939-0380,Parent,rkarpychev19@hc360.com,32326197422,689 Sunbrook Drive,,Nakuru,Kenya,1/18/1952,SEP IT 2019
+Henry,Baguley,hbaguley1a@amazon.co.jp,Male,910-454-2226,Henry Baguley,919-392-8564,Parent,hbaguley1a@rakuten.co.jp,123673801959,71 Bay Circle,,Treinta y Tres,Uruguay,2/6/1917,SEP IT 2018
+Brynn,Aleswell,baleswell1b@usgs.gov,Female,638-476-9585,Brynn Aleswell,460-809-4619,Sibling,baleswell1b@nps.gov,568685763112,7 Saint Paul Court,,Speightstown,Barbados,7/24/1926,SEP IT 2020
+Shanda,Stannus,sstannus1c@soundcloud.com,Female,773-628-4057,Shanda Stannus,202-955-4630,Aunt/Uncle,sstannus1c@ebay.co.uk,541414168544,1697 Lake View Crossing,,Rongai,Kenya,6/1/1935,SEP IT 2020
+Olenolin,Toohey,otoohey1d@sourceforge.net,Male,375-488-0305,Olenolin Toohey,288-816-5398,Other,otoohey1d@foxnews.com,449358979969,13 Granby Trail,,Tarariras,Uruguay,5/11/1920,SEP IT 2020
+Mickey,Watts,mwatts1e@sogou.com,Male,120-740-2542,Mickey Watts,212-977-3137,Sibling,mwatts1e@discuz.net,127135915240,3 Eagan Pass,,Bella Unión,Uruguay,7/11/1976,SEP COM 2020
+Nonie,Wooder,nwooder1f@mediafire.com,Female,397-279-9288,Nonie Wooder,525-464-4337,Grand Parent,nwooder1f@wikispaces.com,543313060298,1579 Grover Drive,,Rafael Perazza,Uruguay,12/29/2000,SEP IT 2020
+Klara,Harrad,kharrad1g@nba.com,Female,832-610-0660,Klara Harrad,605-370-3240,Sibling,kharrad1g@gov.uk,812820318701,3 Summerview Alley,,Moroto,Uganda,9/8/1949,SEP IT 2018
+Waite,Bish,wbish1h@house.gov,Male,208-269-8264,Waite Bish,713-497-3535,Other,wbish1h@dailymotion.com,202649636587,611 Maple Parkway,,Tupambaé,Uruguay,10/19/1901,SEP IT 2020
+Burnard,Feldmark,bfeldmark1i@ocn.ne.jp,Male,443-928-3606,Burnard Feldmark,716-134-3118,Grand Parent,bfeldmark1i@wunderground.com,459784935430,065 Kinsman Plaza,,Ntungamo,Uganda,1/13/1955,SEP IT 2018
+Filip,Stonham,fstonham1j@mlb.com,Male,676-848-4742,Filip Stonham,688-998-2391,Grand Parent,fstonham1j@ft.com,492277411095,55352 Pepper Wood Street,,Ol Kalou,Kenya,5/13/1922,SEP IT 2019
+Ofelia,Colbran,ocolbran1k@chron.com,Female,938-984-1119,Ofelia Colbran,459-330-2204,Grand Parent,ocolbran1k@washingtonpost.com,2985488561,67953 Briar Crest Street,,Kilifi,Kenya,2/3/1996,SEP IT 2018
+Jordan,Goldstone,jgoldstone1l@yolasite.com,Female,880-268-1166,Jordan Goldstone,307-383-9844,Grand Parent,jgoldstone1l@angelfire.com,397123246205,874 Commercial Place,,Eldoret,Kenya,2/22/1918,SEP IT 2018
+Amalie,Coal,acoal1m@is.gd,Female,631-328-1965,Amalie Coal,612-731-0849,Sibling,acoal1m@biglobe.ne.jp,243933901027,19725 Anhalt Point,,Rivera,Uruguay,12/4/1915,SEP IT 2018
+Heywood,Ottewell,hottewell1n@mediafire.com,Male,639-912-8472,Heywood Ottewell,355-619-6003,Other,hottewell1n@moonfruit.com,971825635228,025 Larry Plaza,,Kagadi,Uganda,7/28/1952,SEP IT 2019
+Culver,Moloney,cmoloney1o@reverbnation.com,Male,393-343-8150,Culver Moloney,567-554-2879,Aunt/Uncle,cmoloney1o@ning.com,948455047637,33 Manley Circle,,Makueni,Kenya,3/10/1955,SEP IT 2018
+Farly,Magwood,fmagwood1p@facebook.com,Male,216-209-4771,Farly Magwood,274-878-0997,Other,fmagwood1p@twitpic.com,505825326049,64 Norway Maple Parkway,,Luuka Town,Uganda,10/21/1932,SEP COM 2019
+Celle,Flux,cflux1q@pbs.org,Female,229-736-3808,Celle Flux,873-245-3599,Other,cflux1q@diigo.com,774873322435,1 Colorado Junction,,Kakamega,Kenya,3/4/1960,SEP IT 2020
+Raimondo,Harbert,rharbert1r@uol.com.br,Male,602-421-1400,Raimondo Harbert,236-913-6300,Parent,rharbert1r@vkontakte.ru,87808708344,770 Gulseth Avenue,,Busia,Kenya,7/9/1981,SEP IT 2018
+Lorenza,Burchmore,lburchmore1s@merriam-webster.com,Female,252-183-3987,Lorenza Burchmore,507-931-3878,Grand Parent,lburchmore1s@unblog.fr,294765002213,6123 Morningstar Court,,Mercedes,Uruguay,3/31/1949,SEP COM 2020
+Cherise,Copland,ccopland1t@parallels.com,Female,928-235-4726,Cherise Copland,826-590-3563,Aunt/Uncle,ccopland1t@nydailynews.com,99161160287,2704 7th Place,,Mayuge,Uganda,7/29/1988,SEP IT 2019
+Maegan,Proudler,mproudler1u@si.edu,Female,924-965-9017,Maegan Proudler,468-531-6986,Aunt/Uncle,mproudler1u@tumblr.com,417212077914,9544 Sommers Road,,Paidha,Uganda,6/15/1943,SEP COM 2019
+Jeniffer,McCulloch,jmcculloch1v@homestead.com,Female,915-300-7249,Jeniffer McCulloch,822-866-8131,Parent,jmcculloch1v@opensource.org,210545784766,65645 Shelley Parkway,,Garissa,Kenya,4/2/1928,SEP IT 2018
+Alden,Trudgeon,atrudgeon1w@chron.com,Male,197-916-2228,Alden Trudgeon,942-929-4132,Aunt/Uncle,atrudgeon1w@tinyurl.com,932577738432,49 4th Road,,Kyenjojo,Uganda,5/16/1934,SEP IT 2020
+Haleigh,Gorhardt,hgorhardt1x@imdb.com,Female,576-108-7693,Haleigh Gorhardt,709-599-2151,Aunt/Uncle,hgorhardt1x@feedburner.com,278143112826,6918 Scott Park,,Tupambaé,Uruguay,10/30/2004,SEP IT 2018
+Carolyn,Lipman,clipman1y@smugmug.com,Female,305-267-7540,Carolyn Lipman,340-682-1511,Aunt/Uncle,clipman1y@theguardian.com,968135118311,88 Waubesa Plaza,,Kole,Uganda,4/7/1959,SEP IT 2018
+Melanie,Doneld,mdoneld1z@bing.com,Female,658-744-4796,Melanie Doneld,265-445-7985,Grand Parent,mdoneld1z@icq.com,366672312573,33766 Myrtle Way,,Jinja,Uganda,12/1/1963,SEP IT 2020
+Lonny,Algeo,lalgeo20@nih.gov,Male,906-749-4283,Lonny Algeo,374-539-3784,Parent,lalgeo20@simplemachines.org,435279316633,20247 Weeping Birch Court,,La Paloma,Uruguay,3/17/1958,SEP IT 2018
+Annaliese,Puckett,apuckett21@weebly.com,Female,717-934-7868,Annaliese Puckett,938-958-3226,Sibling,apuckett21@google.de,749053490050,4483 Graceland Avenue,,Wakiso,Uganda,12/10/1967,SEP IT 2018
+Albert,Broxup,abroxup22@mozilla.com,Male,460-154-4725,Albert Broxup,908-149-0980,Sibling,abroxup22@homestead.com,810544543600,61811 Mesta Drive,,Njeru,Uganda,6/24/1969,SEP IT 2019
+Allan,Neillans,aneillans23@disqus.com,Male,511-995-4398,Allan Neillans,535-597-7094,Parent,aneillans23@51.la,245522288634,24855 Dryden Plaza,,Kagadi,Uganda,8/4/1901,SEP COM 2020
+Etti,Dineen,edineen24@wikimedia.org,Female,789-445-4907,Etti Dineen,209-319-5144,Aunt/Uncle,edineen24@columbia.edu,318652786540,81432 Katie Lane,,Gulu,Uganda,8/26/1974,SEP IT 2019
+Yvonne,Entres,yentres25@usa.gov,Female,364-929-6868,Yvonne Entres,141-415-3615,Other,yentres25@mit.edu,724845741204,83677 Heffernan Street,,Kyankwanzi,Uganda,2/10/1904,SEP IT 2018
+Cobby,Kordova,ckordova26@dagondesign.com,Male,948-493-2886,Cobby Kordova,946-961-4403,Aunt/Uncle,ckordova26@bluehost.com,639635804309,72 Forest Run Place,,Kitale,Kenya,1/22/1913,SEP IT 2020
+Conney,Tick,ctick27@army.mil,Male,855-538-6633,Conney Tick,935-313-7278,Grand Parent,ctick27@soup.io,655285984,49 Heffernan Circle,,Kajiado,Kenya,11/24/1969,SEP COM 2019
+Forrester,Eynaud,feynaud28@google.ca,Male,749-178-8349,Forrester Eynaud,959-431-7186,Other,feynaud28@shutterfly.com,969988925613,64527 Loeprich Road,,Cardal,Uruguay,5/2/1926,SEP COM 2019
+Lucilia,Amberson,lamberson29@skype.com,Female,594-303-5204,Lucilia Amberson,521-591-3992,Other,lamberson29@tamu.edu,167539271799,096 Corry Junction,,Soriano,Uruguay,3/27/1960,SEP IT 2019
+Marielle,Beevors,mbeevors2a@hubpages.com,Female,435-894-7804,Marielle Beevors,320-337-8444,Sibling,mbeevors2a@europa.eu,48384260508,462 Chive Junction,,Ntoroko,Uganda,12/24/1971,SEP IT 2020
+Alvie,Elliff,aelliff2b@whitehouse.gov,Male,868-407-8380,Alvie Elliff,432-440-6417,Aunt/Uncle,aelliff2b@zdnet.com,649288647625,32531 Haas Road,,Vichadero,Uruguay,11/29/1979,SEP IT 2018
+Trenna,Hulse,thulse2c@booking.com,Female,459-459-9235,Trenna Hulse,976-687-6130,Grand Parent,thulse2c@360.cn,398248008771,4 Paget Place,,Kiambu,Kenya,12/28/1969,SEP COM 2019
+Cathi,Cullum,ccullum2d@altervista.org,Female,909-777-0563,Cathi Cullum,714-706-6257,Sibling,ccullum2d@wikipedia.org,10701745539,0 Buell Terrace,,Kapsabet,Kenya,11/24/1992,SEP COM 2019
+Mikel,Pitkeathley,mpitkeathley2e@newsvine.com,Male,232-682-2769,Mikel Pitkeathley,834-311-1309,Sibling,mpitkeathley2e@webeden.co.uk,604024015654,2445 Thompson Alley,,Santiago Vázquez,Uruguay,2/10/1917,SEP IT 2018
+Elene,Gorioli,egorioli2f@friendfeed.com,Female,547-275-3960,Elene Gorioli,420-648-9710,Sibling,egorioli2f@ezinearticles.com,153570597014,69073 Londonderry Plaza,,Mumias,Kenya,8/3/1971,SEP COM 2019
+Montgomery,Janowski,mjanowski2g@tmall.com,Male,437-971-3555,Montgomery Janowski,975-454-9846,Sibling,mjanowski2g@arstechnica.com,314604500015,34 Nancy Street,,Kinango,Kenya,7/3/1995,SEP IT 2020
+Fransisco,Hannam,fhannam2h@china.com.cn,Male,366-855-5380,Fransisco Hannam,105-819-8665,Sibling,fhannam2h@mayoclinic.com,771278493440,72 Mallory Place,,Malikisi,Kenya,5/8/1950,SEP COM 2019
+Nariko,O'Shavlan,noshavlan2i@nasa.gov,Female,265-497-1644,Nariko O'Shavlan,127-353-5293,Aunt/Uncle,noshavlan2i@apache.org,476064973590,6351 Morningstar Center,,Greenland,Barbados,11/22/2003,SEP COM 2020
+Easter,Boulding,eboulding2j@sciencedaily.com,Female,681-994-9162,Easter Boulding,278-202-7843,Grand Parent,eboulding2j@pinterest.com,562771560911,1309 Elka Alley,,Castillos,Uruguay,6/27/1949,SEP IT 2018
+Zulema,Jennions,zjennions2k@bloglovin.com,Female,648-222-8789,Zulema Jennions,608-480-3889,Other,zjennions2k@bigcartel.com,436973683390,896 Muir Circle,,Aguas Corrientes,Uruguay,9/7/2019,SEP IT 2020
+Glenden,Ivasechko,givasechko2l@google.co.uk,Male,485-742-9183,Glenden Ivasechko,503-920-5320,Sibling,givasechko2l@senate.gov,140886612863,27456 Kropf Crossing,,Rakai,Uganda,4/16/2000,SEP IT 2019
+Doloritas,Macauley,dmacauley2m@free.fr,Female,756-227-3712,Doloritas Macauley,987-102-5972,Parent,dmacauley2m@europa.eu,179654125417,70019 Maryland Way,,Lodwar,Kenya,6/16/2005,SEP COM 2019
+Rebecca,Pollock,rpollock2n@state.gov,Female,564-879-2185,Rebecca Pollock,879-589-8321,Other,rpollock2n@artisteer.com,302898618191,72 Jay Road,,Namayingo,Uganda,7/16/1999,SEP IT 2018
+Willyt,Glazyer,wglazyer2o@is.gd,Female,264-377-5734,Willyt Glazyer,322-343-3328,Sibling,wglazyer2o@ucsd.edu,984790852018,08 Hayes Circle,,Luuka Town,Uganda,3/21/1999,SEP COM 2020
+Paolo,Riditch,priditch2p@apache.org,Male,171-724-6875,Paolo Riditch,913-456-2262,Other,priditch2p@myspace.com,460762200569,14577 Schmedeman Lane,,Keruguya,Kenya,8/18/1961,SEP IT 2020
+Klaus,Hartles,khartles2q@blogs.com,Male,880-206-5753,Klaus Hartles,534-756-2526,Other,khartles2q@wikispaces.com,324779177509,3 Milwaukee Drive,,Punta del Este,Uruguay,1/10/1954,SEP IT 2018
+Deeyn,Screach,dscreach2r@sfgate.com,Female,314-195-0466,Deeyn Screach,662-107-2997,Sibling,dscreach2r@ca.gov,763751951682,6490 Manufacturers Pass,,Kabarnet,Kenya,12/3/1966,SEP IT 2020

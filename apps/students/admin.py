@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.students.models import Student, StudentDocument
+from apps.students.models import Student, StudentDocument, StudentAttendance
 
 
 # Register your models here.
@@ -14,3 +14,8 @@ class StudentAdmin(admin.ModelAdmin):
 class StudentDocumentAdmin(admin.ModelAdmin):
     list_display = ("id", "student", "name", "file")
     list_filter = ("student",)
+
+
+@admin.register(StudentAttendance)
+class StudentAttendanceAdmin(admin.ModelAdmin):
+    list_display = ["id", "student", "session", "status", "date"]

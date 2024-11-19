@@ -30,27 +30,41 @@
       </div>
     </div>
   </div>
-
   {% include "students/edit_student.html" %}
   <!-- Course Details -->
   <div class="card mb-4">
     <div class="card-header">
-      <h5 class="card-title mb-0">Course Details</h5>
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="card-title mb-0">Programme Details</h5>
+        </div>
+        <div class="col d-flex justify-content-end">
+          <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudentCohortModal{{student.id}}"><i class="fas fa-edit"></i></a>
+        </div>
+      </div>
     </div>
     <div class="card-body">
-      <p><strong>Course:</strong> Bachelor of Science in Computer Science</p>
-      <p><strong>Year:</strong> 3rd Year</p>
-      <p><strong>Semester:</strong> 2nd Semester</p>
-      <p><strong>Department:</strong> Department of Computer Science</p>
+      <p><strong>Course:</strong> {{student.programme}}</p>
+      <p><strong>Year:</strong> {{student.cohort.current_year}}</p>
+      <p><strong>Semester:</strong> {{student.cohort.current_semester}}</p>
+      <p><strong>Department:</strong> Department of {{student.programme.department}}</p>
+      <p><strong>Cohort:</strong> {{student.cohort}}</p>
     </div>
   </div>
-
+{% include "students/edit_student_cohort.html" %}
   <!-- Contact Information -->
  <div class="row">
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
-              <h5 class="card-title mb-0">Address Information</h5>
+              <div class="row align-items-center">
+                <div class="col">
+                  <h5 class="card-title mb-0">Address Information</h5>
+                </div>
+                <div class="col d-flex justify-content-end">
+                  <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudentAddressModal{{student.id}}"><i class="fas fa-edit"></i></a>
+                </div>
+              </div>
             </div>
             <div class="card-body">
               <p><strong>Address:</strong> {{student.user.address}}</p>
@@ -64,7 +78,14 @@
         <!-- Guardian Information -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="card-title mb-0">Guardian Information</h5>
+          <div class="row align-items-center">
+            <div class="col">
+              <h5 class="card-title mb-0">Guardian Information</h5>
+            </div>
+            <div class="col d-flex justify-content-end">
+              <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudentGuardianModal{{student.id}}"><i class="fas fa-edit"></i></a>
+            </div>
+          </div>
         </div>
         <div class="card-body">
           <p><strong>Name:</strong> {{student.guardian_name}}</p>
@@ -75,7 +96,8 @@
       </div>
     </div>
  </div>
-
+{% include "students/edit_student_guardian.html" %}
+{% include "students/edit_student_address.html" %}
   <!-- Past Education History -->
   <div class="card mb-4">
 

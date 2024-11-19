@@ -88,9 +88,13 @@ class ProgrammeCohort(AbsoluteBaseModel):
     
     def __str__(self):
         return self.name
+    
+    def students_count(self):
+        return self.cohortstudents.all().count()
+    
 
 class CourseSession(AbsoluteBaseModel):
-    cohort = models.ForeignKey(ProgrammeCohort, on_delete=models.CASCADE)
+    cohort = models.ForeignKey(ProgrammeCohort, on_delete=models.CASCADE, related_name="cohortsessions")
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True)
     period = models.FloatField(default=2)
@@ -98,3 +102,15 @@ class CourseSession(AbsoluteBaseModel):
     
     def __str__(self):
         return self.course.name
+    
+    def attendance(self):
+        return self.sessionattendances.filter(status="Present").count()
+    
+    def attendance_percent(self):
+        records = self.sessionattendances.all().count()
+        attendances = self.attendance()
+        
+        value = (attendances / records) * 100
+        
+        return f"{round(value, 2)} %"
+        

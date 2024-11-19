@@ -1,0 +1,83 @@
+<div class="modal fade" id="newBookModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Book</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'new-book' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+            
+                <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Book Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="title"
+                    name="title"
+                    required
+                  />
+                </div>
+                </div>
+            
+                <div class="row mb-3">
+                <div class="col">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Book Author</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="author"
+                      name="author"
+                    />
+                  </div>
+                </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Book ISBN</label>
+                        <input type="text" class="form-control" name="isbn" id="isbn" required />
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Date Published</label>
+                        <input type="date" class="form-control" name="publication_date" id="publication_date" required />
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Book Category</label>
+                        <select class="form-select" id="category" name="category">
+                            <option></option>
+                            {% for category in book_categories %}
+                                <option value="{{category}}">{{category}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Copies Available</label>
+                        <input type="number" class="form-control" name="copies_available" id="copies_available" required />
+                    </div>
+                </div>
+
+               
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label">Total Copies</label>
+                        <input type="number" class="form-control" name="total_copies" id="total_copies" required />
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Unit Price</label>
+                        <input type="number" class="form-control" name="unit_price" id="unit_price" required />
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Create Book</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

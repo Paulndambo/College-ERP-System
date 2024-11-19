@@ -33,7 +33,8 @@
                 <ul class="collapse submenu">
                     <li class="nav-item"><a href="{% url 'students' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-graduation-cap"></i> Students List</a></li>
                     <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-fingerprint"></i> Attendance</a></li>
-                    
+                    <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-user-check"></i> Gate Check-Ins</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-utensils"></i> MealCards</a></li>
                 </ul>
             </li>
            
@@ -87,6 +88,18 @@
                     <li class="nav-item"><a href="{% url 'hostels' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-house-user"></i> Hostels</a></li>
                     <li class="nav-item"><a href="{% url 'hostel-rooms' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-bed"></i> Rooms</a></li>
                     <li class="nav-item"><a href="{% url 'bookings' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-calendar-check"></i> Bookings</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fa-solid fa-university icon"></i>
+                    <span class="link-text">Library</span>
+                </a>
+                <ul class="collapse submenu">
+                    <li class="nav-item"><a href="{% url 'books' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-book"></i> Books</a></li>
+                    <li class="nav-item"><a href="{% url 'members' %}" class="nav-link d-flex align-items-center gap-2"><i class="fa-solid fa-users"></i> Members</a></li>
+                    <li class="nav-item"><a href="{% url 'issued-books' %}" class="nav-link d-flex align-items-center gap-2"><i class="fa-solid fa-hand-holding"></i> Books Issued</a></li>
+                    <li class="nav-item"><a href="{% url 'borrowing-fines' %}" class="nav-link d-flex align-items-center gap-2"><i class="fa-solid fa-file-invoice-dollar"></i> Fines</a></li>
                 </ul>
             </li>
             <li>

@@ -55,6 +55,7 @@ class Student(AbsoluteBaseModel):
     programme = models.ForeignKey(
         "schools.Programme", on_delete=models.SET_NULL, null=True
     )
+    cohort = models.ForeignKey("schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True, related_name="cohortstudents")
 
     def __str__(self):
         return (
@@ -70,7 +71,7 @@ class StudentEducationHistory(AbsoluteBaseModel):
     graduated = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.student.user.first_name} {self.student.user.last_name}: {self.name}"
+        return f"{self.student.user.first_name} {self.student.user.last_name}"
 
 
 class StudentDocument(AbsoluteBaseModel):
@@ -107,9 +108,9 @@ class StudentProgramme(AbsoluteBaseModel):
     
 class StudentAttendance(AbsoluteBaseModel):
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE, related_name="studentattendances")
-    session = models.ForeignKey("schools.CourseSession", on_delete=models.CASCADE, null=True)
+    session = models.ForeignKey("schools.CourseSession", on_delete=models.CASCADE, related_name="sessionattendances")
     date = models.DateField()
-    status = models.CharField(max_length=255, choices=ATTENDANCE_STATUS_CHOICES, null=True)
+    status = models.CharField(max_length=255, choices=ATTENDANCE_STATUS_CHOICES, default="Present")
     reason = models.CharField(max_length=255, null=True)
 
     def __str__(self):

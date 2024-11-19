@@ -1,0 +1,25 @@
+<div class="modal fade" id="uploadBooksModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Upload Cohorts Data</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'upload-books' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="row mb-3">
+                <div class="col">
+                    <label class="form-label fw-bold">Books Data File</label>
+                    <input type="file" accept=".csv, .xlsx" class="form-control" id="books_file" name="books_file" required />
+                </div>
+                </div>
+        
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Upload Books</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

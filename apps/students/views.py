@@ -12,7 +12,7 @@ from django.db.models import Q
 from apps.students.models import Student, StudentDocument, MealCard, StudentEducationHistory
 from apps.users.models import User
 from apps.core.models import UserRole
-from apps.schools.models import Programme
+from apps.schools.models import Programme, ProgrammeCohort
 
 
 # Create your views here.
@@ -45,7 +45,7 @@ class StudentListView(ListView):
     model = Student
     template_name = 'students/students.html'
     context_object_name = 'students'
-    paginate_by = 8
+    paginate_by = 10
     
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -73,8 +73,10 @@ class StudentListView(ListView):
 def student_details(request, student_id):
     student = Student.objects.get(id=student_id)
     
+    cohorts = ProgrammeCohort.objects.all().order_by("-created_on")
+    
     education_history = StudentEducationHistory.objects.filter(student_id=student_id).order_by("-created_on")
-    context = {"student": student, "education_history": education_history, "levels": EDUCATION_LEVELS, "statuses": GRADUATION_STATUSES}
+    context = {"student": student, "education_history": education_history, "cohorts": cohorts, "levels": EDUCATION_LEVELS, "statuses": GRADUATION_STATUSES}
     
     return render(request, "students/student_details.html", context)
 
@@ -144,56 +146,45 @@ def edit_student(request):
         guardian_email = request.POST.get("guardian_email")
         guardian_relationship = request.POST.get("guardian_relationship")
         
-        new_data = {
-            "first_name": first_name,
-            "last_name": last_name,
-            "email": email,
-            "gender": gender,
-            "phone_number": phone_number,
-            "address": address,
-            "postal_code": postal_code,
-            "city": city,
-            "state": state,
-            "country": country,
-            "registration_number": registration_number,
-            "guardian_name": guardian_name,
-            "guardian_phone_number": guardian_phone_number,
-            "guardian_email": guardian_email,
-            "guardian_relationship": guardian_relationship,
-            
-        }
-        print(new_data)
-
-        programme_id = request.POST.get("programme_id")
 
         student = Student.objects.get(id=student_id)
+        user = User.objects.get(id=student.user.id)
 
-        student.user.first_name = first_name
-        student.user.last_name = last_name
-        student.user.email = email
-        student.user.phone_number = phone_number
-        student.user.address = address
-        student.user.city = city
-        student.user.country = country
-        student.user.gender = gender
-        student.user.postal_code = postal_code
-        student.user.state = state
+        user.first_name = first_name if first_name else user.first_name
+        user.last_name = last_name if last_name else user.last_name
+        user.email = email if email else user.email
+        user.phone_number = phone_number if phone_number else user.phone_number
+        user.address = address if address else user.address
+        user.city = city if city else user.city
+        user.country = country if country else user.country
+        user.gender = gender if gender else user.gender
+        user.postal_code = postal_code if postal_code else user.postal_code
+        user.state = state if state else user.state
+        user.save()
 
-        student.user.save()
-
-        student.registration_number = registration_number
-        student.guardian_name = guardian_name
-        student.guardian_phone_number = guardian_phone_number
-        student.programme_id = programme_id
-        student.guardian_email = guardian_email
-        student.guardian_relationship = guardian_relationship
-        
+        student.registration_number = registration_number if registration_number else student.registration_number
+        student.guardian_name = guardian_name if guardian_name else student.guardian_name
+        student.guardian_phone_number = guardian_phone_number if guardian_phone_number else student.guardian_phone_number
+        student.guardian_email = guardian_email if guardian_email else student.guardian_email
+        student.guardian_relationship = guardian_relationship if guardian_relationship else student.guardian_relationship
         student.save()
 
-        return redirect("students")
-
+        return redirect(f"/students/{student.id}/details")
     return render(request, "students/edit_student.html")
 
+
+def edit_student_cohort(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id")
+        cohort_id = request.POST.get("cohort_id")
+        
+        student = Student.objects.get(id=student_id)
+        cohort = ProgrammeCohort.objects.get(id=cohort_id)
+        student.cohort = cohort
+        student.programme = cohort.programme
+        student.save()
+        return redirect(f"/students/{student.id}/details")
+    return render(request, "students/edit_student_cohort.html")
 
 def delete_student(request):
     if request.method == "POST":
