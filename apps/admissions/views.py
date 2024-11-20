@@ -11,7 +11,7 @@ from django.db import transaction
 from django.views.generic import ListView
 from django.http import JsonResponse
 
-from apps.admissions.models import StudentApplication, ApplicationDocument
+from apps.admissions.models import StudentApplication, ApplicationDocument, ApplicationEducationHistory
 
 # Create your views here.
 class StudentApplicationsListView(ListView):
@@ -44,7 +44,12 @@ class StudentApplicationsListView(ListView):
 def application_details(request, id):
     application = StudentApplication.objects.get(id=id)
     
+    documents = ApplicationDocument.objects.filter(student_application=application)
+    education_history = ApplicationEducationHistory.objects.filter(student_application=application)
+    
     context = {
-        "application": application
+        "application": application,
+        "documents": documents,
+        "education_history": education_history
     }
     return render(request, "admissions/application_details.html", context)

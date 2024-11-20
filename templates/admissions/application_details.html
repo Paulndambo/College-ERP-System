@@ -148,6 +148,7 @@
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
+                            <th></th>
                             <th>Level</th>
                             <th>Institution</th>
                             <th>Year</th>
@@ -156,20 +157,16 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for record in education_history %}
                         <tr>
-                            <td>High School</td>
-                            <td>Cambridge High</td>
-                            <td>2018</td>
-                            <td>3.8</td>
-                            <td>Science</td>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{record.level}}</td>
+                            <td>{{record.institution}}</td>
+                            <td>{{record.year}}</td>
+                            <td>{{record.grade_or_gpa}}</td>
+                            <td>{{record.major}}</td>
                         </tr>
-                        <tr>
-                            <td>College</td>
-                            <td>Boston Community College</td>
-                            <td>2020</td>
-                            <td>3.9</td>
-                            <td>Computer Science</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -186,39 +183,35 @@
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
+                            <th></th>
                             <th>Document Type</th>
-                            <th>Upload Date</th>
+                            <th>Name</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% for document in documents %}
                         <tr>
-                            <td>Passport Copy</td>
-                            <td>2024-01-15</td>
-                            <td><span class="badge bg-success">Verified</span></td>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{document.document_type}}</td>
+                            <td>{{document.document_name}}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary me-1">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-download"></i>
-                                </button>
+                                {% if document.verified %}
+                                <span class="badge bg-success">Verified</span>
+                                {% else %}
+                                <span class="badge bg-danger">Not Verified</span>
+                                {% endif %}
                             </td>
-                        </tr>
-                        <tr>
-                            <td>Academic Transcripts</td>
-                            <td>2024-01-15</td>
-                            <td><span class="badge bg-warning">Pending</span></td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary me-1">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary">
+                                
+                                <a href="{{document.document_file.url}}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                     <i class="fas fa-download"></i>
-                                </button>
+                                </a>
                             </td>
+                            {% include "admissions/document_container.html" %}
                         </tr>
+                      {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -248,6 +241,15 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <iframe id="pdfViewer" src="" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}
 
 {% block additional_scripts %}
@@ -259,5 +261,19 @@
             alert('Application successfully converted to student!');
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const viewButtons = document.querySelectorAll('.view-btn');
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const title = this.getAttribute('data-title');
+                const url = this.getAttribute('data-url');
+
+                document.getElementById('viewModalLabel').textContent = title;
+                document.getElementById('pdfViewer').src = url;
+            });
+        });
+    });
 </script>
 {% endblock additional_scripts %}

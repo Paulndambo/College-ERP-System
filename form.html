@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Application Form</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .step-wizard {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .step-wizard-item {
+            flex-basis: 0;
+            flex-grow: 1;
+            max-width: 100%;
+            position: relative;
+            text-align: center;
+        }
+        
+        .step-wizard-item::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 3px;
+            background: #e0e0e0;
+            transform: translateX(0%);
+            z-index: -1;
+        }
+        
+        .step-wizard-item:last-child::before {
+            display: none;
+        }
+        
+        .step-wizard-item.active .step-wizard-icon,
+        .step-wizard-item.completed .step-wizard-icon {
+            background-color: #0d6efd;
+            color: #fff;
+        }
+        
+        .step-wizard-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            margin: 0 auto;
+            color: #707070;
+            font-weight: bold;
+        }
+        
+        .step-wizard-text {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #707070;
+        }
+        
+        .form-section {
+            display: none;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .required::after {
+            content: "*";
+            color: red;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-5">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="text-center mb-4">Student Application Form</h2>
+                
+                <!-- Step Wizard -->
+                <div class="step-wizard">
+                    <div class="step-wizard-item active">
+                        <div class="step-wizard-icon">1</div>
+                        <p class="step-wizard-text">Personal Info</p>
+                    </div>
+                    <div class="step-wizard-item">
+                        <div class="step-wizard-icon">2</div>
+                        <p class="step-wizard-text">Contact</p>
+                    </div>
+                    <div class="step-wizard-item">
+                        <div class="step-wizard-icon">3</div>
+                        <p class="step-wizard-text">Education</p>
+                    </div>
+                    <div class="step-wizard-item">
+                        <div class="step-wizard-icon">4</div>
+                        <p class="step-wizard-text">Documents</p>
+                    </div>
+                </div>
+
+                <!-- Form Sections -->
+                <form id="studentForm">
+                    <!-- Personal Information Section -->
+                    <div class="form-section active" id="section1">
+                        <h4 class="mb-4">Personal Information</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">First Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Last Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Date of Birth</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Gender</label>
+                                <select class="form-select" required>
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label required">Nationality</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Section -->
+                    <div class="form-section" id="section2">
+                        <h4 class="mb-4">Contact Information</h4>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label required">Email</label>
+                                <input type="email" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Phone Number</label>
+                                <input type="tel" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label required">Current Address</label>
+                                <textarea class="form-control" rows="3" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">City</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">Postal Code</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education Records Section -->
+                    <div class="form-section" id="section3">
+                        <h4 class="mb-4">Education Records</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Level</th>
+                                        <th>Institution</th>
+                                        <th>Year</th>
+                                        <th>Grade/CGPA</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="educationTableBody">
+                                    <tr>
+                                        <td>
+                                            <select class="form-select">
+                                                <option>High School</option>
+                                                <option>Undergraduate</option>
+                                                <option>Graduate</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td><input type="number" class="form-control"></td>
+                                        <td><input type="text" class="form-control"></td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger btn-sm">Remove</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="addEducationRow()">
+                            Add Education Record
+                        </button>
+                    </div>
+
+                    <!-- Documents Section -->
+                    <div class="form-section" id="section4">
+                        <h4 class="mb-4">Required Documents</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Document Type</th>
+                                        <th>File</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Photo ID</td>
+                                        <td>
+                                            <input type="file" class="form-control">
+                                        </td>
+                                        <td><span class="badge bg-warning">Pending</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>High School Transcript</td>
+                                        <td>
+                                            <input type="file" class="form-control">
+                                        </td>
+                                        <td><span class="badge bg-warning">Pending</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Birth Certificate</td>
+                                        <td>
+                                            <input type="file" class="form-control">
+                                        </td>
+                                        <td><span class="badge bg-warning">Pending</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" class="btn btn-secondary" id="prevBtn" onclick="navigateStep(-1)">Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="navigateStep(1)">Next</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStep = 1;
+        const totalSteps = 4;
+
+        function navigateStep(direction) {
+            const newStep = currentStep + direction;
+            
+            if (newStep > 0 && newStep <= totalSteps) {
+                // Update form sections
+                document.querySelector(`#section${currentStep}`).classList.remove('active');
+                document.querySelector(`#section${newStep}`).classList.add('active');
+                
+                // Update step wizard
+                const steps = document.querySelectorAll('.step-wizard-item');
+                steps[currentStep - 1].classList.remove('active');
+                steps[newStep - 1].classList.add('active');
+                
+                // Mark previous steps as completed
+                if (direction > 0) {
+                    steps[currentStep - 1].classList.add('completed');
+                }
+                
+                currentStep = newStep;
+                
+                // Update button states
+                updateButtons();
+            }
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            prevBtn.style.display = currentStep === 1 ? 'none' : 'block';
+            
+            if (currentStep === totalSteps) {
+                nextBtn.textContent = 'Submit';
+                nextBtn.onclick = submitForm;
+            } else {
+                nextBtn.textContent = 'Next';
+                nextBtn.onclick = () => navigateStep(1);
+            }
+        }
+
+        function addEducationRow() {
+            const tbody = document.getElementById('educationTableBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>
+                    <select class="form-select">
+                        <option>High School</option>
+                        <option>Undergraduate</option>
+                        <option>Graduate</option>
+                    </select>
+                </td>
+                <td><input type="text" class="form-control"></td>
+                <td><input type="number" class="form-control"></td>
+                <td><input type="text" class="form-control"></td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">Remove</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        function submitForm() {
+            // Add form submission logic here
+            alert('Form submitted successfully!');
+        }
+
+        // Initialize button states
+        updateButtons();
+    </script>
+</body>
+</html>
