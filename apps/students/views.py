@@ -45,7 +45,7 @@ class StudentListView(ListView):
     model = Student
     template_name = 'students/students.html'
     context_object_name = 'students'
-    paginate_by = 10
+    paginate_by = 9
     
     def get_queryset(self):
         queryset = super().get_queryset()

@@ -1,3 +1,68 @@
 from django.db import models
 
+from apps.core.models import AbsoluteBaseModel
 # Create your models here.
+PAYMENT_TYPES = (
+    ("Fees Payment", "Fees Payment"),
+    ("Meal Card Payment", "Meal Card Payment"),
+    ("Library Fine Payment", "Library Fine Payment"),
+    ("Hostel Payment", "Hostel Payment"),
+)
+
+PAYMENT_DIRECTIONS = (
+    ("Income", "Income"),
+    ("Expense", "Expense"),
+)
+
+PAYMENT_METHODS = (
+    ("Cash", "Cash"),
+    ("Bank Transfer", "Bank Transfer"),
+    ("Mobile Money", "Mobile Money"),
+    ("Cheque", "Cheque"),
+)
+
+class Payment(AbsoluteBaseModel):
+    payer = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="payers")
+    receiver = models.ForeignKey("users.User", on_delete=models.CASCADE, related_name="receivers")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_type = models.CharField(max_length=255, choices=PAYMENT_TYPES)
+    direction = models.CharField(max_length=255, choices=PAYMENT_DIRECTIONS)
+    recorded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
+    payment_method = models.CharField(max_length=255, choices=PAYMENT_METHODS)
+    
+    class Meta:
+        ordering = ["-created_on"]
+
+    def __str__(self):
+        return self.payment_type
+    
+
+class FeePayment(AbsoluteBaseModel):
+    student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_date = models.DateField()
+    payment_method = models.CharField(max_length=255, choices=PAYMENT_METHODS)
+    payment_reference = models.CharField(max_length=255, null=True, blank=True)
+    recorded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        ordering = ["-created_on"]
+
+    def __str__(self):
+        return self.student.user.name + " " + self.payment_type
+    
+    
+class LibraryFinePayment(AbsoluteBaseModel):
+    member = models.ForeignKey("library.Member", on_delete=models.CASCADE)
+    fine = models.OneToOneField("library.Fine", on_delete=models.CASCADE, null=True, related_name="finepayment")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_date = models.DateField(null=True)
+    payment_method = models.CharField(max_length=255, choices=PAYMENT_METHODS, null=True)
+    payment_reference = models.CharField(max_length=255, null=True, blank=True)
+    recorded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
+    paid = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_on"]
+        
+   

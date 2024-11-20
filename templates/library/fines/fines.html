@@ -46,12 +46,16 @@
                         </span>
                     </td>
                     <td>
+                        {% if fine.status_text == "Requested" %}
+                        {% else %}
                         <div class="d-flex gap-1">
-                            <a class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#markFineAsModal{{ fine.id }}">
-                                <i class="fas fa-pencil"></i>
+                            <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#requestFinePaymentModal{{ fine.id }}">
+                                <i class="fas fa-hand-holding-dollar"></i>
                               </a>
                           </div>
+                        {% endif %}
                     </td>
+                    {% include "library/fines/request_fine_payment.html" %}
                 </tr>
                 {% empty %}
                 <tr>

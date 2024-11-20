@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.timezone import now
 from datetime import timedelta, date
 from apps.core.models import AbsoluteBaseModel
+from apps.finance.models import LibraryFinePayment
 
 class Book(AbsoluteBaseModel):
     CATEGORY_CHOICES = [
@@ -41,12 +42,13 @@ class Member(AbsoluteBaseModel):
 
 class BorrowTransaction(AbsoluteBaseModel):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book_number = models.CharField(max_length=255, null=True)
     member = models.ForeignKey(Member, on_delete=models.CASCADE)
     borrow_date = models.DateField(default=now)
     due_date = models.DateField(null=True)  # Default 2-week loan
     return_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=255, null=True, choices=[("Returned", "Returned"), ("Pending Return", "Pending Return"), ("Lost", "Lost")], default="Pending Return")
-    
+    issued_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
     
     def save(self, *args, **kwargs):
         if not self.due_date:
@@ -57,6 +59,14 @@ class BorrowTransaction(AbsoluteBaseModel):
         if self.return_date:
             return self.return_date > self.due_date
         return date.today() > self.due_date
+    
+    def days_overdue(self):
+        days_count = 0
+        if self.return_date:
+            days_count = (self.return_date - self.due_date).days 
+        days_count = (date.today() - self.due_date).days
+        
+        return days_count if days_count > 0 else 0
     
     def __str__(self):
         return f"{self.book.title} borrowed by {self.member.name}"
@@ -87,7 +97,14 @@ class Fine(AbsoluteBaseModel):
         super().save(*args, **kwargs)
         
     def status_text(self):
-        return "Paid" if self.paid else "Unpaid"
+        text_value = ""
+        fine_payment = LibraryFinePayment.objects.filter(fine=self).first()
+        if fine_payment:
+            text_value = "Requested"
+        else:
+            text_value = "Paid" if self.paid else "Unpaid"
+        
+        return text_value
     
     def __str__(self):
         return f"Fine for {self.borrow_transaction.book.title}: ${self.calculated_fine}"

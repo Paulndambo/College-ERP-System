@@ -4,42 +4,24 @@
 {% block content %}
 <div class="card mb-2">
     <div class="card-body">
-      <h5 class="card-title text-center">Book Title: {{book.title}}</h5>
-      <hr/>
-      <div class="row">
-        <div class="col">
-            <p class="card-text">
-                <strong>Author:</strong> {{book.author}}<br>
-                <strong>Category:</strong> {{book.category}}<br>
-                <strong>ISBN:</strong> {{book.isbn}}<br>
-                <strong>Unit Price:</strong> {{book.unit_price}}<br>
-              </p>
-        </div>
-        <div class="col">
-            <p class="card-text">
-                <strong>Date Published:</strong> {{book.publication_date}}<br>
-                <strong>Copies Available:</strong> {{book.copies_available}}<br>
-                <strong>Total Copies:</strong> {{book.total_copies}}<br>
-              </p>
-        </div>
-      </div>
-      
+      <h5 class="card-title text-center">Member: {{member.user.name}}</h5>
+      <hr/> 
     </div>
   </div>
 <div class="table-card">
     <div class="row py-3 px-2">
         <div class="col">
-            <h3>Issuing Records</h3>
+            <h3>Books Issued</h3>
         </div>
         <div class="col">
             <input type="text" class="form-control" placeholder="Search..." 
             id="searchInput" value="{{ search_query }}">
         </div>
         <div class="col">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#issueBookModal{{book.id}}">Issue to Member</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#issueMemberBookModal{{member.id}}">Issue A Book</button>
         </div>
     </div>
-{% include "library/books/issue_book.html" %}
+{% include "library/members/issue_member_book.html" %}
     <!-- Table Toolbar --> 
     <!-- Loading Bar -->
     <div class="loader" id="loader"></div>
@@ -50,7 +32,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Member</th>
+                    <th>Book</th>
                     <th>Borrow Date</th>
                     <th>Due Date</th>
                     <th>Return Date</th>
@@ -62,7 +44,7 @@
                 {% for borrowing in borrowings %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ borrowing.member }}</td>
+                    <td>{{ borrowing.book.title }}</td>
                     <td>{{ borrowing.borrow_date }}</td>
                     <td>{{ borrowing.due_date }}</td>
                     <td>{{ borrowing.return_date }}</td>
@@ -74,7 +56,7 @@
                     <td>
                         <div class="d-flex gap-1">
                             <a  data-bs-toggle="modal" data-bs-target="#borrowingDetailsModal{{borrowing.id}}" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>
-                          </div>
+                        </div>
                     </td>
                     {% include "library/borrowing/borrowing_details.html" %}
                 </tr>
@@ -83,6 +65,7 @@
                     <td colspan="8" class="text-center py-4">
                         No students found
                     </td>
+                    
                 </tr>
                 {% endfor %}
             </tbody>

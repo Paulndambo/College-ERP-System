@@ -1,22 +1,22 @@
-<div class="modal fade" id="issueBookModal{{book.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="issueMemberBookModal{{member.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-md">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5 text-center">Issue: {{book.title}}</h1>
+          <h1 class="modal-title fs-5 text-center">Issue: {{member.user.name}} A Book</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-            <form action="{% url 'issue-book' %}" method="POST" enctype="multipart/form-data">
+            <form action="{% url 'issue-member-book' %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="modal-body">
-                <input type="number" hidden id="book_id" name="book_id" value="{{book.id}}" readonly required />
+                <input type="number" hidden id="member_id" name="member_id" value="{{member.id}}" readonly required />
             
                 <div class="row mb-3">
                 <div class="col">
-                  <label for="exampleInputPassword1" class="form-label fw-bold">Member</label>
-                  <select class="form-select" id="member_id" name="member_id">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Book Title</label>
+                  <select class="form-select" id="book_id" name="book_id">
                     <option></option>
-                    {% for member in members %}
-                        <option value="{{member.id}}">{{member.user.name}}</option>
+                    {% for book in books %}
+                        <option value="{{book.id}}">{{book.title}}</option>
                     {% endfor %}
                   </select>
                 </div>

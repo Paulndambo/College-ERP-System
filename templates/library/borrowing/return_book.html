@@ -6,6 +6,25 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="row">
+                    <p><b>Member: </b> {{borrowing.member.user.name}}</p>
+                    <p><b>Book Title: </b> {{borrowing.book.title}}</p>
+                    <hr/>
+                    <div class="col">
+                        <p><b>Book Number: </b> {{borrowing.book_number}}</p>
+                        <p><b>Issue Date: </b> {{borrowing.borrow_date}}</p>
+                        <p><b>Due Date: </b> <b>{{borrowing.due_date}}</b></p>
+                        <p><b>Return Date: </b> <b>{{borrowing.return_date}}</b></p>
+                    </div>
+                    <div class="col">
+                        
+                        <p><b>Status: </b> {{borrowing.status}}</p>
+                        <p><b>Days OverDue: </b> <b>{{borrowing.days_overdue}}</b></p>
+                        <p><b>Issued By: </b> {{borrowing.issued_by.name}}</p>
+                    </div>
+                </div>
+                
+                <hr/>
                 <form method="POST" action="{% url 'return-issued-book' %}">
                     {% csrf_token %}
                     <input type="number" id="borrowing_id" name="borrowing_id" value="{{borrowing.id}}" hidden readonly required />
