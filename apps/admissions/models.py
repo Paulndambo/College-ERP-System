@@ -1,12 +1,18 @@
 from django.db import models
+from datetime import datetime
+from django.utils.text import slugify
+from uuid import uuid4
 
 from apps.core.models import AbsoluteBaseModel
+
+date_today = datetime.now().date()
 # Create your models here.
 APPLICATION_STATUSES = (
     ("Under Review", "Under Review"),
     ("Declined", "Declined"),
     ("Info Requested", "Info Requested"),
     ("Accepted", "Accepted"),
+    ("Draft", "Draft"),
 )
 EDUCATION_LEVEL_CHOICES = (
     ("Primary School", "Primary School"),
@@ -32,6 +38,7 @@ class Intake(AbsoluteBaseModel):
 
 class StudentApplication(AbsoluteBaseModel):
     application_number = models.CharField(max_length=255, null=True)
+    lead = models.ForeignKey('marketing.Lead', on_delete=models.SET_NULL, null=True, related_name='leadapplications')
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField()
@@ -57,9 +64,18 @@ class StudentApplication(AbsoluteBaseModel):
     
     intake = models.ForeignKey(Intake, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=255, choices=APPLICATION_STATUSES, default="Under Review")
+    slug = models.SlugField(unique=True, null=True)
     
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"      
+        return f"{self.first_name} {self.last_name}"  
+    
+    def save(self, *args, **kwargs):
+        # Automatically generate slug from title if it's not provided
+        if not self.slug:
+            full_name = f"{self.first_name} {self.last_name}-{uuid4()}"
+            self.slug = slugify(full_name)
+        super().save(*args, **kwargs)
+    
     
 class ApplicationDocument(AbsoluteBaseModel):
     student_application = models.ForeignKey('admissions.StudentApplication', on_delete=models.CASCADE)

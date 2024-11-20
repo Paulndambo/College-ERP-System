@@ -10,17 +10,28 @@
                 <div class="modal-body">
                   <input type="number" id="lead_id" name="lead_id" value="{{lead.id}}" hidden readonly required />
                   <div class="row mb-3">
-                <div class="col">
-                  <label for="exampleInputPassword1" class="form-label fw-bold">Name</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="name"
-                    name="name"
-                    value="{{lead.name}}"
-                    required
-                  />
-                </div>
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">First Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="first_name"
+                        name="first_name"
+                        value="{{lead.first_name}}"
+                        required
+                      />
+                    </div>
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Last Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="last_name"
+                        name="last_name"
+                        value="{{lead.last_name}}"
+                        required
+                      />
+                    </div>
                 </div>
                 <div class="row mb-3">
                   <div class="col">

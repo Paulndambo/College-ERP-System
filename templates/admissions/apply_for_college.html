@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Application Form</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .section-card {
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .section-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px 10px 0 0;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .table-responsive {
+            margin: 0;
+        }
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 8px 15px;
+        }
+        .document-icon {
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <!-- Application Header -->
+        <div class="text-center mb-2">
+            <div>
+                <h2 class="mb-1">Make your Application</h2>
+            </div>
+            
+        </div>
+
+        <!-- Personal Information -->
+        <div class="card section-card">
+            <div class="section-header d-flex justify-content-between align-items-center">
+                <!-- Left Side: Personal Information -->
+                <h4 class="m-0">
+                  <i class="fas fa-user me-2"></i>Personal Information
+                </h4>
+                
+                <!-- Right Side: Button -->
+                <button class="btn btn-primary">
+                  Edit Information
+                </button>
+              </div>
+              
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Full Name</label>
+                        <p>John Michael Smith</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Date of Birth</label>
+                        <p>15 March 2000</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Gender</label>
+                        <p>Male</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Nationality</label>
+                        <p>American</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Passport/ID</label>
+                        <p>P123456789</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h4 class="m-0"><i class="fas fa-address-card me-2"></i>Contact & Address Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Email</label>
+                        <p>john.smith@email.com</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Phone</label>
+                        <p>+1 234 567 8900</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Mobile</label>
+                        <p>+1 234 567 8901</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="fw-bold">Address</label>
+                        <p>123 College Street, Cambridge, MA 02138, United States</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guardian Information -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h4 class="m-0"><i class="fas fa-users me-2"></i>Guardian Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Guardian Name</label>
+                        <p>Robert Smith</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Relationship</label>
+                        <p>Father</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Contact</label>
+                        <p>+1 234 567 8902</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Email</label>
+                        <p>robert.smith@email.com</p>
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <label class="fw-bold">Address</label>
+                        <p>123 College Street, Cambridge, MA 02138, United States</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Education -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h4 class="m-0"><i class="fas fa-graduation-cap me-2"></i>Previous Education</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Level</th>
+                                <th>Institution</th>
+                                <th>Year</th>
+                                <th>Grade/CGPA</th>
+                                <th>Major</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>High School</td>
+                                <td>Cambridge High</td>
+                                <td>2018</td>
+                                <td>3.8</td>
+                                <td>Science</td>
+                            </tr>
+                            <tr>
+                                <td>College</td>
+                                <td>Boston Community College</td>
+                                <td>2020</td>
+                                <td>3.9</td>
+                                <td>Computer Science</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h4 class="m-0"><i class="fas fa-file-alt me-2"></i>Documents</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Document Type</th>
+                                <th>Upload Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Passport Copy</td>
+                                <td>2024-01-15</td>
+                                <td><span class="badge bg-success">Verified</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Academic Transcripts</td>
+                                <td>2024-01-15</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Programme Interest -->
+        <div class="card section-card">
+            <div class="section-header">
+                <h4 class="m-0"><i class="fas fa-book me-2"></i>Programme Interest</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">First Choice</label>
+                        <p>Bachelor of Computer Science</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Second Choice</label>
+                        <p>Bachelor of Information Technology</p>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="fw-bold">Intake</label>
+                        <p>September 2024</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <button class="btn btn-success">
+                <i class="fas fa-user-graduate me-2"></i>Submit Application
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function convertToStudent() {
+            if (confirm('Are you sure you want to convert this application to student?')) {
+                // Add your conversion logic here
+                alert('Application successfully converted to student!');
+            }
+        }
+    </script>
+</body>
+</html>

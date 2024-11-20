@@ -41,34 +41,25 @@ CAMPAIGN_STATUSES = (
 
 
 class Lead(AbsoluteBaseModel):
-    name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
     email = models.EmailField()
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    gender = models.CharField(
-        max_length=10, choices=GENDER_CHOICES, blank=True, null=True
-    )
-    source = models.CharField(
-        max_length=100,
-        help_text="Source of the lead, e.g., Social Media, Referral, Event",
-    )
-    programme = models.ForeignKey(
-        "schools.Programme", on_delete=models.SET_NULL, null=True
-    )
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
+    source = models.CharField(max_length=100)
+    programme = models.ForeignKey("schools.Programme", on_delete=models.SET_NULL, null=True)
     city = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=50, choices=LEAD_STATUS_CHOICES, default="New")
     score = models.IntegerField(default=0, help_text="Lead scoring to prioritize leads")
-    assigned_to = models.ForeignKey(
-        "users.User", on_delete=models.SET_NULL, null=True, related_name="agentleads"
-    )
-    campaign = models.ForeignKey(
-        "marketing.Campaign", on_delete=models.SET_NULL, null=True, related_name="leads"
-    )
+    assigned_to = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="agentleads")
+    campaign = models.ForeignKey("marketing.Campaign", on_delete=models.SET_NULL, null=True, related_name="leads")
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.first_name} {self.last_name}"
 
-
+    def name(self):
+        return f"{self.first_name} {self.last_name}"
 # 2. Interaction model to track communication history with leads
 class Interaction(AbsoluteBaseModel):
     lead = models.ForeignKey(

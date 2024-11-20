@@ -4,7 +4,7 @@ from apps.admissions.models import StudentApplication, ApplicationDocument, Inta
 # Register your models here.
 @admin.register(StudentApplication)
 class StudentApplicationAdmin(admin.ModelAdmin):
-    list_display = ["id", "first_name", "last_name", "phone_number", "gender", "status"]
+    list_display = ["id", "slug", "first_name", "last_name", "phone_number", "gender", "status"]
 
 
 @admin.register(Intake)

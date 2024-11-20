@@ -33,19 +33,33 @@
     <!-- Application Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="mb-1">Application #APP2024001</h2>
-            <span class="badge bg-warning status-badge">Pending Review</span>
+            <h2 class="mb-1">Application #{{application.application_number}}</h2>
+            <span class="badge bg-warning status-badge">{{application.status}}</span>
         </div>
-        <button class="btn btn-success" onclick="convertToStudent()">
-            <i class="fas fa-user-graduate me-2"></i>Convert to Student
-        </button>
+            {% if application.status == "Under Review" %}
+            <button class="btn btn-success"><i class="fas fa-user-graduate me-2"></i>Accept/Decline Student</button>
+            
+            {% elif application.status == "Accepted" %}
+            <button class="btn btn-success"><i class="fas fa-user-graduate me-2"></i>Admit Student</button>
+            {% elif application.status == "Draft" %}
+            <button class="btn btn-success"><i class="fas fa-user-graduate me-2"></i>Submit Application</button>
+            {% elif application.status == "Info Requested" %}
+            <button class="btn btn-info"><i class="fas fa-user-graduate me-2"></i>Request Information</button>
+            {% endif %}
     </div>
 
     <!-- Personal Information -->
     <div class="card section-card">
-        <div class="section-header">
-            <h4 class="m-0"><i class="fas fa-user me-2"></i>Personal Information</h4>
-        </div>
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <h4 class="m-0">
+              <i class="fas fa-user me-2"></i>Personal Information
+            </h4>
+            
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editApplicationPersonalInfoModal{{application.id}}">
+              Edit Information
+            </button>
+          </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4 mb-3">
@@ -75,12 +89,20 @@
             </div>
         </div>
     </div>
-
+{% include "admissions/info/edit_personal.html" %}
     <!-- Contact Information -->
     <div class="card section-card">
-        <div class="section-header">
-            <h4 class="m-0"><i class="fas fa-address-card me-2"></i>Contact & Address Information</h4>
-        </div>
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <!-- Left Side: Personal Information -->
+            <h4 class="m-0">
+              <i class="fas fa-address-card me-2"></i>Contact & Address Information
+            </h4>
+            
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editApplicationAddressModal{{application.id}}">
+              Edit Information
+            </button>
+          </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -102,12 +124,20 @@
             </div>
         </div>
     </div>
-
+{% include "admissions/info/edit_contact.html" %}
     <!-- Guardian Information -->
     <div class="card section-card">
-        <div class="section-header">
-            <h4 class="m-0"><i class="fas fa-users me-2"></i>Guardian Information</h4>
-        </div>
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <!-- Left Side: Personal Information -->
+            <h4 class="m-0">
+              <i class="fas fa-user me-2"></i>Guardian Information
+            </h4>
+            
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editApplicationGuardianModal{{application.id}}">
+              Edit Information
+            </button>
+          </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-4 mb-3">
@@ -138,6 +168,7 @@
         </div>
     </div>
 
+{% include "admissions/info/edit_guardian.html" %}
     <!-- Previous Education -->
     <div class="card section-card">
         <div class="section-header">
@@ -204,10 +235,16 @@
                                 {% endif %}
                             </td>
                             <td>
-                                
-                                <a href="{{document.document_file.url}}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                                    <i class="fas fa-download"></i>
-                                </a>
+                                <div class="d-flex gap-1">
+                                    <a href="{{document.document_file.url}}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% if not document.verified %}
+                                    <a href="{% url 'verify-document' document.id %}" class="btn btn-sm btn-success">
+                                        Verify
+                                    </a>
+                                    {% endif %}
+                                </div>
                             </td>
                             {% include "admissions/document_container.html" %}
                         </tr>
@@ -227,15 +264,15 @@
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <label class="fw-bold">First Choice</label>
-                    <p>Bachelor of Computer Science</p>
+                    <p>{{application.first_choice_programme}}</p>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="fw-bold">Second Choice</label>
-                    <p>Bachelor of Information Technology</p>
+                    <p>{{application.second_choice_programme}}</p>
                 </div>
                 <div class="col-md-4 mb-3">
                     <label class="fw-bold">Intake</label>
-                    <p>September 2024</p>
+                    <p>{{application.intake}}</p>
                 </div>
             </div>
         </div>

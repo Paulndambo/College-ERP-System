@@ -65,4 +65,7 @@ class LibraryFinePayment(AbsoluteBaseModel):
     class Meta:
         ordering = ["-created_on"]
         
+    def payment_status(self):
+        return "Paid" if self.paid else "Unpaid"
+        
    

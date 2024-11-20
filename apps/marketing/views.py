@@ -14,6 +14,7 @@ from apps.marketing.models import Lead, Interaction, Task, LeadStage
 from apps.schools.models import Department, Programme, Course
 from apps.users.models import User
 from apps.core.models import UserRole
+from apps.admissions.models import StudentApplication, Intake
 
 from django.views.generic import ListView
 from django.http import JsonResponse
@@ -39,7 +40,7 @@ class LeadsListView(ListView):
             queryset = queryset.filter(
                 Q(id__icontains=search_query) |
                 Q(phone_number__icontains=search_query) |
-                Q(name__icontains=search_query) | 
+                Q(first_name__icontains=search_query) | 
                 Q(email__icontains=search_query)
             )
         
@@ -66,6 +67,7 @@ def lead_details(request, lead_id):
     tasks = Task.objects.filter(lead=lead).order_by("-created_on")
 
     lead_stages = LeadStage.objects.filter(lead=lead).order_by("-created_on")
+    intakes = Intake.objects.all()
 
     print(users)
 
@@ -77,6 +79,7 @@ def lead_details(request, lead_id):
         "tasks": tasks,
         "stages": LEAD_STAGES,
         "lead_stages": lead_stages,
+        "intakes": intakes
     }
     return render(request, "marketing/leads/lead_details.html", context)
 
@@ -84,7 +87,8 @@ def lead_details(request, lead_id):
 @login_required
 def capture_lead(request):
     if request.method == "POST":
-        name = request.POST.get("name")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
         email = request.POST.get("email")
         phone_number = request.POST.get("phone")
         gender = request.POST.get("gender")
@@ -94,7 +98,8 @@ def capture_lead(request):
         country = request.POST.get("country")
 
         lead = Lead.objects.create(
-            name=name,
+            first_name=first_name,
+            last_name=last_name,
             email=email,
             phone_number=phone_number,
             gender=gender,
@@ -105,7 +110,7 @@ def capture_lead(request):
         )
 
         LeadStage.objects.create(
-            lead=lead, user=request.user, stage="New", added_by=request.user
+            lead=lead, stage="New", added_by=request.user
         )
 
         return redirect("leads")
@@ -117,7 +122,8 @@ def capture_lead(request):
 def edit_lead(request):
     if request.method == "POST":
         lead_id = request.POST.get("lead_id")
-        name = request.POST.get("name")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
         email = request.POST.get("email")
         phone_number = request.POST.get("phone")
         gender = request.POST.get("gender")
@@ -128,7 +134,8 @@ def edit_lead(request):
         assigned_to = request.POST.get("assigned_to")
 
         lead = Lead.objects.get(id=lead_id)
-        lead.name = name
+        lead.first_name = first_name
+        lead.last_name = last_name
         lead.email = email
         lead.phone_number = phone_number
         lead.gender = gender
@@ -241,3 +248,27 @@ def delete_lead_task(request):
         task.delete()
         return redirect("lead-details", lead_id=task.lead.id)
     return render(request, "marketing/leads/delete_task.html")
+
+
+def create_application_with_lead(request):
+    if request.method == "POST":
+        lead_id = request.POST.get("lead_id")
+        id_number = request.POST.get("id_number")
+        
+        lead = Lead.objects.get(id=lead_id)
+        StudentApplication.objects.create(
+            first_name=lead.first_name,
+            last_name=lead.last_name,
+            id_number=id_number,
+            gender=lead.gender,
+            email=lead.email,
+            first_choice_programme=lead.programme,
+            city=lead.city,
+            country=lead.country,
+            phone_number=lead.phone_number,
+            status="Draft"
+        )
+        lead.status = "Application in Progress"
+        lead.save()
+        return redirect("lead-details", lead_id=lead.id)
+    return render(request, "marketing/leads/start_application.html")

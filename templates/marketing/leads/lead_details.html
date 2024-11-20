@@ -109,10 +109,15 @@
                                     <h6>{{lead.status}}</h6>
                                 </div>
                             </div>
+                            {% if lead.status == "Interested" %}
+                            <div class="col-md-12 text-center">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#startApplicationModal{{lead.id}}">Start Application!!</button>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-
+{% include "marketing/leads/start_application.html" %}
                 <!-- 
                 <div class="card mb-4">
                     <div class="card-header">

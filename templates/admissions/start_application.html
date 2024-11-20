@@ -1,0 +1,102 @@
+<div class="modal fade" id="startApplicationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Start Student Application</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'start-application' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="row mb-2">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">First Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="first_name"
+                    name="first_name"
+                    required
+                  />
+                </div>
+                <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Last Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="last_name"
+                      name="last_name"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-2">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Phone Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="phone_number"
+                      name="phone_number"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="email"
+                      name="email"
+                      required
+                    />
+                  </div>
+                </div>
+               
+                <div class="row mb-2">
+                  <div class="col">
+                    <label class="form-label fw-bold">Gender</label>
+                    <select class="form-select" id="gender" name="gender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">ID Number</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="id_number"
+                        name="id_number"
+                        required
+                      />
+                  </div>  
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Programme Interested</label>
+                      <select class="form-select" id="programme_id" name="programme_id">
+                        <option value=""></option>
+                        {% for programme in programmes %}
+                            <option value="{{programme.id}}">{{programme.level}} of {{programme.name}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Intake Interested</label>
+                      <select class="form-select" id="intake_id" name="intake_id">
+                        <option value=""></option>
+                        {% for intake in intakes %}
+                            <option value="{{intake.id}}">{{intake}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                  <button type="submit" class="btn btn-primary w-30">Start Application</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>
