@@ -13,6 +13,7 @@ APPLICATION_STATUSES = (
     ("Info Requested", "Info Requested"),
     ("Accepted", "Accepted"),
     ("Draft", "Draft"),
+    ("Enrolled", "Enrolled"),
 )
 EDUCATION_LEVEL_CHOICES = (
     ("Primary School", "Primary School"),
@@ -24,7 +25,7 @@ EDUCATION_LEVEL_CHOICES = (
 DOCUMENT_TYPES = (
     ("Transcript", "Transcript"),
     ("Certificate", "Certificate"),
-    ("Indentification", "Indentification"),
+    ("Identification", "Identification"),
 )
 
 class Intake(AbsoluteBaseModel):

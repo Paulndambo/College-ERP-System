@@ -26,6 +26,7 @@ users_role = UserRole.objects.get(name="Student")
 users = User.objects.exclude(role=users_role)
 
 
+date_today = datetime.now().date()
 class LeadsListView(ListView):
     model = Lead
     template_name = 'marketing/leads/leads.html'
@@ -256,7 +257,7 @@ def create_application_with_lead(request):
         id_number = request.POST.get("id_number")
         
         lead = Lead.objects.get(id=lead_id)
-        StudentApplication.objects.create(
+        application = StudentApplication.objects.create(
             first_name=lead.first_name,
             last_name=lead.last_name,
             id_number=id_number,
@@ -268,6 +269,8 @@ def create_application_with_lead(request):
             phone_number=lead.phone_number,
             status="Draft"
         )
+        application.application_number = f"APP-{application.id}/{date_today.month}/{date_today.year}"
+        application.save()
         lead.status = "Application in Progress"
         lead.save()
         return redirect("lead-details", lead_id=lead.id)

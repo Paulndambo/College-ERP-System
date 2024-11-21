@@ -74,9 +74,17 @@ def student_details(request, student_id):
     student = Student.objects.get(id=student_id)
     
     cohorts = ProgrammeCohort.objects.all().order_by("-created_on")
+    documents = StudentDocument.objects.filter(student=student)
     
     education_history = StudentEducationHistory.objects.filter(student_id=student_id).order_by("-created_on")
-    context = {"student": student, "education_history": education_history, "cohorts": cohorts, "levels": EDUCATION_LEVELS, "statuses": GRADUATION_STATUSES}
+    context = {
+        "student": student, 
+        "education_history": education_history, 
+        "cohorts": cohorts, 
+        "levels": EDUCATION_LEVELS, 
+        "statuses": GRADUATION_STATUSES,
+        "documents": documents
+    }
     
     return render(request, "students/student_details.html", context)
 
@@ -213,17 +221,17 @@ def create_education_history(request):
         student_id = request.POST.get("student_id")
         institution = request.POST.get("institution")
         level = request.POST.get("level")
-        graduated = request.POST.get("graduated")
-        start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
+        major = request.POST.get("major")
+        year = request.POST.get("year")
+        grade_or_gpa = request.POST.get("grade_or_gpa")
 
         StudentEducationHistory.objects.create(
             student_id=student_id,
             institution=institution,
             level=level,
-            start_date=start_date,
-            end_date=end_date,
-            graduated=True if graduated == "Graduated" else False,
+            major=major,
+            year=year,
+            grade_or_gpa=grade_or_gpa
         )
         return redirect(f"/students/{student_id}/details/")
     return render(request, "education_history/create_education_history.html")
@@ -233,16 +241,16 @@ def edit_education_history(request):
         education_history_id = request.POST.get("education_history_id")
         institution = request.POST.get("institution")
         level = request.POST.get("level")
-        graduated = request.POST.get("graduated")
-        start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
+        major = request.POST.get("major")
+        year = request.POST.get("year")
+        grade_or_gpa = request.POST.get("grade_or_gpa")
 
         education_history = StudentEducationHistory.objects.get(id=education_history_id)
         education_history.institution = institution
         education_history.level = level
-        education_history.start_date = start_date
-        education_history.end_date = end_date
-        education_history.graduated = True if graduated == "Graduated" else False
+        education_history.year = year
+        education_history.grade_or_gpa =grade_or_gpa
+        education_history.major = major
 
         education_history.save()
         return redirect(f"/students/{education_history.student.id}/details/")

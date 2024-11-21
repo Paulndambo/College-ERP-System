@@ -52,10 +52,9 @@ class Student(AbsoluteBaseModel):
     guardian_relationship = models.CharField(max_length=255, null=True)
     guardian_email = models.EmailField(null=True)
     status = models.CharField(max_length=255, choices=STUDENT_STATUS_CHOICES)
-    programme = models.ForeignKey(
-        "schools.Programme", on_delete=models.SET_NULL, null=True
-    )
+    programme = models.ForeignKey("schools.Programme", on_delete=models.SET_NULL, null=True)
     cohort = models.ForeignKey("schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True, related_name="cohortstudents")
+    hostel_room = models.ForeignKey("hostels.HostelRoom", on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return (
@@ -66,8 +65,9 @@ class StudentEducationHistory(AbsoluteBaseModel):
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE, related_name="educationhistory")
     institution = models.CharField(max_length=255)
     level = models.CharField(max_length=255, choices=EDUCATION_LEVEL_CHOICES)
-    start_date = models.DateField()
-    end_date = models.DateField(null=True)
+    grade_or_gpa = models.CharField(max_length=255, null=True)
+    major = models.CharField(max_length=255, null=True)
+    year = models.CharField(max_length=255, null=True)
     graduated = models.BooleanField(default=False)
 
     def __str__(self):
@@ -76,8 +76,9 @@ class StudentEducationHistory(AbsoluteBaseModel):
 
 class StudentDocument(AbsoluteBaseModel):
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    file = models.FileField(upload_to="student_documents/", null=True, blank=True)
+    document_type = models.CharField(max_length=255, null=True)
+    document_name = models.CharField(max_length=255)
+    document_file = models.FileField(upload_to="student_documents/", null=True, blank=True)
 
     def __str__(self):
         return f"{self.student.user.username}: {self.document.name}"

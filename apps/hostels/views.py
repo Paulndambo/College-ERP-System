@@ -141,14 +141,51 @@ class HostelRoomsListView(ListView):
 
 def room_occupants(request, room_id):
     room = HostelRoom.objects.get(id=room_id)
-    room_occupants = Student.objects.all()[:room.room_capacity]
+    room_occupants = Student.objects.filter(hostel_room=room)
+    
+    students = Student.objects.filter(hostel_room__isnull=True, user__gender=room.hostel.gender)
 
     context = {
-        "students": room_occupants,
-        "room": room
+        "occupants": room_occupants,
+        "room": room,
+        "students": students
     }
     return render(request, "hostels/rooms/room_occupants.html", context)    
 
+
+def add_occupant(request):
+    if request.method == "POST":
+        room_id = request.POST.get("room_id")
+        student_id = request.POST.get("student_id")
+        
+        room = HostelRoom.objects.get(id=room_id)
+        student = Student.objects.get(id=student_id)
+        student.hostel_room = room
+        student.save()
+        
+        room.students_assigned += 1
+        room.save()
+        
+        return redirect(f"/hostels/hostel-rooms/{room_id}/occupants")
+    return render(request, "hostels/rooms/add_occupant.html")
+
+
+def remove_occupant(request):
+    if request.method == "POST":
+        student_id = request.POST.get("student_id")
+        
+        student = Student.objects.get(id=student_id)
+        
+        room = HostelRoom.objects.get(id=student.hostel_room.id)
+        room.students_assigned -= 1
+        room.save()
+        
+        student.hostel_room=None
+        student.save()
+        
+        return redirect(f"/hostels/hostel-rooms/{room.id}/occupants")
+    return render(request, "hostels/rooms/add_occupant.html")
+        
 
 def new_room(request):
     if request.method == "POST":

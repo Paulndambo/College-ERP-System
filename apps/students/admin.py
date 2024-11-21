@@ -12,7 +12,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(StudentDocument)
 class StudentDocumentAdmin(admin.ModelAdmin):
-    list_display = ("id", "student", "name", "file")
+    list_display = ("id", "student", "document_type", "document_name", "document_file")
     list_filter = ("student",)
 
 

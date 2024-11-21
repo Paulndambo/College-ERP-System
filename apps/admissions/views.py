@@ -11,10 +11,15 @@ from django.db import transaction
 from django.views.generic import ListView
 from django.http import JsonResponse
 
+from apps.core.models import UserRole
 from apps.admissions.models import StudentApplication, ApplicationDocument, ApplicationEducationHistory, Intake
-from apps.schools.models import Programme
+from apps.schools.models import Programme, ProgrammeCohort
+from apps.users.models import User
+from apps.students.models import Student, StudentDocument, StudentEducationHistory
 
 date_today = datetime.now().date()
+education_levels = ["Primary School", "Secondary School", "Undergraduate", "Graduate"]
+DOCUMENT_TYPES = ["Transcript", "Certificate", "Identification"]
 # Create your views here.
 class StudentApplicationsListView(ListView):
     model = StudentApplication
@@ -36,7 +41,6 @@ class StudentApplicationsListView(ListView):
                 Q(first_name__icontains=search_query) |
                 Q(last_name__icontains=search_query)
             )
-        
         # Get sort parameter
         return queryset.order_by("-created_on")
 
@@ -56,13 +60,23 @@ def application_details(request, id):
     
     gender_choices = ["Male", "Female"]
     GUARDIAN_RELATIONSHIPS = ["Parent", "Grand Parent", "Sibling", "Aunt/Uncle", "Other"]
+    programmes = Programme.objects.all()
+    intakes = Intake.objects.all()
+    
+    cohorts = ProgrammeCohort.objects.filter(programme=application.first_choice_programme).order_by("-created_on")
+    print(cohorts)
     
     context = {
         "application": application,
         "documents": documents,
         "education_history": education_history,
         "gender_choices": gender_choices,
-        "relationship_choices":  GUARDIAN_RELATIONSHIPS 
+        "relationship_choices":  GUARDIAN_RELATIONSHIPS,
+        "education_levels": education_levels,
+        "document_types": DOCUMENT_TYPES,
+        "programmes": programmes,
+        "intakes": intakes,
+        "cohorts": cohorts
     }
     return render(request, "admissions/application_details.html", context)
 
@@ -124,6 +138,101 @@ def edit_application(request):
         return redirect("application-details", id=application_id)
     
 
+def upload_application_document(request):
+    if request.method == "POST":
+        application_id = request.POST.get("application_id")
+        document_type = request.POST.get("document_type")
+        document_name = request.POST.get("document_name")
+        document_file = request.FILES.get("document_file")
+        
+        ApplicationDocument.objects.create(
+            student_application_id=application_id,
+            document_type=document_type,
+            document_name=document_name,
+            document_file=document_file
+        )
+        
+        return redirect("application-details", id=application_id)
+        
+    return render(request, "admissions/info/upload_document.html")
+
+
+def edit_application_document(request):
+    if request.method == "POST":
+        document_id = request.POST.get("document_id")
+        document_type = request.POST.get("document_type")
+        document_name = request.POST.get("document_name")
+        document_file = request.FILES.get("document_file")
+        
+        document = ApplicationDocument.objects.get(id=document_id)
+        document.document_name = document_name if document_name else document.document_name
+        document.document_file = document_file if document_file else document.document_file
+        document.document_type = document_type if document_type else document.document_type
+        document.save()
+        
+        return redirect("application-details", id=document.student_application.id)
+    return render(request, "admissions/info/edit_document.html")
+
+
+def delete_application_document(request):
+    if request.method == "POST":
+        document_id = request.POST.get("document_id")
+        document = ApplicationDocument.objects.get(id=document_id)
+        document.delete()
+        return redirect("application-details", id=document.student_application.id)
+    return render(request, "admissions/info/delete_document.html")
+
+
+def create_education_history(request):
+    if request.method == "POST":
+        application_id = request.POST.get("application_id")
+        institution = request.POST.get("institution")
+        level = request.POST.get("level")
+        major = request.POST.get("major")
+        year = request.POST.get("year")
+        grade_or_gpa = request.POST.get("grade_or_gpa")
+        
+        ApplicationEducationHistory.objects.create(
+            student_application_id=application_id,
+            institution=institution,
+            level=level,
+            major=major,
+            year=year,
+            grade_or_gpa=grade_or_gpa
+        )
+        return redirect("application-details", id=application_id)
+    return render(request, "admissions/info/add_education_history.html")
+
+
+def edit_education_history(request):
+    if request.method == "POST":
+        history_id = request.POST.get("history_id")
+        institution = request.POST.get("institution")
+        level = request.POST.get("level")
+        major = request.POST.get("major")
+        year = request.POST.get("year")
+        grade_or_gpa = request.POST.get("grade_or_gpa")
+        
+        history = ApplicationEducationHistory.objects.get(id=history_id)
+        history.institution = institution if institution else history.institution
+        history.level = level if level else history.level
+        history.major = major if major else history.major
+        history.year = year if year else history.year
+        history.grade_or_gpa = grade_or_gpa if grade_or_gpa else history.grade_or_gpa
+        history.save()
+        return redirect("application-details", id=history.student_application.id)
+    return render(request, "admissions/info/edit_education_history.html")
+
+
+def delete_education_history(request):
+    if request.method == "POST":
+        history_id = request.POST.get("history_id")
+        history = ApplicationEducationHistory.objects.get(id=history_id)
+        history.delete()
+        return redirect("application-details", id=history.student_application.id)
+    return render(request, "admissions/info/delete_education_history.html")
+
+
 def verify_document(request, document_id):
     document = ApplicationDocument.objects.get(id=document_id)
     document.verified = True
@@ -149,5 +258,92 @@ def start_student_application(request):
         return redirect("applications")
     return render(request, "admissions/start_application.html")
 
+
+def submit_application(request, id):
+    application = StudentApplication.objects.get(id=id)
+    application.status = "Under Review"
+    application.save()
+    return redirect("applications")
+
+
+def accept_application(request, id):
+    application = StudentApplication.objects.get(id=id)
+    application.status = "Accepted"
+    application.save()
+    return redirect("application-details", id=application.id)
+
+
 def apply_for_college(request):
     return render(request, "admissions/apply_for_college.html")
+
+
+@transaction.atomic
+def enroll_applicant(request):
+    if request.method == "POST":        
+        application_id = request.POST.get("application_id")
+        cohort_id = request.POST.get("cohort_id")
+        application = StudentApplication.objects.get(id=application_id)
+        
+        documents = ApplicationDocument.objects.filter(student_application=application)
+        eduction_history = ApplicationEducationHistory.objects.filter(student_application=application)
+        
+        role = UserRole.objects.get(name="Student")
+        # Create User
+        user = User.objects.create(
+            first_name=application.first_name,
+            last_name=application.last_name,
+            email=application.email,
+            phone_number=application.phone_number,
+            id_number=application.id_number,
+            passport_number=application.passport_number,
+            gender=application.gender,
+            date_of_birth=application.date_of_birth,
+            address=application.address,
+            postal_code=application.postal_code,
+            city=application.city,
+            country=application.country,
+            role=role
+        )
+        
+        # Create Student
+        student = Student.objects.create(
+            user=user,
+            registration_number=application.application_number,
+            guardian_name=application.guardian_name,
+            guardian_email=application.guardian_email,
+            guardian_phone_number=application.guardian_phone_number,
+            guardian_relationship=application.guardian_relationship,
+            programme=application.first_choice_programme,
+            status="Active",
+            cohort_id=cohort_id
+        )
+        
+        # Create Student Documents
+        for document in documents:
+            StudentDocument.objects.create(
+                student=student,
+                document_name=document.document_name,
+                document_type=document.document_type,
+                document_file=document.document_file
+            )
+        
+        # Create Student Education History
+        for history in eduction_history:
+            StudentEducationHistory.objects.create(
+                student=student,
+                institution=history.institution,
+                level=history.level,
+                major=history.major,
+                year=history.year,
+                grade_or_gpa=history.grade_or_gpa
+            )
+            
+        # Update Lead if any
+        if application.lead:
+            application.lead.status = "Converted"
+            application.lead.save()
+        
+        application.status = "Enrolled"
+        application.save()
+        return redirect("applications")
+    return render(request, "admissions/enroll_applicant.html")

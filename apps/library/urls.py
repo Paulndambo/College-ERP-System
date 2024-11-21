@@ -16,7 +16,9 @@ from apps.library.views import (
     return_issued_book,
     reset_borrowed_book,
     BorrowingFinesListView,
-    request_fine_payment
+    request_fine_payment,
+    deactivate_member,
+    reactivate_member
 )
 
 from apps.library.uploads.views import upload_books
@@ -34,6 +36,8 @@ urlpatterns = [
     path("members/", MembersListView.as_view(), name="members"),
     path("members/<int:id>/details/", MembersBooksListView.as_view(), name="member-details"),
     path("new-member/", new_member, name="new-member"),
+    path("deactivate-member/", deactivate_member, name="deactivate-member"),
+    path("reactivate-member/", reactivate_member, name="reactivate-member"),
 
     
     path("issued-books/", BooksIssuedListView.as_view(), name="issued-books"),

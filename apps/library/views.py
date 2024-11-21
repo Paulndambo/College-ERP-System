@@ -257,6 +257,24 @@ def new_member(request):
     return render(request, "library/members/new_member.html")
 
 
+def deactivate_member(request):
+    if request.method == "POST":
+        member_id = request.POST.get("member_id")
+        member = Member.objects.get(id=member_id)
+        member.active = False
+        member.save()
+        return redirect("members")
+    return render(request, "library/members/deactivate_member.html")
+
+
+def reactivate_member(request):
+    if request.method == "POST":
+        member_id = request.POST.get("member_id")
+        member = Member.objects.get(id=member_id)
+        member.active = True
+        member.save()
+        return redirect("members")
+    return render(request, "library/members/reactivate_member.html")
 
 class BooksIssuedListView(ListView):
     model = BorrowTransaction

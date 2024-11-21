@@ -28,6 +28,6 @@ urlpatterns = [
     path("upload-students/", upload_students, name="upload-students"),
 
     path("create-education-history/", create_education_history, name="create-education-history"),
-    path("edit-education-history/", edit_education_history, name="edit-education-history"),
+    path("edit-student-education-history/", edit_education_history, name="edit-student-education-history"),
     path("delete-education-history/", delete_education_history, name="delete-education-history"),
 ]
