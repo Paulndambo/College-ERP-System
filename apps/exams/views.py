@@ -24,7 +24,7 @@ class ExamMarksListView(ListView):
     model = ExamData
     template_name = 'exams/student_marks.html'
     context_object_name = 'students-marks'
-    paginate_by = 10
+    paginate_by = 12
     
     def get_queryset(self):
         queryset = super().get_queryset()

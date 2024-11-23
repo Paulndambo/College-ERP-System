@@ -38,7 +38,8 @@ from apps.schools.courses.views import (
     CohortsListView,
     new_cohort,
     edit_cohort,
-    delete_cohort,    
+    delete_cohort,  
+    attendance_sheet  
 )
 
 from apps.schools.uploads.views import upload_cohorts
@@ -76,6 +77,7 @@ urlpatterns = [
     path("new-session/", new_session, name="new-session"),
     path("edit-session/", edit_session, name="edit-session"),
     path("delete-session/", delete_session, name="delete-session"),
+    path("attendance/<int:id>/sheet/", attendance_sheet, name="attendance-sheet"),
     
     path("cohorts/", CohortsListView.as_view(), name="cohorts"),
     path("new-cohort/", new_cohort, name="new-cohort"),

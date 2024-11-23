@@ -5,15 +5,13 @@
 <div class="table-card">
     <div class="row py-3 px-2">
         <div class="col">
-            <h3>Course Sessions</h3>
+            <h3>Classes List</h3>
         </div>
         <div class="col">
             <input type="text" class="form-control" placeholder="Search..." 
             id="searchInput" value="{{ search_query }}">
         </div>
-        <div class="col">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newSessionModal">New Session</button>
-        </div>
+       
     </div>
     <!-- Table Toolbar --> 
     <!-- Loading Bar -->
@@ -25,50 +23,40 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Cohort</th>
-                    <th>Course</th>
-                    <th>Start Time</th>
-                    <th>Period</th>
+                    <th>Name</th>
+                    <th>Programme</th>
+                    <th>Current Year</th>
+                    <th>Semester</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                {% for session in sessions %}
+                {% for cohort in cohorts %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ session.cohort }}</td>
-                    <td>{{ session.course }}</td>
-                    <td>{{ session.start_time }}</td>
-                    <td>{{session.period}} hrs</td>
+                    <td>{{ cohort.name }}</td>
+                    <td>{{ cohort.programme }}</td>
+                    <td>{{ cohort.current_year }}</td>
+                    <td>{{ cohort.current_semester }}</td>
                     <td>
-                        <span class="status-badge status-{{ session.status|lower }}">
-                            {{ session.status }}
+                        <span class="status-badge status-{{ cohort.status|lower }}">
+                            {{ cohort.status }}
                         </span>
                     </td>
                     
                     <td>
                         <div class="d-flex gap-1">
-                            <a href="{% url 'session-attendance' session.id %}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
-                            <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editSessionModal{{ session.id }}">
-                                <i class="fas fa-pencil"></i>
+                            <a href="{% url 'cohorts-semesters' cohort.id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i>
                               </a>
-                            <button class="btn btn-sm btn-outline-danger action-btn delete-btn" 
-                            data-bs-toggle="modal" data-bs-target="#deleteSessionModal{{ session.id }}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <a href="{% url 'attendance-sheet' session.id %}" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-print"></i>
-                            </a>
                         </div>
                     </td>
-                    {% include "sessions/delete_session.html" %}
-                    {% include "sessions/edit_session.html" %}
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="8" class="text-center py-4">
-                        No students found
+                        No cohorts found
                     </td>
                 </tr>
                 {% endfor %}

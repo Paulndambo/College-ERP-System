@@ -27,3 +27,14 @@ class Campus(AbsoluteBaseModel):
 
     def __str__(self):
         return self.name
+
+
+class CheckIn(AbsoluteBaseModel):
+    user = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
+    check_in_time = models.DateTimeField(auto_now_add=True)
+    check_out_time = models.DateTimeField(null=True)
+    recorded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="checkinofficers")
+    
+
+    def __str__(self):
+        return self.user.first_name

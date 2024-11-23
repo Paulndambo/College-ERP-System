@@ -10,6 +10,10 @@ from apps.exams.transcripts.views import (
     department_transcripts,
     StudentsTranscriptsListView,
     student_transcripts_details,
+    CohortsListView,
+    ProgrammesListView,
+    CohortsSemestersListView,
+    cohort_transcripts_details,
 )
 
 urlpatterns = [
@@ -33,5 +37,13 @@ urlpatterns = [
         "student-transcripts/<int:student_id>/",
         student_transcripts_details,
         name="student-transcripts-details",
+    ),
+    path("cohorts-list/", CohortsListView.as_view(), name="cohorts-list"),
+    path("programmes-list/", ProgrammesListView.as_view(), name="programmes-list"),
+    path("cohorts-semesters/<int:cohort_id>/", CohortsSemestersListView.as_view(), name="cohorts-semesters"),
+    path(
+        "cohort-transcripts/<int:semester_id>/<int:cohort_id>/",
+        cohort_transcripts_details,
+        name="cohort-transcripts",
     ),
 ]

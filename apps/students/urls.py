@@ -16,6 +16,9 @@ from apps.students.views import (
 )
 
 from apps.students.uploads.views import upload_students
+from apps.students.attendance.views import (
+    AttendanceDashboardListView, CohortAttendanceDetailView
+)
 
 urlpatterns = [
     path("", StudentListView.as_view(), name="students"),
@@ -30,4 +33,7 @@ urlpatterns = [
     path("create-education-history/", create_education_history, name="create-education-history"),
     path("edit-student-education-history/", edit_education_history, name="edit-student-education-history"),
     path("delete-education-history/", delete_education_history, name="delete-education-history"),
+    
+    path("attendance-dashboard/", AttendanceDashboardListView.as_view(), name="attendance-dashboard"),
+    path("attendance-dashboard/<int:cohort_id>/", CohortAttendanceDetailView.as_view(), name="cohort-attendance-dashboard"),
 ]

@@ -3,306 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College ERP Dashboard</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <title>Financial Analytics Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --primary-color: #4e73df;
-            --secondary-color: #858796;
-        }
-
-        body {
-            background-color: #f8f9fc;
-            font-family: 'Nunito', sans-serif;
-            overflow-x: hidden;
-        }
-
-        .wrapper {
-            display: flex;
-            width: 100%;
-        }
-
-        .sidebar {
-            background: linear-gradient(180deg, var(--primary-color) 10%, #224abe 100%);
-            min-height: 100vh;
-            transition: all 0.3s ease;
-            width: 250px;
-            position: fixed;
-            z-index: 1000;
-        }
-
-        .sidebar.collapsed {
-            width: 70px;
-        }
-
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 1rem;
-            margin: 0.2rem 0;
-            border-radius: 0.35rem;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        .sidebar .nav-link:hover {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar .nav-link i {
-            margin-right: 0.5rem;
-            width: 20px;
-            text-align: center;
-        }
-
-        .sidebar.collapsed .nav-link span {
-            display: none;
-        }
-
-        .sidebar.collapsed .brand-text {
-            display: none;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            transition: all 0.3s ease;
-            width: calc(100% - 250px);
-        }
-
-        .main-content.expanded {
-            margin-left: 70px;
-            width: calc(100% - 70px);
-        }
-
-        .toggle-btn {
-            background: none;
+        .metric-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 15px;
             border: none;
-            color: white;
-            padding: 10px;
-            cursor: pointer;
         }
-
-        .toggle-btn:hover {
-            color: rgba(255, 255, 255, 0.8);
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-
-        .card {
-            border: none;
-            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-            transition: transform 0.2s;
+        .custom-select {
+            border-radius: 10px;
+            padding: 8px;
         }
-
-        .card:hover {
-            transform: translateY(-3px);
+        .trend-indicator {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 12px;
         }
-
-        .card-stat {
-            border-left: 4px solid;
+        .trend-up {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
         }
-
-        .stats-icon {
-            font-size: 2rem;
-            opacity: 0.4;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 70px;
-            }
-            
-            .sidebar .nav-link span {
-                display: none;
-            }
-            
-            .main-content {
-                margin-left: 70px;
-                width: calc(100% - 70px);
-            }
-            
-            .sidebar.collapsed {
-                margin-left: -70px;
-            }
-            
-            .main-content.expanded {
-                margin-left: 0;
-                width: 100%;
-            }
+        .trend-down {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
         }
     </style>
 </head>
-<body>
-    <div class="wrapper">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="d-flex justify-content-between align-items-center p-4">
-                <h4 class="text-white mb-0 brand-text">College ERP</h4>
-                <button class="toggle-btn" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h3 mb-0">Financial Analytics Dashboard</h1>
+                <p class="text-muted">Track and analyze financial performance metrics</p>
             </div>
-            <nav class="nav flex-column">
-                <a class="nav-link active" href="#">
-                    <i class="fas fa-home"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-users"></i>
-                    <span>Students</span>
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                    <span>Staff</span>
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-building"></i>
-                    <span>Hostels</span>
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Reports</span>
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-money-bill"></i>
-                    <span>Finance</span>
-                </a>
-                <a class="nav-link" href="#">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>Marketing</span>
-                </a>
-            </nav>
+            <div class="col-auto">
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="downloadReport()">
+                        <i class="fas fa-download me-2"></i>Download Report
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="main-content" id="main">
-            <div class="p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2>Dashboard Overview</h2>
-                    <div class="user-info">
-                        <i class="fas fa-user-circle fa-2x text-secondary"></i>
-                        <span class="ms-2">Admin User</span>
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <select class="form-select custom-select" id="yearSelect">
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <select class="form-select custom-select" id="departmentSelect">
+                    <option value="all">All Departments</option>
+                    <option value="cs">Computer Science</option>
+                    <option value="eng">Engineering</option>
+                    <option value="business">Business School</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Key Metrics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-money-bill text-primary"></i>
+                                </div>
+                                <h6 class="mb-0">Total Revenue</h6>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i class="fas fa-arrow-up me-1"></i>8.2%
+                            </span>
+                        </div>
+                        <h2 class="mb-2">$12.4M</h2>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 82%"></div>
+                        </div>
+                        <small class="text-muted">vs $11.5M last year</small>
                     </div>
                 </div>
-
-                <!-- Stats Row -->
-                <div class="row g-4 mb-4">
-                    <div class="col-xl-3 col-md-6">
-                        <div class="card card-stat border-primary h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="text-primary">Total Students</h6>
-                                        <h3>2,500</h3>
-                                    </div>
-                                    <i class="fas fa-users stats-icon text-primary"></i>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-hand-holding-dollar text-success"></i>
                                 </div>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="fas fa-arrow-up"></i> 3.5%</span>
-                                    <span class="text-muted ms-2">From last month</span>
-                                </div>
+                                <h6 class="mb-0">Fee Collection</h6>
                             </div>
+                            <span class="trend-indicator trend-up">
+                                <i class="fas fa-arrow-up me-1"></i>5.3%
+                            </span>
                         </div>
-                    </div>
-
-                    <div class="col-xl-3 col-md-6">
-                        <div class="card card-stat border-success h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="text-success">Staff Members</h6>
-                                        <h3>150</h3>
-                                    </div>
-                                    <i class="fas fa-chalkboard-teacher stats-icon text-success"></i>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="fas fa-arrow-up"></i> 2.1%</span>
-                                    <span class="text-muted ms-2">From last month</span>
-                                </div>
-                            </div>
+                        <h2 class="mb-2">92.7%</h2>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 92.7%"></div>
                         </div>
-                    </div>
-
-                    <div class="col-xl-3 col-md-6">
-                        <div class="card card-stat border-info h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="text-info">Hostel Occupancy</h6>
-                                        <h3>85%</h3>
-                                    </div>
-                                    <i class="fas fa-building stats-icon text-info"></i>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-danger"><i class="fas fa-arrow-down"></i> 1.2%</span>
-                                    <span class="text-muted ms-2">From last month</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-3 col-md-6">
-                        <div class="card card-stat border-warning h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="text-warning">Monthly Revenue</h6>
-                                        <h3>$125K</h3>
-                                    </div>
-                                    <i class="fas fa-dollar-sign stats-icon text-warning"></i>
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-success"><i class="fas fa-arrow-up"></i> 4.8%</span>
-                                    <span class="text-muted ms-2">From last month</span>
-                                </div>
-                            </div>
-                        </div>
+                        <small class="text-muted">of total expected fees</small>
                     </div>
                 </div>
-
-                <!-- Features Grid -->
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="rounded-circle bg-primary p-3 me-3">
-                                        <i class="fas fa-bed text-white"></i>
-                                    </div>
-                                    <h5 class="card-title mb-0">Hostel Bookings</h5>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-danger bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-wallet text-danger"></i>
                                 </div>
-                                <p class="card-text">Manage student accommodations and room assignments.</p>
-                                <a href="#" class="btn btn-light">View Details</a>
+                                <h6 class="mb-0">Expenses</h6>
                             </div>
+                            <span class="trend-indicator trend-down">
+                                <i class="fas fa-arrow-down me-1"></i>3.1%
+                            </span>
+                        </div>
+                        <h2 class="mb-2">$8.2M</h2>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 75%"></div>
+                        </div>
+                        <small class="text-muted">vs $8.5M last year</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-info bg-opacity-10 p-3 rounded-circle me-3">
+                                    <i class="fas fa-chart-pie text-info"></i>
+                                </div>
+                                <h6 class="mb-0">Net Profit</h6>
+                            </div>
+                            <span class="trend-indicator trend-up">
+                                <i class="fas fa-arrow-up me-1"></i>12.4%
+                            </span>
+                        </div>
+                        <h2 class="mb-2">$4.2M</h2>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 88%"></div>
+                        </div>
+                        <small class="text-muted">vs $3.7M last year</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <div class="col-xl-8 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Revenue vs Expenses Trend</h6>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown">
+                                Last 12 Months
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="updateTrend('6')">Last 6 Months</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateTrend('12')">Last 12 Months</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateTrend('24')">Last 24 Months</a></li>
+                            </ul>
                         </div>
                     </div>
+                    <div class="card-body">
+                        <canvas id="revenueTrend" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-white py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Expense Distribution</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="expenseDistribution"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="rounded-circle bg-success p-3 me-3">
-                                        <i class="fas fa-file-alt text-white"></i>
-                                    </div>
-                                    <h5 class="card-title mb-0">Reports</h5>
-                                </div>
-                                <p class="card-text">Generate and analyze various institutional reports.</p>
-                                <a href="#" class="btn btn-light">View Details</a>
-                            </div>
+        <!-- Financial Details Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">Financial Transactions</h6>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="exportTransactions()">
+                                <i class="fas fa-file-excel me-2"></i>Export
+                            </button>
                         </div>
                     </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="rounded-circle bg-info p-3 me-3">
-                                        <i class="fas fa-bullhorn text-white"></i>
-                                    </div>
-                                    <h5 class="card-title mb-0">Marketing</h5>
-                                </div>
-                                <p class="card-text">Manage campaigns and track enrollment metrics.</p>
-                                <a href="#" class="btn btn-light">View Details</a>
-                            </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Transaction ID</th>
+                                        <th>Date</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsTable">
+                                    <!-- Table content will be dynamically populated -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -310,27 +235,256 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Sidebar toggle functionality
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-            document.getElementById('main').classList.toggle('expanded');
+        // Revenue vs Expenses Trend Chart
+        const trendCtx = document.getElementById('revenueTrend').getContext('2d');
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Revenue',
+                    data: [1.2, 1.3, 1.1, 1.4, 1.2, 1.3, 1.1, 1.2, 1.4, 1.2, 1.3, 1.1].map(x => x * 1000000),
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }, {
+                    label: 'Expenses',
+                    data: [0.8, 0.9, 0.7, 0.8, 0.7, 0.8, 0.7, 0.8, 0.9, 0.7, 0.8, 0.7].map(x => x * 1000000),
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    }
+                }
+            }
         });
 
-        // Add active class to current nav item
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function() {
-                document.querySelector('.nav-link.active').classList.remove('active');
-                this.classList.add('active');
-            });
+        // Expense Distribution Chart
+        const distributionCtx = document.getElementById('expenseDistribution').getContext('2d');
+        const distributionChart = new Chart(distributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Salaries', 'Infrastructure', 'Research', 'Operations', 'Marketing'],
+                datasets: [{
+                    data: [45, 20, 15, 12, 8],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
         });
 
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
+    
+        // Utility functions
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+};
+
+const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+};
+
+// Populate transactions table
+const transactions = [
+    { id: "TRX001", date: "2024-03-21", category: "Fee Collection", description: "Student Fees - Spring 2024", amount: 250000, status: "Completed" },
+    { id: "TRX002", date: "2024-03-20", category: "Salary", description: "Faculty Payroll - March", amount: -180000, status: "Completed" },
+    { id: "TRX003", date: "2024-03-19", category: "Infrastructure", description: "Lab Equipment", amount: -45000, status: "Pending" },
+    { id: "TRX004", date: "2024-03-18", category: "Research", description: "Research Grant", amount: 75000, status: "Completed" },
+    { id: "TRX005", date: "2024-03-17", category: "Operations", description: "Utilities Payment", amount: -12000, status: "Completed" }
+];
+
+const populateTransactionsTable = () => {
+    const tableBody = document.getElementById('transactionsTable');
+    tableBody.innerHTML = '';
+
+    transactions.forEach(transaction => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${transaction.id}</td>
+            <td>${formatDate(transaction.date)}</td>
+            <td>${transaction.category}</td>
+            <td>${transaction.description}</td>
+            <td class="${transaction.amount >= 0 ? 'text-success' : 'text-danger'}">
+                ${formatCurrency(transaction.amount)}
+            </td>
+            <td>
+                <span class="badge ${transaction.status === 'Completed' ? 'bg-success' : 'bg-warning'} rounded-pill">
+                    ${transaction.status}
+                </span>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+};
+
+// Update trend chart based on time range
+const updateTrend = (months) => {
+    const labels = [];
+    const revenueData = [];
+    const expenseData = [];
+    
+    // Generate dummy data based on selected months
+    for (let i = 0; i <script months; i++) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        labels.unshift(date.toLocaleString('default', { month: 'short' }));
+        
+        // Generate random revenue and expense data
+        const revenue = Math.random() * 500000 + 1000000; // Random revenue between 1M and 1.5M
+        const expense = revenue * (Math.random() * 0.2 + 0.6); // Expenses 60-80% of revenue
+        
+        revenueData.unshift(revenue);
+        expenseData.unshift(expense);
+    }
+
+    trendChart.data.labels = labels;
+    trendChart.data.datasets[0].data = revenueData;
+    trendChart.data.datasets[1].data = expenseData;
+    trendChart.update();
+};
+
+// Update department data
+const updateDepartmentData = (department) => {
+    // Simulate data update based on department selection
+    const departmentMultipliers = {
+        'all': 1,
+        'cs': 0.8,
+        'eng': 1.2,
+        'business': 0.9
+    };
+
+    const multiplier = departmentMultipliers[department];
+    
+    // Update metrics
+    document.querySelector('.metric-card:nth-child(1) h2').textContent = 
+        formatCurrency(12400000 * multiplier);
+    document.querySelector('.metric-card:nth-child(2) h2').textContent = 
+        `${(92.7 * multiplier).toFixed(1)}%`;
+    document.querySelector('.metric-card:nth-child(3) h2').textContent = 
+        formatCurrency(8200000 * multiplier);
+    document.querySelector('.metric-card:nth-child(4) h2').textContent = 
+        formatCurrency(4200000 * multiplier);
+
+    // Update charts
+    updateTrend(12);
+    updateExpenseDistribution(department);
+};
+
+// Update expense distribution chart
+const updateExpenseDistribution = (department) => {
+    const departmentExpenses = {
+        'all': [45, 20, 15, 12, 8],
+        'cs': [40, 25, 20, 10, 5],
+        'eng': [35, 30, 15, 15, 5],
+        'business': [50, 15, 10, 15, 10]
+    };
+
+    distributionChart.data.datasets[0].data = departmentExpenses[department];
+    distributionChart.update();
+};
+
+// Export transactions
+const exportTransactions = () => {
+    // In a real application, this would generate and download a CSV/Excel file
+    alert('Downloading transactions data...');
+};
+
+// Download report
+const downloadReport = () => {
+    // In a real application, this would generate and download a PDF report
+    alert('Generating financial report...');
+};
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial population of transactions table
+    populateTransactionsTable();
+
+    // Add event listeners for filters
+    document.getElementById('yearSelect').addEventListener('change', function(e) {
+        const year = e.target.value;
+        // Update all visualizations based on selected year
+        updateDepartmentData(document.getElementById('departmentSelect').value);
+    });
+
+    document.getElementById('departmentSelect').addEventListener('change', function(e) {
+        const department = e.target.value;
+        updateDepartmentData(department);
+    });
+});
+
+// Real-time updates simulation
+const simulateRealTimeUpdates = () => {
+    setInterval(() => {
+        // Simulate random changes in metrics
+        const metrics = document.querySelectorAll('.metric-card h2');
+        metrics.forEach(metric => {
+            const currentValue = parseFloat(metric.textContent.replace(/[^0-9.-]+/g, ""));
+            const change = (Math.random() - 0.5) * 0.02; // Random change between -1% and 1%
+            
+            if (metric.textContent.includes('%')) {
+                metric.textContent = `${(currentValue * (1 + change)).toFixed(1)}%`;
+            } else {
+                metric.textContent = formatCurrency(currentValue * (1 + change));
+            }
         });
-    </script>
-</body>
-</html>
+
+        // Update trend chart with slight variations
+        const lastRevenueData = trendChart.data.datasets[0].data;
+        const lastExpenseData = trendChart.data.datasets[1].data;
+        
+        lastRevenueData.shift();
+        lastExpenseData.shift();
+        
+        const newRevenue = lastRevenueData[lastRevenueData.length - 1] * (1 + (Math.random() - 0.5) * 0.1);
+        const newExpense = lastExpenseData[lastExpenseData.length - 1] * (1 + (Math.random() - 0.5) * 0.1);
+        
+        lastRevenueData.push(newRevenue);
+        lastExpenseData.push(newExpense);
+        
+        trendChart.update();
+    }, 5000); // Update every 5 seconds
+};
+
+// Start real-time updates simulation
+simulateRealTimeUpdates();
+</script>

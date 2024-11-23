@@ -267,3 +267,20 @@ def delete_session(request):
         session.delete()
         return redirect('sessions')
     return render(request, 'sessions/delete_session.html')
+
+def attendance_sheet(request, id):
+    session = CourseSession.objects.get(id=id)
+    students = StudentAttendance.objects.filter(session=session).values("id", "student__user__first_name", "student__user__last_name", "student__registration_number", "student__cohort__name", "status")
+    
+    
+    students_per_page = 30  # Adjust based on the number of rows that fit on a page
+    pages = [students[i:i + students_per_page] for i in range(0, len(students), students_per_page)]
+    
+    print(pages)
+    
+    context = {
+        "students": students,
+        "pages": pages
+    }
+    return render(request, 'sessions/attendance_sheet.html', context)
+    

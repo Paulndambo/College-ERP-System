@@ -1,71 +1,53 @@
 {% extends "base1.html" %}
 
-
 {% block content %}
 <div class="table-card">
-    <div class="row py-2 px-2">
-      <div class="col">
-          <h3>Students Marks</h3>
-      </div>
-      <div class="col">
-          <input type="text" class="form-control" placeholder="Search..." 
-          id="searchInput" value="{{ search_query }}">
-      </div>
-      <div class="col">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordMarksModal">Record Marks</button>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadMarksModal">Upload Marks</button>
-      </div>
-  </div>
-  <!-- Table Toolbar --> 
-  <!-- Loading Bar -->
-  <div class="loader" id="loader"></div>
+  <div class="row py-2 px-2">
+    <div class="col-md-8">
+        <h3>{{cohort.name}}: Semester Transcripts</h3>
+    </div>
+    <div class="col-md-4">
+        <input type="text" class="form-control" placeholder="Search..." 
+        id="searchInput" value="{{ search_query }}">
+    </div>
 
+</div>
+<!-- Table Toolbar --> 
+<!-- Loading Bar -->
+<div class="loader" id="loader"></div>
       <div class="table-container px-2">
         <table class="table data-table table-sm">
           <thead>
             <tr>
               <th scope="col">#</th>
-              <th scope="col">Student</th>
-              <th scope="col">Semester</th>
-              <th scope="col">Course</th>
-              <th scope="col">Cat</th>
-              <th scope="col">Exam</th>
-              <th scope="col">Marks</th>
-              <th scope="col">Grade</th>
-              <th scope="col" colspan="3"></th>
+              <th scope="col">Name</th>
+              <th scope="col">Acc. Year</th>
+              <th scope="col">Start Date</th>
+              <th scope="col">End Date</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-            {% for mark in page_obj %}
+            {% for semester in page_obj %}
             <tr>
               <td>{{forloop.counter}}</td>
-              <td>{{mark.student}}</td>
-              <td><b>{{mark.semester}}-{{mark.semester.academic_year}}</b></td>
-              <td>{{mark.course}}</td>
-              <td>{{mark.cat_marks}}</td>
-              <td>{{mark.exam_marks}}</td>
-              <td>{{mark.total_marks}}</td>
-              <td><b>{{mark.grade}}</b></td>
+              <td>{{semester.name}}</td>
+              <td>{{semester.academic_year}}</td>
+              <td>{{semester.start_date}}</td>
+              <td>{{semester.end_date}}</td>
               <td>
                 <div class="d-flex gap-1">
-                  <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editMarksModal{{ mark.id }}">
-                    <i class="fas fa-pencil"></i>
-                  </a>
-                  <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMarksModal{{ mark.id }}">
-                    <i class="fas fa-trash"></i>
+                  <a href="{% url 'cohort-transcripts' semester.id cohort.id %}" target="_blank" class="btn btn-primary btn-sm">
+                    View Transcript
                   </a>
                 </div>
               </td>
-              
-              {% include "exams/edit_marks.html" %}
-              {% include "exams/delete_marks.html" %}
             </tr>
             
             {% endfor %}
 
           </tbody>
         </table>
-        <!--
         <div class="table-footer">
           <div class="page-info">
               Showing 
@@ -114,10 +96,8 @@
           </nav>
           {% endif %}
       </div>
-    -->
       </div>
 {% endblock content %}
-
 {% block additional_scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -150,6 +130,10 @@
                 window.location.href = `?sort=${sortField}&direction=${direction}`;
             });
         });
+
+        // Delete functionality
+    
+        // Utility function to get CSRF token
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {

@@ -1,5 +1,5 @@
 <div class="modal fade" id="newSessionModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5 text-center">New Session</h1>
@@ -18,31 +18,28 @@
                         {% endfor %}
                   </select>
                 </div>
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Course</label>
+                  <select class="form-select" id="course" name="course">
+                      <option></option>
+                      {% for course in courses %}
+                          <option value="{{course.id}}">{{course}}</option>
+                      {% endfor %}
+                  </select>
                 </div>
-                <div class="row mb-3">
-                  <div class="col">
-                    <label for="exampleInputPassword1" class="form-label fw-bold">Course</label>
-                    <select class="form-select" id="course" name="course">
-                        <option></option>
-                        {% for course in courses %}
-                            <option value="{{course.id}}">{{course}}</option>
-                        {% endfor %}
-                    </select>
-                  </div>
                 </div>
+                
                 <div class="row mb-3">
                     <div class="col">
                         <label for="exampleInputPassword1" class="form-label fw-bold">Start Time</label>
                         <input type="datetime-local" class="form-control" id="start_time" name="start_time" />
                       </div>
+                      <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Session Period(in Hours)</label>
+                        <input type="number" class="form-control" id="period" name="period" min="0" max="24">
+                      </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col">
-                      <label for="exampleInputPassword1" class="form-label fw-bold">Session Period(in Hours)</label>
-                      <input type="number" class="form-control" id="period" name="period" min="0" max="24">
-                    </div>
-                  </div>
-
+               
                   <div class="row mb-3">
                     <div class="col">
                       <label for="exampleInputPassword1" class="form-label fw-bold">Session Status</label>

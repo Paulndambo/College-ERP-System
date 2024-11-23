@@ -91,7 +91,6 @@ class ProgrammeCohort(AbsoluteBaseModel):
     
     def students_count(self):
         return self.cohortstudents.all().count()
-    
 
 class CourseSession(AbsoluteBaseModel):
     cohort = models.ForeignKey(ProgrammeCohort, on_delete=models.CASCADE, related_name="cohortsessions")
