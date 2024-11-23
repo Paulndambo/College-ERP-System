@@ -14,6 +14,8 @@ from apps.exams.transcripts.views import (
     ProgrammesListView,
     CohortsSemestersListView,
     cohort_transcripts_details,
+    ProgrammesSemestersListView,
+     programme_transcripts,
 )
 
 urlpatterns = [
@@ -40,6 +42,8 @@ urlpatterns = [
     ),
     path("cohorts-list/", CohortsListView.as_view(), name="cohorts-list"),
     path("programmes-list/", ProgrammesListView.as_view(), name="programmes-list"),
+    path("programmes-semesters/<int:programme_id>/", ProgrammesSemestersListView.as_view(), name="programmes-semesters"),
+    path("programme-transcripts/<int:semester_id>/<int:programme_id>/", programme_transcripts, name="programme-transcripts"),
     path("cohorts-semesters/<int:cohort_id>/", CohortsSemestersListView.as_view(), name="cohorts-semesters"),
     path(
         "cohort-transcripts/<int:semester_id>/<int:cohort_id>/",

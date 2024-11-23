@@ -1,17 +1,16 @@
 {% extends "base1.html" %}
 
-
 {% block content %}
 <div class="table-card">
   <div class="row py-2 px-2">
-    <div class="col">
-        <h3>Programmes</h3>
+    <div class="col-md-8">
+        <h3>{{cohort.name}}: Semester Transcripts</h3>
     </div>
-    <div class="col">
+    <div class="col-md-4">
         <input type="text" class="form-control" placeholder="Search..." 
         id="searchInput" value="{{ search_query }}">
     </div>
-   
+
 </div>
 <!-- Table Toolbar --> 
 <!-- Loading Bar -->
@@ -22,25 +21,23 @@
             <tr>
               <th scope="col">#</th>
               <th scope="col">Name</th>
-              <th scope="col">Code</th>
-              <th scope="col">Department</th>
-              <th scope="col">School</th>
-              <th scope="col">Code</th>
-              <th scope="col" colspan="3"></th>
+              <th scope="col">Acc. Year</th>
+              <th scope="col">Start Date</th>
+              <th scope="col">End Date</th>
+              <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-            {% for programme in page_obj %}
+            {% for semester in page_obj %}
             <tr>
               <td>{{forloop.counter}}</td>
-              <td>{{programme.level}} of {{programme.name}}</td>
-              <td>{{programme.code}}</td>
-              <td>{{programme.department}}</td>
-              <td>{{programme.school}}</td>
-              <td>{{programme.code}}</td>
+              <td>{{semester.name}}</td>
+              <td>{{semester.academic_year}}</td>
+              <td>{{semester.start_date}}</td>
+              <td>{{semester.end_date}}</td>
               <td>
                 <div class="d-flex gap-1">
-                  <a href="{% url 'programmes-semesters' programme.id %}" class="btn btn-info btn-sm">
+                  <a href="{% url 'programme-transcripts' semester.id programme.id %}" target="_blank" class="btn btn-primary btn-sm">
                     View Transcript
                   </a>
                 </div>

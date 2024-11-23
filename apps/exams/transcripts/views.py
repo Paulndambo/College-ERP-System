@@ -189,7 +189,6 @@ def cohort_transcripts_details(request, semester_id=None, cohort_id=None):
     return render(request, "exams/cohorts/cohort_transcripts_details.html", context)
     
 
-    
 class ProgrammesListView(ListView):
     model = Programme
     template_name = 'exams/transcripts/programmes/programmes.html'
@@ -214,3 +213,57 @@ class ProgrammesListView(ListView):
         context = super().get_context_data(**kwargs)
         context['search_query'] = self.request.GET.get('search', '')
         return context
+    
+
+class ProgrammesSemestersListView(ListView):
+    model = Semester
+    template_name = 'exams/transcripts/programmes/programme_semesters.html'
+    context_object_name = 'semester'
+    paginate_by = 8
+    
+    programme = Programme.objects.none()
+    
+    def get_queryset(self):
+        programme_id = self.kwargs['programme_id']
+        self.programme = Programme.objects.get(id=programme_id)
+        
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search', '')
+        
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query) |
+                Q(name__icontains=search_query) |
+                Q(academic_year__icontains=search_query) 
+            )
+        # Get sort parameter
+        return queryset.order_by("-created_on")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('search', '')
+        context["programme"] = self.programme
+        return context
+    
+    
+def programme_transcripts(request, semester_id=None, programme_id=None):
+    students = Student.objects.prefetch_related("studentmarks").filter(
+        studentmarks__semester_id=semester_id, studentmarks__course__programme_id=programme_id
+    ).annotate(average_marks=Avg("studentmarks__total_marks")).annotate(average_grade=Case(
+            When(average_marks__gte=70, then=Value("A")),
+            When(average_marks__gte=60, then=Value("B")),
+            When(average_marks__gte=50, then=Value("C")),
+            When(average_marks__gte=40, then=Value("D")),
+            default=Value("F"),
+        ))
+
+    paginator = Paginator(students, 10)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "students": students,
+        "semester_id": semester_id,
+    }
+
+    return render(request, "exams/transcripts/programmes/programme_transcripts.html", context)
