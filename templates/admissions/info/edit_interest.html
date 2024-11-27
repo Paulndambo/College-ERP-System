@@ -1,5 +1,5 @@
 <div class="modal fade" id="editProgrammeInterestModal{{application.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5 text-center">Edit Programme Interest</h1>
@@ -9,7 +9,7 @@
                 {% csrf_token %}
                 <div class="modal-body">
                 <input type="number" id="application_id" name="application_id" value="{{application.id}}" hidden readonly required />
-                 <div class="row mb-3">
+                 <div class="row mb-4">
                     <div class="col">
                         <label for="exampleInputPassword1" class="form-label fw-bold">First Choice Programme</label>
                         <select class="form-select" id="first_choice_programme_id" name="first_choice_programme_id">
@@ -21,8 +21,6 @@
                             {% endfor %}
                         </select>
                     </div>
-                 </div>
-                <div class="row mb-3">
                     <div class="col">
                         <label for="exampleInputPassword1" class="form-label fw-bold">Second Choice Programme</label>
                         <select class="form-select" id="second_choice_programme_id" name="second_choice_programme_id">
@@ -34,9 +32,10 @@
                             {% endfor %}
                         </select>
                     </div>
-                </div>
+                 </div>
+                
 
-                <div class="row mb-3">
+                <div class="row mb-4">
                     <div class="col">
                         <label for="exampleInputPassword1" class="form-label fw-bold">Intake Interested In</label>
                         <select class="form-select" id="intake_id" name="intake_id">
@@ -45,6 +44,17 @@
                                 {% if intake.id != application.intake.id %}
                                     <option value="{{intake.id}}">{{intake}}</option>
                                 {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Campus Enrolling Into</label>
+                        <select class="form-select" id="campus_id" name="campus_id">
+                            {% for campus in campuses %}
+                                <option value="{{campus.id}}">{{campus}}</option>
                             {% endfor %}
                         </select>
                     </div>

@@ -27,37 +27,39 @@ users = User.objects.exclude(role=users_role)
 
 
 date_today = datetime.now().date()
+
+
 class LeadsListView(ListView):
     model = Lead
-    template_name = 'marketing/leads/leads.html'
-    context_object_name = 'leads'
+    template_name = "marketing/leads/leads.html"
+    context_object_name = "leads"
     paginate_by = 8
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        search_query = self.request.GET.get('search', '')
-        
+        search_query = self.request.GET.get("search", "")
+
         if search_query:
             queryset = queryset.filter(
-                Q(id__icontains=search_query) |
-                Q(phone_number__icontains=search_query) |
-                Q(first_name__icontains=search_query) | 
-                Q(email__icontains=search_query)
+                Q(id__icontains=search_query)
+                | Q(phone_number__icontains=search_query)
+                | Q(first_name__icontains=search_query)
+                | Q(email__icontains=search_query)
             )
-        
+
         # Get sort parameter
         return queryset.order_by("-created_on")
 
     def get_context_data(self, **kwargs):
-        
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')
+        context["search_query"] = self.request.GET.get("search", "")
         context["users"] = users
         context["sources"] = SOURCES
         context["gender_choices"] = GENDER_CHOICES
         context["programmes"] = programmes
         return context
-    
+
+
 @login_required
 def lead_details(request, lead_id):
     lead = Lead.objects.get(id=lead_id)
@@ -80,7 +82,7 @@ def lead_details(request, lead_id):
         "tasks": tasks,
         "stages": LEAD_STAGES,
         "lead_stages": lead_stages,
-        "intakes": intakes
+        "intakes": intakes,
     }
     return render(request, "marketing/leads/lead_details.html", context)
 
@@ -110,9 +112,7 @@ def capture_lead(request):
             country=country,
         )
 
-        LeadStage.objects.create(
-            lead=lead, stage="New", added_by=request.user
-        )
+        LeadStage.objects.create(lead=lead, stage="New", added_by=request.user)
 
         return redirect("leads")
 
@@ -185,29 +185,26 @@ def add_lead_stage(request):
 
 class TasksListView(ListView):
     model = Task
-    template_name = 'marketing/leads/tasks/tasks.html'
-    context_object_name = 'tasks'
+    template_name = "marketing/leads/tasks/tasks.html"
+    context_object_name = "tasks"
     paginate_by = 8
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        search_query = self.request.GET.get('search', '')
-        
+        search_query = self.request.GET.get("search", "")
+
         if search_query:
             queryset = queryset.filter(
-                Q(id__icontains=search_query) |
-                Q(title__icontains=search_query) 
+                Q(id__icontains=search_query) | Q(title__icontains=search_query)
             )
 
         # Get sort parameter
         return queryset.order_by("-created_on")
 
     def get_context_data(self, **kwargs):
-        
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')
+        context["search_query"] = self.request.GET.get("search", "")
         return context
-    
 
 
 @login_required
@@ -255,7 +252,7 @@ def create_application_with_lead(request):
     if request.method == "POST":
         lead_id = request.POST.get("lead_id")
         id_number = request.POST.get("id_number")
-        
+
         lead = Lead.objects.get(id=lead_id)
         application = StudentApplication.objects.create(
             first_name=lead.first_name,
@@ -267,9 +264,11 @@ def create_application_with_lead(request):
             city=lead.city,
             country=lead.country,
             phone_number=lead.phone_number,
-            status="Draft"
+            status="Draft",
         )
-        application.application_number = f"APP-{application.id}/{date_today.month}/{date_today.year}"
+        application.application_number = (
+            f"APP-{application.id}/{date_today.month}/{date_today.year}"
+        )
         application.save()
         lead.status = "Application in Progress"
         lead.save()

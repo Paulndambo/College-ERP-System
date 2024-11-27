@@ -1,0 +1,29 @@
+<div class="modal fade" id="newCheckInModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Check-In Student</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'checkin-student' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Student</label>
+                  <select class="form-select" id="student_id" name="student_id">
+                    <option></option>
+                      {% for student in students %}
+                      <option value="{{ student.id }}">{{ student.user.name }}: {{ student.registration_number }}</option>
+                      {% endfor %}
+                  </select>
+                </div>
+                </div>
+                <div class="text-center mt-3">
+                  <button type="submit" class="btn btn-primary">Submit Record</button>
+                </div>
+              </div>
+            </form>
+      </div>
+    </div>
+  </div>

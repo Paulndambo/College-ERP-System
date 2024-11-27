@@ -1,0 +1,64 @@
+<div class="modal fade" id="newMealCardModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Meal Card</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'new-mealcard' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Student</label>
+                  <select class="form-select" id="student_id" name="student_id">
+                      {% for student in students %}
+                        <option value="{{ student.id }}">{{ student.user.name }}</option>
+                      {% endfor %}
+                  </select>
+                </div>
+
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">MealCard Number</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="card_number"
+                      name="card_number"
+                      required
+                    />
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Month</label>
+                    <select class="form-select" id="month" name="month">
+                      {% for month in months %}
+                        <option value="{{ month }}">{{ month }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+                           
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Expiry Date</label>
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="expiry_date"
+                      name="expiry_date"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Create Meal Card</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

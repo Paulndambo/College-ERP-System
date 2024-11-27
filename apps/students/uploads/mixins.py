@@ -39,10 +39,8 @@ class StudentsUploadMixin(object):
                 role=UserRole.objects.get(name="Student"),
             )
 
-            cohort = ProgrammeCohort.objects.filter(
-                name=row["cohort_name"]
-            ).first()
-            
+            cohort = ProgrammeCohort.objects.filter(name=row["cohort_name"]).first()
+
             student = Student.objects.create(
                 user=user,
                 registration_number=row.get("registration_number"),
@@ -52,7 +50,7 @@ class StudentsUploadMixin(object):
                 guardian_email=row.get("guardian_email"),
                 status=row.get("status") if row.get("status") else "Active",
                 cohort=cohort,
-                programme=cohort.programme if cohort else None
+                programme=cohort.programme if cohort else None,
             )
 
         print("Looks like the mixin got a call!!!")

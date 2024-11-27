@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.staff.models import Staff, Department
+from apps.staff.models import Staff, Department, StaffLeave, StaffLeaveApplication
 
 
 # Register your models here.
@@ -14,3 +14,22 @@ class StaffAdmin(admin.ModelAdmin):
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "created_on")
     list_filter = ("name",)
+
+
+@admin.register(StaffLeaveApplication)
+class StaffLeaveApplicationAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "staff",
+        "leave_type",
+        "start_date",
+        "end_date",
+        "status",
+        "created_on",
+    )
+ 
+
+@admin.register(StaffLeave)
+class StaffLeaveAdmin(admin.ModelAdmin):
+    list_display = ("id", "application", "status", "created_on")
+   

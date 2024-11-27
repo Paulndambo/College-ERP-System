@@ -1,0 +1,56 @@
+<div class="modal fade" id="recordLibraryFineModal{{fine.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Record Library Fine Payment</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'capture-library-fine-payment' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" hidden id="fine_id" name="fine_id" value="{{fine.id}}" readonly required />
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Amount Expected</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="amount"
+                      name="amount"
+                      value="{{fine.amount}}"
+                      readonly
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Payment Reference</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="payment_reference"
+                      name="payment_reference"
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Payment Method</label>
+                      <select class="form-select" id="payment_method" name="payment_method" required>
+                          <option></option>
+                          <option value="Cash">Cash</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                          <option value="Cheque">Cheque</option>
+                          <option value="Mobile Money">Mobile Money</option>
+                      </select>
+                    </div>
+                </div>
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Record Fine Payment</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

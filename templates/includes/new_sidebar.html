@@ -16,12 +16,23 @@
             </li>
             <li>
                 <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
+                    <i class="fas fa-users icon"></i>
+                    <span class="link-text">People</span>
+                </a>
+                <ul class="collapse submenu">
+                    <li class="nav-item"><a href="{% url 'staff' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-user-tie"></i> Staff Members</a></li>
+                    <li class="nav-item"><a href="{% url 'students' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-user-graduate"></i> Students</a></li>
+                    <li class="nav-item"><a href="{% url 'visitors' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-user-clock"></i> Visitors</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" aria-expanded="false">
                     <i class="fas fa-briefcase icon"></i>
                     <span class="link-text">Human Resource</span>
                 </a>
                 <ul class="collapse submenu">
-                    <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-file-signature"></i> Leave Applications</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-umbrella-beach"></i> Employee Leaves</a></li>
+                    <li class="nav-item"><a href="{% url 'leave-applications' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-file-signature"></i> Leave Applications</a></li>
+                    <li class="nav-item"><a href="{% url 'leaves' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-umbrella-beach"></i> Employee Leaves</a></li>
                     <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-calendar-days"></i> Attendances</a></li>
                 </ul>
             </li>
@@ -44,8 +55,8 @@
                 <ul class="collapse submenu">
                     <li class="nav-item"><a href="{% url 'students' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-graduation-cap"></i> Students List</a></li>
                     <li class="nav-item"><a href="{% url 'attendance-dashboard' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-fingerprint"></i> Attendance</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-user-check"></i> Gate Check-Ins</a></li>
-                    <li class="nav-item"><a href="#" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-utensils"></i> MealCards</a></li>
+                    <li class="nav-item"><a href="{% url 'student-checkins' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-user-check"></i> Gate Check-Ins</a></li>
+                    <li class="nav-item"><a href="{% url 'meal-cards' %}" class="nav-link d-flex align-items-center gap-2"><i class="fas fa-utensils"></i> MealCards</a></li>
                 </ul>
             </li>
            

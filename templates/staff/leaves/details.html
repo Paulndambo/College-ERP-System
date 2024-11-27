@@ -1,0 +1,73 @@
+{% extends "base1.html" %}
+
+{% block additional_css %}
+<style>
+  .card:hover {
+            transform: translateY(-3px);
+        }
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-decline {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-approve:hover {
+            background-color: #218838;
+        }
+        .btn-decline:hover {
+            background-color: #c82333;
+        }
+    
+</style>
+{% endblock additional_css %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title text-center">Name: {{application.staff.user.name}}</h5>
+      <hr/>
+      <div class="row mb-3">
+        <div class="col">
+            <p class="card-text">
+                <strong>Start Date:</strong> {{application.start_date}}<br>
+                <strong>End Date:</strong> {{application.end_date}}<br>
+              </p>
+        </div>
+        <div class="col">
+            <p class="card-text">
+                <strong>Leave Type:</strong> {{application.leave_type}}<br>
+                <strong>Status:</strong> {{application.status}}<br>
+              </p>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <p><strong>Reason:</strong> {{application.reason}}</p>
+      </div>
+
+      {% if application.status == "Declined" %}
+      <div class="row b-3">
+        <p><strong>Decline Reason:</strong> {{application.reason_declined}}</strong></p>
+      </div>
+      {% endif %}
+      {% if application.status == "Approved" or application.status == "Declined" %}
+      {% else %}
+      <div class="row mb-3 text-center">
+        <div class="col">
+            <button class="btn btn-approve me-3" data-bs-toggle="modal" data-bs-target="#approveLeaveApplicationModal{{ application.id }}">
+                <i class="fas fa-check-circle"></i> Approve Application
+            </button>
+        </div>
+        <div class="col">
+            <button class="btn btn-decline" data-bs-toggle="modal" data-bs-target="#declineLeaveApplicationModal{{ application.id }}">
+                <i class="fas fa-times-circle"></i> Decline Application
+            </button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% include "staff/leaves/approve_application.html" %}
+  {% include "staff/leaves/decline_application.html" %}
+{% endblock content %}

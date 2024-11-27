@@ -9,7 +9,7 @@
                 {% csrf_token %}
                 <div class="modal-body">
                 <input type="number" id="application_id" name="application_id" value="{{application.id}}" hidden readonly required />
-                 <div class="row mb-3">
+                 <div class="row mb-4">
                     <div class="col">
                         <label for="exampleInputPassword1" class="form-label fw-bold">Cohort Enrolling Into</label>
                         <select class="form-select" id="cohort_id" name="cohort_id">
@@ -18,6 +18,16 @@
                             {% endfor %}
                         </select>
                     </div>
+                 </div>
+                 <div class="row mb-4">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Campus Enrolling Into</label>
+                    <select class="form-select" id="campus_id" name="campus_id">
+                        {% for campus in campuses %}
+                            <option value="{{campus.id}}">{{campus}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
                  </div>
             
                

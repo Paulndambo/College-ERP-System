@@ -14,6 +14,9 @@ from apps.staff.models import Staff
 from apps.hostels.models import Booking
 from apps.core.models import UserRole, Campus
 
+from django.views.generic import ListView
+from django.http import JsonResponse
+
 
 # Create your views here.
 @login_required

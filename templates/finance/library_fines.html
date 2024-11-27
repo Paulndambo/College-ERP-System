@@ -44,9 +44,10 @@
                     <td>
                         <div class="d-flex gap-1">
                             <a href="#" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
-                            <a href="#" class="btn btn-primary btn-sm"><i class="fas fa-credit-card"></i></a>
+                            <a data-bs-toggle="modal" data-bs-target="#recordLibraryFineModal{{ fine.id }}" class="btn btn-primary btn-sm"><i class="fas fa-credit-card"></i></a>
                         </div>
                     </td>
+                    {% include "finance/record_library_fine.html" %}
                 </tr>
                 {% empty %}
                 <tr>

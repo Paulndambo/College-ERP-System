@@ -33,7 +33,6 @@ class HostelRoom(AbsoluteBaseModel):
     room_number = models.CharField(max_length=255)
     room_capacity = models.IntegerField(default=1)
     students_assigned = models.IntegerField(default=0)
-    
 
     def __str__(self):
         return self.room_number

@@ -1,0 +1,64 @@
+<div class="modal fade" id="editLeaveApplicationModal{{leave.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Leave Application</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-leave-application' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                <input type="number" id="application_id" name="application_id" value="{{leave.id}}" hidden readonly />
+                 <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Leave Type</label>
+                    <select class="form-select" id="leave_type" name="leave_type" required>
+                        <option value="{{leave.leave_type}}">{{leave.leave_type}}</option>
+                        {% for leave_type in leave_types %}
+                            {% if leave.leave_type != leave_type %}
+                                <option value="{{leave_type}}">{{leave_type}}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                 </div>
+                 </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Start Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="start_date"
+                        name="start_date"
+                        value="{{leave.start_date | date:'Y-m-d'}}"
+                        required
+                      />
+                  </div>  
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">End Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="end_date"
+                        name="end_date"
+                        value="{{leave.end_date | date:'Y-m-d'}}"
+                        required
+                      />
+                  </div>  
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Reason</label>
+                    <textarea class="form-control" id="reason" name="reason" required>{{leave.reason}}</textarea>
+                  </div>
+                </div>  
+
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Application</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>
