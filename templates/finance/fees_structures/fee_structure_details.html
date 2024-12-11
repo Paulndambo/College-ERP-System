@@ -3,12 +3,18 @@
 {% block content %}
 <div class="table-card">
     <row class="text-center p-2">
-        <h3 class="">Computer Science Semester Fee Structure</h3>
-        <p class="lead">Academic Year 2024-2025</p>
+        <h3 class="">{{structure.programme}}</h3>
+        <p class="lead">{{structure.year_of_study}} {{structure.semester}} Fee Structure</p>
     </row>
 
     <div class="row">
-        
+        <div class="row">
+            <div class="col"></div>
+            <div class="col text-end">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newFeeStructureItemModal{{structure.id}}">New Item</button>
+            </div>
+        </div>
+        {% include "finance/fees_structures/new_item.html" %}
             <div class="fee-table p-4">
                 <table class="table table-striped table-hover">
                     <thead class="table-primary">
@@ -37,6 +43,8 @@
                                     </a>
                                   </div>
                               </td>
+                              {% include "finance/fees_structures/delete_item.html" %}
+                              {% include "finance/fees_structures/edit_item.html" %}
                         </tr>
                         {% endfor %}
                         <tr class="total-row">
