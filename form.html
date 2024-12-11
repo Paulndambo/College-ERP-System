@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Attendance Sheet</title>
+    <style>
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .page {
+                page-break-after: always;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .header-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .attendance-table th, 
+        .attendance-table td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+            font-size: 10px;
+        }
+        
+        .attendance-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .signature-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-block {
+            width: 30%;
+            border-top: 1px solid #000;
+            text-align: center;
+            font-size: 10px;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <h1>{{ institution_name }}</h1>
+            <div class="header-details">
+                <span>Department: {{ department }}</span>
+                <span>Academic Year: {{ academic_year }}</span>
+                <span>Semester: {{ semester }}</span>
+            </div>
+            <div class="header-details">
+                <span>Subject: {{ subject_name }}</span>
+                <span>Faculty: {{ faculty_name }}</span>
+            </div>
+        </div>
+        
+        <table class="attendance-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">Sl. No.</th>
+                    <th rowspan="2">Student ID</th>
+                    <th rowspan="2">Student Name</th>
+                    <th colspan="{{ total_classes }}">Attendance Record</th>
+                    <th rowspan="2">Total Present</th>
+                    <th rowspan="2">Attendance %</th>
+                </tr>
+                <tr>
+                    {% for date in class_dates %}
+                    <th>{{ date|date:"d/m" }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ student.id }}</td>
+                    <td>{{ student.name }}</td>
+                    {% for attendance in student.attendance %}
+                    <td>{{ attendance|yesno:"P,A" }}</td>
+                    {% endfor %}
+                    <td>{{ student.total_present }}</td>
+                    <td>{{ student.attendance_percentage }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="signature-section">
+            <div class="signature-block">
+                Faculty Signature
+            </div>
+            <div class="signature-block">
+                HOD Signature
+            </div>
+            <div class="signature-block">
+                Principal Signature
+            </div>
+        </div>
+    </div>
+</body>
+</html>

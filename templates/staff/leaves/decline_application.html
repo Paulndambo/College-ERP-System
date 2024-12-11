@@ -1,0 +1,28 @@
+<div class="modal fade" id="declineLeaveApplicationModal{{application.id}}" tabindex="-1" aria-labelledby="newTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newTransactionModalLabel">Decline Leave Application</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'decline-leave-application' %}">
+                    {% csrf_token %}
+                    <input type="number" id="application_id" name="application_id" value="{{application.id}}" hidden readonly required />
+                    <div class="mb-3">
+                        <p>Are you sure you want to decline leave application for <b>{{application.staff.user.name}}</b>?</p>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <textarea class="form-control" id="decline_reason" name="decline_reason" required></textarea>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Close</button>
+                        <button type="submit" class="btn btn-warning">Yes, Proceed</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

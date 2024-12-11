@@ -13,7 +13,9 @@ from apps.hostels.views import (
     new_hostel_room,
     edit_room,
     delete_room,
-    room_occupants
+    room_occupants,
+    add_occupant,
+    remove_occupant,
 )
 
 urlpatterns = [
@@ -25,11 +27,14 @@ urlpatterns = [
     path("bookings/", BookingsListView.as_view(), name="bookings"),
     path("hostel-booking/", bookings_home, name="hostel-booking"),
     path("book-hostel/", book_hostel, name="book-hostel"),
-   
     path("hostel-rooms/", HostelRoomsListView.as_view(), name="hostel-rooms"),
     path("new-hostel-room/", new_room, name="new-hostel-room"),
     path("create-hostel-room/", new_hostel_room, name="create-hostel-room"),
     path("edit-hostel-room/", edit_room, name="edit-hostel-room"),
     path("delete-hostel-room/", delete_room, name="delete-hostel-room"),
-    path("hostel-rooms/<int:room_id>/occupants/", room_occupants, name="room-occupants"),
+    path(
+        "hostel-rooms/<int:room_id>/occupants/", room_occupants, name="room-occupants"
+    ),
+    path("add-occupant/", add_occupant, name="add-occupant"),
+    path("remove-occupant/", remove_occupant, name="remove-occupant"),
 ]

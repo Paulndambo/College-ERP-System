@@ -1,0 +1,78 @@
+<div class="modal fade" id="addEducationModal{{application.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Add Education History</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'add-education-history' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" id="application_id" name="application_id" value="{{application.id}}" hidden readonly required />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Institution Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="institution"
+                    name="institution"
+                    required
+                  />
+                </div>
+
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Education Level</label>
+                    <select class="form-select" id="level" name="level" required>
+                        <option value=""></option>
+                        {% for level in education_levels %}
+                            <option value="{{ level }}">{{ level }}</option>
+                        {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Grade or GPA</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="grade_or_gpa"
+                      name="grade_or_gpa"
+                      required
+                    />
+                  </div>
+                </div>
+               
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Year</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="year"
+                      name="year"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Major</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="major"
+                      name="major"
+                      required
+                    />
+                  </div>
+                </div>
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Education History</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

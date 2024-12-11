@@ -1,0 +1,18 @@
+Part 1: Working with text files
+You are provided with a text file that contains lines of text, Read the contents of that file and store it as a list 
+in a list named first_file_data.
+Note: Just create a file yourself and put some dummy lines of text.
+
+Then,
+Loop over the elements in the first_file_data, while writing them into another file named second_file.txt
+
+
+Part 2: Working with csv files.
+Create a csv file that contains information about courses, the information should be;- id, name, fees.
+Read the contents of the csv file and store it into a variable named course data.
+Loop through the course data list and print each element.
+
+
+Part 3: Working with csv files Part II 
+Create a list of people and their professions and store then information in a list of dictionaries.
+Write this list of people to a csv file named people.csv.

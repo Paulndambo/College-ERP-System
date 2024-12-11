@@ -15,6 +15,8 @@ from apps.schools.models import School, Department, Programme, Course, Semester
 PROGRAMME_TYPES = ["Artisan", "Certificate", "Diploma", "Bachelor", "Masters", "PhD"]
 
 SEMESTER_STATUSES = ["Active", "Closed"]
+
+
 ### Schools
 def schools(request):
     schools = School.objects.all().order_by("-created_on")
@@ -171,27 +173,25 @@ def delete_department(request):
 ### Programmes
 class ProgrammesListView(ListView):
     model = Programme
-    template_name = 'programmes/programmes.html'
-    context_object_name = 'programmes'
+    template_name = "programmes/programmes.html"
+    context_object_name = "programmes"
     paginate_by = 8
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        search_query = self.request.GET.get('search', '')
-        
+        search_query = self.request.GET.get("search", "")
+
         if search_query:
             queryset = queryset.filter(
-                Q(id__icontains=search_query) |
-                Q(name__icontains=search_query) 
+                Q(id__icontains=search_query) | Q(name__icontains=search_query)
             )
-        
+
         # Get sort parameter
         return queryset.order_by("-created_on")
 
     def get_context_data(self, **kwargs):
-        
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')
+        context["search_query"] = self.request.GET.get("search", "")
         context["levels"] = PROGRAMME_TYPES
         return context
 
@@ -262,31 +262,30 @@ def delete_programme(request):
 ### Courses
 class CoursesListView(ListView):
     model = Course
-    template_name = 'courses/courses.html'
-    context_object_name = 'courses'
+    template_name = "courses/courses.html"
+    context_object_name = "courses"
     paginate_by = 8
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        search_query = self.request.GET.get('search', '')
-        
+        search_query = self.request.GET.get("search", "")
+
         if search_query:
             queryset = queryset.filter(
-                Q(id__icontains=search_query) |
-                Q(name__icontains=search_query) |
-                Q(course_code__icontains=search_query) |
-                Q(programme__name__icontains=search_query)
+                Q(id__icontains=search_query)
+                | Q(name__icontains=search_query)
+                | Q(course_code__icontains=search_query)
+                | Q(programme__name__icontains=search_query)
             )
-        
+
         # Get sort parameter
         return queryset.order_by("-created_on")
 
     def get_context_data(self, **kwargs):
-        
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')
+        context["search_query"] = self.request.GET.get("search", "")
         return context
-    
+
 
 def new_course(request):
     if request.method == "POST":
@@ -337,34 +336,33 @@ def delete_course(request):
         return redirect("courses")
     return render(request, "courses/delete_course.html")
 
+
 # Semesters
 class SemestersListView(ListView):
     model = Semester
-    template_name = 'semesters/semesters.html'
-    context_object_name = 'semesters'
+    template_name = "semesters/semesters.html"
+    context_object_name = "semesters"
     paginate_by = 8
-    
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        search_query = self.request.GET.get('search', '')
-        
+        search_query = self.request.GET.get("search", "")
+
         if search_query:
             queryset = queryset.filter(
-                Q(id__icontains=search_query) |
-                Q(name__icontains=search_query) 
+                Q(id__icontains=search_query) | Q(name__icontains=search_query)
             )
-        
+
         # Get sort parameter
         return queryset.order_by("-created_on")
 
     def get_context_data(self, **kwargs):
-        
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('search', '')
+        context["search_query"] = self.request.GET.get("search", "")
         context["semester_statuses"] = SEMESTER_STATUSES
         return context
-    
-    
+
+
 def new_semester(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -373,7 +371,13 @@ def new_semester(request):
         start_date = request.POST.get("start_date")
         end_date = request.POST.get("end_date")
 
-        Semester.objects.create(name=name, academic_year=academic_year, status=status, start_date=start_date, end_date=end_date)
+        Semester.objects.create(
+            name=name,
+            academic_year=academic_year,
+            status=status,
+            start_date=start_date,
+            end_date=end_date,
+        )
         return redirect("semesters")
 
     return render(request, "semesters/new_semester.html")

@@ -30,27 +30,41 @@
       </div>
     </div>
   </div>
-
   {% include "students/edit_student.html" %}
   <!-- Course Details -->
   <div class="card mb-4">
     <div class="card-header">
-      <h5 class="card-title mb-0">Course Details</h5>
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="card-title mb-0">Programme Details</h5>
+        </div>
+        <div class="col d-flex justify-content-end">
+          <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudentCohortModal{{student.id}}"><i class="fas fa-edit"></i></a>
+        </div>
+      </div>
     </div>
     <div class="card-body">
-      <p><strong>Course:</strong> Bachelor of Science in Computer Science</p>
-      <p><strong>Year:</strong> 3rd Year</p>
-      <p><strong>Semester:</strong> 2nd Semester</p>
-      <p><strong>Department:</strong> Department of Computer Science</p>
+      <p><strong>Course:</strong> {{student.programme}}</p>
+      <p><strong>Year:</strong> {{student.cohort.current_year}}</p>
+      <p><strong>Semester:</strong> {{student.cohort.current_semester}}</p>
+      <p><strong>Department:</strong> Department of {{student.programme.department}}</p>
+      <p><strong>Cohort:</strong> {{student.cohort}}</p>
     </div>
   </div>
-
+{% include "students/edit_student_cohort.html" %}
   <!-- Contact Information -->
  <div class="row">
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
-              <h5 class="card-title mb-0">Address Information</h5>
+              <div class="row align-items-center">
+                <div class="col">
+                  <h5 class="card-title mb-0">Address Information</h5>
+                </div>
+                <div class="col d-flex justify-content-end">
+                  <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudentAddressModal{{student.id}}"><i class="fas fa-edit"></i></a>
+                </div>
+              </div>
             </div>
             <div class="card-body">
               <p><strong>Address:</strong> {{student.user.address}}</p>
@@ -64,7 +78,14 @@
         <!-- Guardian Information -->
       <div class="card mb-4">
         <div class="card-header">
-          <h5 class="card-title mb-0">Guardian Information</h5>
+          <div class="row align-items-center">
+            <div class="col">
+              <h5 class="card-title mb-0">Guardian Information</h5>
+            </div>
+            <div class="col d-flex justify-content-end">
+              <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudentGuardianModal{{student.id}}"><i class="fas fa-edit"></i></a>
+            </div>
+          </div>
         </div>
         <div class="card-body">
           <p><strong>Name:</strong> {{student.guardian_name}}</p>
@@ -75,14 +96,15 @@
       </div>
     </div>
  </div>
-
+{% include "students/edit_student_guardian.html" %}
+{% include "students/edit_student_address.html" %}
   <!-- Past Education History -->
   <div class="card mb-4">
 
     <div class="card-header">
       <div class="row align-items-center">
         <div class="col">
-          <h5 class="card-title mb-0">Past Education History</h5>
+          <h5 class="card-title mb-0">Education Records</h5>
         </div>
         <div class="col d-flex justify-content-end">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newEducationHistoryModal{{student.id}}">Record Education</button>
@@ -97,9 +119,9 @@
                 <th>#</th>
                 <th scope="col">School</th>
                 <th scope="col">Level</th>
-                <th scope="col">Start Year</th>
-                <th scope="col">End Year</th>
-                <th scope="col">Status</th>
+                <th scope="col">Year</th>
+                <th scope="col">Grade/GPA</th>
+                <th scope="col">Major</th>
                 <th scope="col" colspan="2"></th>
               </tr>
             </thead>
@@ -109,9 +131,9 @@
                 <td>{{ forloop.counter }}</td>
                 <td>{{ history.institution }}</td>
                 <td>{{ history.level }}</td>
-                <td>{{ history.start_date }}</td>
-                <td>{{ history.end_date }}</td>
-                <td>{% if history.graduated %} Graduated {% else %} Not Graduated {% endif %}</td>
+                <td>{{ history.year }}</td>
+                <td>{{ history.grade_or_gpa }}</td>
+                <td>{{ history.major }}</td>
                 <td><a data-bs-toggle="modal" data-bs-target="#editEducationHistoryModal{{history.id}}" class="btn btn-secondary btn-sm"><i class="fas fa-edit"></i></a></td>
                 <td><a data-bs-toggle="modal" data-bs-target="#deleteEducationHistoryModal{{history.id}}" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a></td>
                 {% include "education_history/edit_education_history.html" %}
@@ -123,6 +145,60 @@
     </div>
   </div>
 {% include "education_history/create_education_history.html" %}
+<div class="card mb-4">
+    <div class="card-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h5 class="card-title mb-0">Documents</h5>
+        </div>
+        <div class="col d-flex justify-content-end">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newStudentDocumentModal{{student.id}}">New Document</button>
+        </div>
+      </div>
+    </div>
+
+  <div class="card-body">
+      <div class="table-responsive">
+          <table class="table table-sm table-responsive mb-0">
+              <thead class="">
+                  <tr>
+                      <th>#</th>
+                      <th>Document Type</th>
+                      <th>Name</th>
+                      <th>Added On</th>
+                      <th></th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for document in documents %}
+                  <tr>
+                      <td>{{forloop.counter}}</td>
+                      <td>{{document.document_type}}</td>
+                      <td>{{document.document_name}}</td>
+                      
+                      <td>{{document.created_on}}</td>
+                      <td>
+                          <div class="d-flex gap-1">
+                              <a href="{{document.document_file.url}}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                  <i class="fas fa-download"></i>
+                              </a>
+                             
+                              <a class="btn btn-sm btn-outline-primary" 
+                              data-bs-toggle="modal" data-bs-target="#editStudentDocumentModal{{ document.id }}">
+                                  <i class="fas fa-pencil"></i>
+                              </a>
+                              <a class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteStudentDocumentModal{{ document.id }}">
+                                  <i class="fas fa-trash"></i>
+                              </a>
+                          </div>
+                      </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+          </table>
+      </div>
+  </div>
+</div>
   <!-- Academic Performance -->
   <div class="card mb-4">
     <div class="card-header">

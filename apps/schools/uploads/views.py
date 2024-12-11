@@ -15,6 +15,7 @@ fs = FileSystemStorage(location="temp")
 
 from apps.schools.uploads.upload_cohorts_mixin import CohortsUploadMixin
 
+
 def upload_cohorts(request):
     if request.method == "POST":
         try:

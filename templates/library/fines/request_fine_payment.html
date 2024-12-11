@@ -1,0 +1,23 @@
+<div class="modal fade" id="requestFinePaymentModal{{fine.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Send Fine Request to Finance</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'request-fine-payment' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                <input type="number" hidden id="fine_id" name="fine_id" value="{{fine.id}}" readonly required />
+                <div class="mb-3">
+                    <p>Are you sure you want to send a fine payment collection request to finance office of <b>{{fine.calculated_fine}}</b> for <b>{{fine.borrow_transaction.member}}</b> ?</p>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Close</button>
+                    <button type="submit" class="btn btn-success">Yes, Proceed</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

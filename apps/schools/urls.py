@@ -26,15 +26,19 @@ from apps.schools.views import (
 )
 
 from apps.schools.courses.views import (
-    CourseSessionsListView, 
+    CourseSessionsListView,
     new_session,
     edit_session,
     delete_session,
-    
+    session_attendance,
+    CourseSessionAttendancesListView,
+    mark_student_absent,
+    mark_student_present,
     CohortsListView,
     new_cohort,
     edit_cohort,
-    delete_cohort,    
+    delete_cohort,
+    attendance_sheet,
 )
 
 from apps.schools.uploads.views import upload_cohorts
@@ -55,21 +59,28 @@ urlpatterns = [
     path("new-programme/", new_programme, name="new-programme"),
     path("delete-programme/", delete_programme, name="delete-programme"),
     path("departments/", departments, name="departments"),
-    path("departments/<int:id>/details/", department_details, name="department-details"),
+    path(
+        "departments/<int:id>/details/", department_details, name="department-details"
+    ),
     path("new-department/", new_department, name="new-department"),
     path("edit-department/", edit_department, name="edit-department"),
     path("delete-department/", delete_department, name="delete-department"),
-    
     path("semesters/", SemestersListView.as_view(), name="semesters"),
     path("new-semester/", new_semester, name="new-semester"),
     path("edit-semester/", edit_semester, name="edit-semester"),
-    path("delete-semester/", delete_semester, name="delete-semester"),   
-    
+    path("delete-semester/", delete_semester, name="delete-semester"),
     path("sessions/", CourseSessionsListView.as_view(), name="sessions"),
+    path(
+        "sessions/<int:id>/attendances/",
+        CourseSessionAttendancesListView.as_view(),
+        name="session-attendance",
+    ),
+    path("mark-student-absent/", mark_student_absent, name="mark-student-absent"),
+    path("mark-student-present/", mark_student_present, name="mark-student-present"),
     path("new-session/", new_session, name="new-session"),
     path("edit-session/", edit_session, name="edit-session"),
     path("delete-session/", delete_session, name="delete-session"),
-    
+    path("attendance/<int:id>/sheet/", attendance_sheet, name="attendance-sheet"),
     path("cohorts/", CohortsListView.as_view(), name="cohorts"),
     path("new-cohort/", new_cohort, name="new-cohort"),
     path("edit-cohort/", edit_cohort, name="edit-cohort"),

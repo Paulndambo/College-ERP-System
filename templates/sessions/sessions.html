@@ -49,7 +49,7 @@
                     
                     <td>
                         <div class="d-flex gap-1">
-                            <a href="#" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'session-attendance' session.id %}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
                             <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editSessionModal{{ session.id }}">
                                 <i class="fas fa-pencil"></i>
                               </a>
@@ -57,6 +57,9 @@
                             data-bs-toggle="modal" data-bs-target="#deleteSessionModal{{ session.id }}">
                                 <i class="fas fa-trash"></i>
                             </button>
+                            <a href="{% url 'attendance-sheet' session.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-print"></i>
+                            </a>
                         </div>
                     </td>
                     {% include "sessions/delete_session.html" %}

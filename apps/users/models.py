@@ -14,6 +14,8 @@ class User(AbstractUser, AbsoluteBaseModel):
     role = models.ForeignKey(UserRole, on_delete=models.CASCADE, null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     phone_number = models.CharField(max_length=255)
+    id_number = models.CharField(max_length=255, null=True)
+    passport_number = models.CharField(max_length=255, null=True)
     address = models.CharField(max_length=255, null=True)
     postal_code = models.CharField(max_length=255, null=True)
     city = models.CharField(max_length=255, null=True)

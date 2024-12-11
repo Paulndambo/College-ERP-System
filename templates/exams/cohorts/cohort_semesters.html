@@ -1,0 +1,153 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<div class="table-card">
+  <div class="row py-2 px-2">
+    <div class="col-md-8">
+        <h3>{{cohort.name}}: Semester Transcripts</h3>
+    </div>
+    <div class="col-md-4">
+        <input type="text" class="form-control" placeholder="Search..." 
+        id="searchInput" value="{{ search_query }}">
+    </div>
+
+</div>
+<!-- Table Toolbar --> 
+<!-- Loading Bar -->
+<div class="loader" id="loader"></div>
+      <div class="table-container px-2">
+        <table class="table data-table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Acc. Year</th>
+              <th scope="col">Start Date</th>
+              <th scope="col">End Date</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for semester in page_obj %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>{{semester.name}}</td>
+              <td>{{semester.academic_year}}</td>
+              <td>{{semester.start_date}}</td>
+              <td>{{semester.end_date}}</td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'cohort-transcripts' semester.id cohort.id %}" target="_blank" class="btn btn-primary btn-sm">
+                    View Transcript
+                  </a>
+                </div>
+              </td>
+            </tr>
+            
+            {% endfor %}
+
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div class="page-info">
+              Showing 
+              {{ page_obj.start_index }} 
+              to 
+              {{ page_obj.end_index }} 
+              of 
+              {{ paginator.count }} 
+              entries
+          </div>
+          {% if is_paginated %}
+          <nav>
+              <ul class="pagination mb-0">
+                  {% if page_obj.has_previous %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          Previous
+                      </a>
+                  </li>
+                  {% else %}
+                  <li class="page-item disabled">
+                      <span class="page-link">Previous</span>
+                  </li>
+                  {% endif %}
+  
+                  {% for num in paginator.page_range %}
+                  <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                      <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          {{ num }}
+                      </a>
+                  </li>
+                  {% endfor %}
+  
+                  {% if page_obj.has_next %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          Next
+                      </a>
+                  </li>
+                  {% else %}
+                  <li class="page-item disabled">
+                      <span class="page-link">Next</span>
+                  </li>
+                  {% endif %}
+              </ul>
+          </nav>
+          {% endif %}
+      </div>
+      </div>
+{% endblock content %}
+{% block additional_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const loader = document.getElementById('loader');
+        let searchTimeout;
+
+        // Search functionality
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            loader.classList.add('active');
+
+            searchTimeout = setTimeout(() => {
+                const searchQuery = this.value;
+                window.location.href = `?search=${encodeURIComponent(searchQuery)}`;
+            }, 500);
+        });
+
+        // Sort functionality
+        document.querySelectorAll('th[data-sort]').forEach(header => {
+            header.addEventListener('click', function() {
+                const sortField = this.dataset.sort;
+                const currentIcon = this.querySelector('i');
+                let direction = 'asc';
+
+                if (currentIcon.classList.contains('fa-sort-up')) {
+                    direction = 'desc';
+                }
+
+                window.location.href = `?sort=${sortField}&direction=${direction}`;
+            });
+        });
+
+        // Delete functionality
+    
+        // Utility function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock additional_scripts %}

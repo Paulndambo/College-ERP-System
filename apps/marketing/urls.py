@@ -11,6 +11,7 @@ from apps.marketing.views import (
     mark_task_as_complete,
     delete_lead_task,
     TasksListView,
+    create_application_with_lead,
 )
 
 from apps.marketing.campaigns.views import (
@@ -39,6 +40,11 @@ urlpatterns = [
     path("add-lead-stage/", add_lead_stage, name="add-lead-stage"),
     path("mark-task-as-complete/", mark_task_as_complete, name="mark-task-as-complete"),
     path("delete-lead-task/", delete_lead_task, name="delete-lead-task"),
+    path(
+        "start-application-with-lead/",
+        create_application_with_lead,
+        name="start-application-with-lead",
+    ),
     path("campaigns/", campaigns, name="campaigns"),
     path(
         "campaigns/<int:campaign_id>/details", campaign_details, name="campaign-details"

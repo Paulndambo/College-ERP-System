@@ -1,5 +1,5 @@
 <div class="modal fade" id="newEducationHistoryModal{{student.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5 text-center">Add Education History</h1>
@@ -32,41 +32,44 @@
                         {% endfor %}
                     </select>
                   </div>
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Grade or GPA</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="grade_or_gpa"
+                      name="grade_or_gpa"
+                      required
+                    />
+                  </div>
                 </div>
                
                 <div class="row mb-3">
-                    <div class="col">
-                        <label for="exampleInputPassword1" class="form-label fw-bold">Start Date</label>
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="start_date"
-                          name="start_date"
-                          required
-                        />
-                      </div>
-                      <div class="col">
-                        <label for="exampleInputPassword1" class="form-label fw-bold">End Date</label>
-                        <input
-                          type="date"
-                          class="form-control"
-                          id="end_date"
-                          name="end_date"
-                        />
-                      </div>
-                </div>
-  
-                <div class="row mb-3">
-                <div class="col">
                   <div class="col">
-                    <label for="exampleInputPassword1" class="form-label fw-bold">Have you graduated?</label>
-                    <select class="form-select" id="graduated" name="graduated">
-                        <option value="Graduated">Yes, I Have Graduated</option>
-                        <option value="No Graduated">Not Graduated Yet.</option>
-                    </select>
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Year</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="year"
+                      name="year"
+                      
+                    />
                   </div>
-                </div>
-                </div>
+            </div>
+
+            <div class="row mb-3">
+            <div class="col">
+              <div class="col">
+                <label for="exampleInputPassword1" class="form-label fw-bold">Major</label>
+                <input
+                      type="text"
+                      class="form-control"
+                      id="major"
+                      name="major"
+                    />
+              </div>
+            </div>
+            </div>
                 <div class="text-center mt-2">
                   <button type="submit" class="btn btn-primary">Submit</button>
                 </div>

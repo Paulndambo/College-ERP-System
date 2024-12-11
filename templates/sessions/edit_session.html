@@ -1,5 +1,5 @@
 <div class="modal fade" id="editSessionModal{{session.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5 text-center">Edit Session</h1>
@@ -21,33 +21,30 @@
                         {% endfor %}
                   </select>
                 </div>
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Course</label>
+                  <select class="form-select" id="course" name="course">
+                      <option value="{{session.course.id}}">{{session.course}}</option>
+                      {% for course in courses %}
+                          {% if course.id != session.course.id %}
+                              <option value="{{course.id}}">{{course}}</option>
+                          {% endif %}
+                      {% endfor %}
+                  </select>
                 </div>
-                <div class="row mb-3">
-                  <div class="col">
-                    <label for="exampleInputPassword1" class="form-label fw-bold">Course</label>
-                    <select class="form-select" id="course" name="course">
-                        <option value="{{session.course.id}}">{{session.course}}</option>
-                        {% for course in courses %}
-                            {% if course.id != session.course.id %}
-                                <option value="{{course.id}}">{{course}}</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
-                  </div>
                 </div>
+                
                 <div class="row mb-3">
                     <div class="col">
-                        <label for="exampleInputPassword1" class="form-label fw-bold">Start Time</label>
-                        <input type="datetime-local" class="form-control" id="start_time" name="start_time" value="{{session.start_time | date:'Y-m-d\TH:i'}}" />
-                      </div>
-                </div>
-                <div class="row mb-3">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Start Time</label>
+                      <input type="datetime-local" class="form-control" id="start_time" name="start_time" value="{{session.start_time | date:'Y-m-d\TH:i'}}" />
+                    </div>
                     <div class="col">
                       <label for="exampleInputPassword1" class="form-label fw-bold">Session Period(in Hours)</label>
                       <input type="number" class="form-control" id="period" name="period" min="0" max="24" value="{{session.period}}">
                     </div>
-                  </div>
-
+                </div>
+               
                   <div class="row mb-3">
                     <div class="col">
                       <label for="exampleInputPassword1" class="form-label fw-bold">Session Status</label>

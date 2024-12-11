@@ -33,10 +33,12 @@ class HostelRoom(AbsoluteBaseModel):
     room_number = models.CharField(max_length=255)
     room_capacity = models.IntegerField(default=1)
     students_assigned = models.IntegerField(default=0)
-    fully_booked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.room_number
+
+    def fully_booked(self):
+        return True if self.students_assigned >= self.room_capacity else False
 
     def status(self):
         return "Fully Booked" if self.fully_booked else "Available"

@@ -1,0 +1,73 @@
+{% extends "base1.html" %}
+
+{% block additional_css %}
+<style>
+  .card:hover {
+            transform: translateY(-3px);
+        }
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-decline {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-approve:hover {
+            background-color: #218838;
+        }
+        .btn-decline:hover {
+            background-color: #c82333;
+        }
+    
+</style>
+{% endblock additional_css %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title text-center">Name: {{leave.application.staff.user.name}}</h5>
+      <hr/>
+      <div class="row mb-3">
+        <div class="col">
+            <p class="card-text">
+                <strong>Start Date:</strong> {{leave.application.start_date}}<br>
+                <strong>End Date:</strong> {{leave.application.end_date}}<br>
+              </p>
+        </div>
+        <div class="col">
+            <p class="card-text">
+                <strong>Leave Type:</strong> {{leave.application.leave_type}}<br>
+                <strong>Status:</strong> {{leave.application.status}}<br>
+              </p>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <p><strong>Reason:</strong> {{leave.application.reason}}</p>
+      </div>
+
+      {% if leave.status == "Cancelled" %}
+      <div class="row b-3">
+        <p><strong>Reason Cancelled:</strong> {{leave.reason_cancelled}}</strong></p>
+      </div>
+      {% endif %}
+      {% if leave.status == "Completed" or leave.status == "Cancelled" %}
+      {% else %}
+      <div class="row mb-3 text-center">
+        <div class="col">
+            <button class="btn btn-approve me-3" data-bs-toggle="modal" data-bs-target="#completeLeaveModal{{ leave.id }}">
+                <i class="fas fa-check-circle"></i> Complete Leave
+            </button>
+        </div>
+        <div class="col">
+            <button class="btn btn-decline" data-bs-toggle="modal" data-bs-target="#cancelLeaveModal{{ leave.id }}">
+                <i class="fas fa-times-circle"></i> Cancel Leave
+            </button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% include "staff/leaves/cancel_leave.html" %}
+  {% include "staff/leaves/complete_leave.html" %}
+{% endblock content %}

@@ -1,0 +1,23 @@
+<div class="modal fade" id="deleteEducationHistoryModal{{record.id}}" tabindex="-1" aria-labelledby="newTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newTransactionModalLabel">Delete Education History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'delete-education-history' %}">
+                    {% csrf_token %}
+                    <input type="number" id="history_id" name="history_id" value="{{record.id}}" hidden readonly required />
+                    <div class="mb-3">
+                        <p>Are you sure you want to delete education history for <b>{{record.level}}</b>?</p>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Close</button>
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

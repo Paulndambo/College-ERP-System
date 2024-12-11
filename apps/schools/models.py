@@ -28,6 +28,7 @@ SEMESTER_TYPES = (
     ("Semester Three", "Semester Three"),
 )
 
+
 class School(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     email = models.EmailField()
@@ -74,27 +75,61 @@ class Semester(AbsoluteBaseModel):
     academic_year = models.CharField(max_length=255)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
-    status = models.CharField(max_length=255, choices=[("Active", "Active"), ("Closed", "Closed")], null=True)
+    status = models.CharField(
+        max_length=255, choices=[("Active", "Active"), ("Closed", "Closed")], null=True
+    )
 
     def __str__(self):
         return self.name
-    
+
+
 class ProgrammeCohort(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
     current_year = models.CharField(max_length=255, choices=COHORT_YEAR_CHOICES)
     current_semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
-    status = models.CharField(max_length=255, choices=[("Active", "Active"), ("Graduated", "Graduated")], default="Active")
-    
+    status = models.CharField(
+        max_length=255,
+        choices=[("Active", "Active"), ("Graduated", "Graduated")],
+        default="Active",
+    )
+
     def __str__(self):
         return self.name
 
+    def students_count(self):
+        return self.cohortstudents.all().count()
+
+
 class CourseSession(AbsoluteBaseModel):
-    cohort = models.ForeignKey(ProgrammeCohort, on_delete=models.CASCADE)
+    cohort = models.ForeignKey(
+        ProgrammeCohort, on_delete=models.CASCADE, related_name="cohortsessions"
+    )
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     start_time = models.DateTimeField(null=True)
     period = models.FloatField(default=2)
-    status = models.CharField(max_length=255, choices=[("Future", "Future"), ("Active", "Active"), ("Completed", "Completed"), ("Cancelled", "Cancelled"), ("Rescheduled", "Rescheduled")], default="Active")
-    
+    status = models.CharField(
+        max_length=255,
+        choices=[
+            ("Future", "Future"),
+            ("Active", "Active"),
+            ("Completed", "Completed"),
+            ("Cancelled", "Cancelled"),
+            ("Rescheduled", "Rescheduled"),
+        ],
+        default="Active",
+    )
+
     def __str__(self):
         return self.course.name
+
+    def attendance(self):
+        return self.sessionattendances.filter(status="Present").count()
+
+    def attendance_percent(self):
+        records = self.sessionattendances.all().count()
+        attendances = self.attendance()
+
+        value = (attendances / records) * 100
+
+        return f"{round(value, 2)} %"

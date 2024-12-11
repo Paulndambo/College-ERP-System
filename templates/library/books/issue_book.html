@@ -1,0 +1,46 @@
+<div class="modal fade" id="issueBookModal{{book.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Issue: {{book.title}}</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'issue-book' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                <input type="number" hidden id="book_id" name="book_id" value="{{book.id}}" readonly required />
+            
+                <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Member</label>
+                  <select class="form-select" id="member_id" name="member_id">
+                    <option></option>
+                    {% for member in members %}
+                        <option value="{{member.id}}">{{member.user.name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Book Number</label>
+                      <input type="text" class="form-control" id="book_number" name="book_number">
+                  </div>
+              </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Due Date</label>
+                        <input type="date" class="form-control" id="due_date" name="due_date">
+                    </div>
+                </div>
+            
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Issue A Book</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

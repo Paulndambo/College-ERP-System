@@ -1,0 +1,30 @@
+<div class="modal fade" id="newRoomOccupantModal{{room.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Add Room Occupant</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'add-occupant' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <input type="number" id="room_id" name="room_id" value="{{room.id}}" hidden readonly required />
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="exampleInputPassword1" class="form-label fw-bold">Student</label>
+                    <select class="form-select" id="student_id" name="student_id">
+                        <option></option>
+                        {% for student in students %}
+                            <option value="{{student.id}}">{{student.user.name}}: {{student.registration_number}}</option>
+                        {% endfor %}
+                    </select>
+                  </div>
+                </div>        
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Room Occupant</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

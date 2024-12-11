@@ -1,0 +1,56 @@
+<div class="modal fade" id="addDocumentModal{{application.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Upload Document</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'upload-application-document' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                <input type="number" id="application_id" name="application_id" value="{{application.id}}" hidden readonly required />
+                 <div class="row mb-3">
+                    <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Document Type</label>
+                        <select class="form-select" id="document_type" name="document_type">
+                            <option value=""></option>
+                            {% for document_type in document_types %}
+                                <option value="{{document_type}}">{{document_type}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                 </div>
+                <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Document Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="document_name"
+                        name="document_name"
+                        required
+                      />
+                    </div>
+                    </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="exampleInputPassword1" class="form-label fw-bold">Document File</label>
+                        <input
+                          type="file"
+                          class="form-control"
+                          id="document_file"
+                          name="document_file"
+                          required
+                        />
+                      </div>
+                </div>
+               
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Upload Document</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

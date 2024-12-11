@@ -1,0 +1,370 @@
+{% extends "base1.html" %}
+
+{% block additional_css %}
+<style>
+    .section-card {
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    .section-header {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px 10px 0 0;
+        border-bottom: 2px solid #e9ecef;
+    }
+    .table-responsive {
+        margin: 0;
+    }
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 8px 15px;
+    }
+    .document-icon {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock additional_css %}
+
+
+{% block content %}
+<div class="py-4">
+    <!-- Application Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Application #{{application.application_number}}</h2>
+            <span class="badge bg-warning status-badge">{{application.status}}</span>
+        </div>
+            {% if application.status == "Under Review" %}
+            <a href="{% url 'accept-application' application.id %}" class="btn btn-success"><i class="fas fa-user-graduate me-2"></i>Accept/Decline Student</a>
+            
+            {% elif application.status == "Draft" %}
+            <a href="{% url 'submit-application' application.id %}" class="btn btn-success"><i class="fas fa-user-graduate me-2"></i>Submit Application</a>
+            {% elif application.status == "Info Requested" %}
+            <button class="btn btn-info"><i class="fas fa-user-graduate me-2"></i>Request Information</button>
+            {% elif application.status == "Accepted" %}
+            <a data-bs-toggle="modal" data-bs-target="#enrollApplicantModal{{application.id}}" class="btn btn-success"><i class="fas fa-user-graduate me-2"></i>Enroll Applicant</a>
+            {% endif %}
+    </div>
+    {% include "admissions/enroll_applicant.html" %}
+
+    <!-- Personal Information -->
+    <div class="card section-card">
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <h4 class="m-0">
+              <i class="fas fa-user me-2"></i>Personal Information
+            </h4>
+            
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editApplicationPersonalInfoModal{{application.id}}">
+              Edit Information
+            </button>
+          </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Full Name</label>
+                    <p>{{application.first_name}} {{application.last_name}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Date of Birth</label>
+                    <p>{{application.date_of_birth}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Gender</label>
+                    <p>{{application.gender}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Nationality</label>
+                    <p>{{application.country}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">ID Number</label>
+                    <p>{{application.id_number}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Passport Np.</label>
+                    <p>{{application.passport_number}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Campus Interested.</label>
+                    <p>{{application.campus}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% include "admissions/info/edit_personal.html" %}
+    <!-- Contact Information -->
+    <div class="card section-card">
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <!-- Left Side: Personal Information -->
+            <h4 class="m-0">
+              <i class="fas fa-address-card me-2"></i>Contact & Address Information
+            </h4>
+            
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editApplicationAddressModal{{application.id}}">
+              Edit Information
+            </button>
+          </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Email</label>
+                    <p>{{application.email}}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Mobile</label>
+                    <p>{{application.phone_number}}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">Address</label>
+                    <p>{{application.address}}, {{application.postal_code}}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="fw-bold">City</label>
+                    <p>{{application.city}}, {{application.country}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% include "admissions/info/edit_contact.html" %}
+    <!-- Guardian Information -->
+    <div class="card section-card">
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <!-- Left Side: Personal Information -->
+            <h4 class="m-0">
+              <i class="fas fa-user me-2"></i>Guardian Information
+            </h4>
+            
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editApplicationGuardianModal{{application.id}}">
+              Edit Information
+            </button>
+          </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Guardian Name</label>
+                    <p>{{application.guardian_name}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Relationship</label>
+                    <p>{{application.guardian_relationship}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Contact</label>
+                    <p>{{application.guardian_phone_number}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Email</label>
+                    <p>{{application.guardian_email}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Address</label>
+                    <p>{{application.address}}, {{application.postal_code}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">City</label>
+                    <p>{{application.city}}, {{application.country}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% include "admissions/info/edit_guardian.html" %}
+    <!-- Previous Education -->
+    <div class="card section-card">
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <!-- Left Side: Personal Information -->
+            <h4 class="m-0">
+              <i class="fas fa-graduation-cap me-2"></i>Education History
+            </h4>
+            
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addEducationModal{{application.id}}">
+              Add New
+            </button>
+          </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th></th>
+                            <th>Level</th>
+                            <th>Institution</th>
+                            <th>Year</th>
+                            <th>Grade/CGPA</th>
+                            <th>Major</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in education_history %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{record.level}}</td>
+                            <td>{{record.institution}}</td>
+                            <td>{{record.year}}</td>
+                            <td>{{record.grade_or_gpa}}</td>
+                            <td>{{record.major}}</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" data-bs-target="#editEducationHistoryModal{{ record.id }}">
+                                        <i class="fas fa-pencil"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-danger" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteEducationHistoryModal{{ record.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            {% include "admissions/info/edit_education_history.html" %}
+                            {% include "admissions/info/delete_education_history.html" %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% include "admissions/info/add_education_history.html" %}
+    <!-- Documents -->
+    <div class="card section-card">
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <!-- Left Side: Personal Information -->
+            <h4 class="m-0">
+              <i class="fas fa-file-alt me-2"></i>Documents
+            </h4>
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addDocumentModal{{application.id}}">
+              Add New
+            </button>
+          </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th></th>
+                            <th>Document Type</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Added On</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in documents %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{document.document_type}}</td>
+                            <td>{{document.document_name}}</td>
+                            <td>
+                                {% if document.verified %}
+                                <span class="badge bg-success">Verified</span>
+                                {% else %}
+                                <span class="badge bg-danger">Not Verified</span>
+                                {% endif %}
+                            </td>
+                            <td>{{document.created_on}}</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a href="{{document.document_file.url}}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    {% if not document.verified %}
+                                    <a href="{% url 'verify-document' document.id %}" class="btn btn-sm btn-success">
+                                        Verify
+                                    </a>
+                                    {% endif %}
+                                    <a class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" data-bs-target="#editDocumentModal{{ document.id }}">
+                                        <i class="fas fa-pencil"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteApplicationModal{{ document.id }}">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                            {% include "admissions/document_container.html" %}
+                            {% include "admissions/info/delete_document.html" %}
+                            {% include "admissions/info/edit_document.html" %}
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% include "admissions/info/upload_documents.html" %}
+    <!-- Programme Interest -->
+    <div class="card section-card">
+        <div class="section-header d-flex justify-content-between align-items-center">
+            <!-- Left Side: Personal Information -->
+            <h4 class="m-0">
+              <i class="fas fa-book me-2"></i>Programme Interest
+            </h4>
+            <!-- Right Side: Button -->
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProgrammeInterestModal{{application.id}}">
+              Edit Information
+            </button>
+          </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">First Choice</label>
+                    <p>{{application.first_choice_programme}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Second Choice</label>
+                    <p>{{application.second_choice_programme}}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="fw-bold">Intake</label>
+                    <p>{{application.intake}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "admissions/info/edit_interest.html" %}
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <iframe id="pdfViewer" src="" style="width: 100%; height: 500px;" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block additional_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    function convertToStudent() {
+        if (confirm('Are you sure you want to convert this application to student?')) {
+            // Add your conversion logic here
+            alert('Application successfully converted to student!');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const viewButtons = document.querySelectorAll('.view-btn');
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const title = this.getAttribute('data-title');
+                const url = this.getAttribute('data-url');
+
+                document.getElementById('viewModalLabel').textContent = title;
+                document.getElementById('pdfViewer').src = url;
+            });
+        });
+    });
+</script>
+{% endblock additional_scripts %}

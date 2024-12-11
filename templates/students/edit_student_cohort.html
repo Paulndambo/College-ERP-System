@@ -1,0 +1,33 @@
+<div class="modal fade" id="editStudentCohortModal{{student.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Student Cohort</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-student-cohort' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                <input type="number" id="student_id" name="student_id" value="{{student.id}}" hidden readonly required />
+               
+                <div class="row mb-3">
+                  <div class="col">
+                    <label class="form-label fw-bold">Cohort Enrolled</label>
+                    <select class="form-select" id="cohort_id" name="cohort_id">
+                        <option value="{{student.cohort.id}}">{{student.cohort.name}}</option>
+                        {% for cohort in     cohorts %}
+                            {% if cohort != student.cohort %}
+                                <option value="{{cohort.id}}">{{cohort.name}}</option>
+                            {% endif %}
+                        {% endfor %}
+                      </select>
+                  </div>
+                </div>
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Edit Student Cohort</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

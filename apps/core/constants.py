@@ -29,6 +29,34 @@ LEAD_STAGES = [
     "Lost",
 ]
 
-SEMESTER_TYPES = ["Semester One", "Semester Two",  "Semester Three"]
-ACADEMIC_YEARS = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year", "Sixth Year", "Seventh Year"]
+SEMESTER_TYPES = ["Semester One", "Semester Two", "Semester Three"]
+ACADEMIC_YEARS = [
+    "First Year",
+    "Second Year",
+    "Third Year",
+    "Fourth Year",
+    "Fifth Year",
+    "Sixth Year",
+    "Seventh Year",
+]
 SESSION_STATUSES = ["Future", "Active", "Cancelled", "Completed", "Rescheduled"]
+
+MONTHS_LIST = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+]
+
+
+LEAVE_TYPES = ["Sick Leave",  "Vacation Leave", "Annual Leave",  "Maternity Leave",
+    "Paternity Leave", "Unpaid Leave",
+    "Casual Leave", "Privilege Leave", "Study Leave", "Emergency Leave", "Other"]

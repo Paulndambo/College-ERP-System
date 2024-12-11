@@ -6,6 +6,8 @@ from apps.students.models import Student
 from apps.users.models import User
 from apps.core.models import UserRole
 
+from apps.schools.models import ProgrammeCohort, Programme
+
 # Record the start time
 start_time = time.time()
 
@@ -31,17 +33,24 @@ class StudentsUploadMixin(object):
                 address=row["address"],
                 city=row["city"],
                 country=row["country"],
+                postal_code=row.get("postal_code"),
                 date_of_birth=row["date_of_birth"],
                 username=row["registration_number"],
                 role=UserRole.objects.get(name="Student"),
             )
 
+            cohort = ProgrammeCohort.objects.filter(name=row["cohort_name"]).first()
+
             student = Student.objects.create(
                 user=user,
-                registration_number=row["registration_number"],
-                guardian_name=row["guardian_name"],
-                guardian_phone_number=row["guardian_phone_number"],
+                registration_number=row.get("registration_number"),
+                guardian_name=row.get("guardian_name"),
+                guardian_phone_number=row.get("guardian_phone_number"),
+                guardian_relationship=row.get("guardian_relationship"),
+                guardian_email=row.get("guardian_email"),
                 status=row.get("status") if row.get("status") else "Active",
+                cohort=cohort,
+                programme=cohort.programme if cohort else None,
             )
 
         print("Looks like the mixin got a call!!!")
