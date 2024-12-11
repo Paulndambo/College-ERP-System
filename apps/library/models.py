@@ -121,7 +121,10 @@ class Fine(AbsoluteBaseModel):
         text_value = ""
         fine_payment = LibraryFinePayment.objects.filter(fine=self).first()
         if fine_payment:
-            text_value = "Requested"
+            if fine_payment.paid:
+                text_value = "Paid"
+            else:
+                text_value = "Requested"
         else:
             text_value = "Paid" if self.paid else "Unpaid"
 

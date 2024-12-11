@@ -46,7 +46,7 @@
                         </span>
                     </td>
                     <td>
-                        {% if fine.status_text == "Requested" %}
+                        {% if fine.status_text == "Requested" or fine.status_text == "Paid" %}
                         {% else %}
                         <div class="d-flex gap-1">
                             <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#requestFinePaymentModal{{ fine.id }}">
