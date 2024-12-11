@@ -1,0 +1,58 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<div class="table-card">
+    <row class="text-center p-2">
+        <h3 class="">Computer Science Semester Fee Structure</h3>
+        <p class="lead">Academic Year 2024-2025</p>
+    </row>
+
+    <div class="row">
+        
+            <div class="fee-table p-4">
+                <table class="table table-striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Last Updated</th>
+                            <th scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{item.description}}</td>
+                            <td>{{item.amount}}</td>
+                            <th>{{item.updated_on}}</th>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editFeeStructureItemModal{{ item.id }}">
+                                      <i class="fas fa-pencil"></i>
+                                    </a>
+                                    <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteFeeStructureItemModal{{ item.id }}">
+                                      <i class="fas fa-trash"></i>
+                                    </a>
+                                  </div>
+                              </td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="total-row">
+                            <td colspan="3" class="text-end">Total Semester Cost</td>
+                            <td class="text-end text-success"><b>{{structure.total_amount}}</b></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-muted mt-3">
+                    <small>*Fees subject to change. Financial aid options available.</small>
+                </p>
+            </div>
+       
+    </div>
+    
+</div>
+
+{% endblock content %}

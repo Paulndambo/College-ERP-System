@@ -14,7 +14,7 @@ from django.views.generic import ListView
 from django.http import JsonResponse
 
 from apps.finance.models import FeeStructure, FeeStructureItem
-from apps.schools.models import Programme
+from apps.schools.models import Programme, Semester
 from apps.core.models import StudyYear
 
 
@@ -48,6 +48,8 @@ class FeeStructureListView(ListView):
     paginate_by = 8
 
     programme = Programme.objects.none()
+    semesters = Semester.objects.all()
+    years_of_study = StudyYear.objects.all()
 
     def get_queryset(self):
         programme_id = self.kwargs.get("programme_id")
@@ -59,7 +61,8 @@ class FeeStructureListView(ListView):
         if search_query:
             queryset = queryset.filter(
                 Q(id__icontains=search_query)
-                | Q(member__user__first_name__icontains=search_query)
+                | Q(semester__name__icontains=search_query)
+                | Q(year_of_study__name__icontains=search_query)
             )
         # Get sort parameter
         return queryset.order_by("-created_on")
@@ -68,8 +71,20 @@ class FeeStructureListView(ListView):
         context = super().get_context_data(**kwargs)
         context["search_query"] = self.request.GET.get("search", "")
         context["programme"] = self.programme
+        context["semesters"] = self.semesters
+        context["years_of_study"] = self.years_of_study
         return context
 
+
+def fees_structire_details(request, id):
+    structure = FeeStructure.objects.get(id=id)
+    items = FeeStructureItem.objects.filter(fee_structure=structure)
+
+    context = {
+        "structure": structure,
+        "items": items
+    }
+    return render(request, "finance/fees_structures/fee_structure_details.html", context)
 
 def new_fees_structure(request):
     if request.method == "POST":
