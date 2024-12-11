@@ -42,3 +42,10 @@ class CheckIn(AbsoluteBaseModel):
 
     def __str__(self):
         return self.user.first_name
+
+
+class StudyYear(AbsoluteBaseModel):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name

@@ -18,6 +18,8 @@ from apps.users.models import User
 from apps.core.models import UserRole
 
 from apps.core.constants import LEAVE_TYPES
+
+
 # Create your views here.
 def staff(request):
     staff = Staff.objects.all().order_by("-created_on")
@@ -42,7 +44,7 @@ class StaffListView(ListView):
     template_name = "staff/staff.html"
     context_object_name = "staffs"
     paginate_by = 9
-    
+
     user_roles = UserRole.objects.exclude(name__in=["Student", "Admin"]).all()
     departments = Department.objects.all()
 
@@ -121,7 +123,7 @@ class LeaveApplicationListView(ListView):
     template_name = "staff/leaves/applications.html"
     context_object_name = "applications"
     paginate_by = 8
-    
+
     staffs = Staff.objects.all()
 
     def get_queryset(self):
@@ -194,10 +196,8 @@ def approve_leave_application(request):
         application = StaffLeaveApplication.objects.get(id=id)
         application.status = "Approved"
         application.save()
-        
-        StaffLeave.objects.create(
-            application=application
-        )
+
+        StaffLeave.objects.create(application=application)
         return redirect("leave-applications")
     return render(request, "staff/leaves/approve_application.html")
 
@@ -214,13 +214,11 @@ def decline_leave_application(request):
     return render(request, "staff/leaves/decline_application.html")
 
 
-
 class LeavesListView(ListView):
     model = StaffLeave
     template_name = "staff/leaves/leaves.html"
     context_object_name = "leaves"
     paginate_by = 8
-    
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -238,13 +236,13 @@ class LeavesListView(ListView):
         context = super().get_context_data(**kwargs)
         context["search_query"] = self.request.GET.get("search", "")
         return context
-    
+
 
 def leave_details(request, id):
     leave = StaffLeave.objects.get(id=id)
     context = {"leave": leave}
-    return render(request, "staff/leaves/leave_details.html", context)    
-    
+    return render(request, "staff/leaves/leave_details.html", context)
+
 
 def complete_leave(request):
     if request.method == "POST":

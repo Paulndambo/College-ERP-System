@@ -57,6 +57,16 @@ MONTHS_LIST = [
 ]
 
 
-LEAVE_TYPES = ["Sick Leave",  "Vacation Leave", "Annual Leave",  "Maternity Leave",
-    "Paternity Leave", "Unpaid Leave",
-    "Casual Leave", "Privilege Leave", "Study Leave", "Emergency Leave", "Other"]
+LEAVE_TYPES = [
+    "Sick Leave",
+    "Vacation Leave",
+    "Annual Leave",
+    "Maternity Leave",
+    "Paternity Leave",
+    "Unpaid Leave",
+    "Casual Leave",
+    "Privilege Leave",
+    "Study Leave",
+    "Emergency Leave",
+    "Other",
+]

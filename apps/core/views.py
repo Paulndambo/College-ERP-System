@@ -12,7 +12,7 @@ from django.db import transaction
 from apps.students.models import Student, MealCard
 from apps.staff.models import Staff
 from apps.hostels.models import Booking
-from apps.core.models import UserRole, Campus
+from apps.core.models import UserRole, Campus, StudyYear
 
 from django.views.generic import ListView
 from django.http import JsonResponse
@@ -97,3 +97,42 @@ def delete_campus(request):
         Campus.objects.get(id=campus_id).delete()
         return redirect("campuses")
     return render(request, "campuses/delete_campus.html")
+
+
+def study_years(request):
+    years = StudyYear.objects.all().order_by("-created_on")
+
+    context = {"years": years}
+
+    return render(request, "admissions/years/years.html", context)
+
+
+def new_study_year(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        StudyYear.objects.create(name=name)
+        return redirect("study-years")
+    return render(request, "admissions/years/new_year.html")
+
+
+def edit_study_year(request):
+    if request.method == "POST":
+        id = request.POST.get("year_id")
+        name = request.POST.get("name")
+
+        year = StudyYear.objects.get(id=id)
+        year.name = name
+        year.save()
+        return redirect("study-years")
+    return render(request, "admissions/years/edit_year.html")
+
+
+def delete_study_year(request):
+    if request.method == "POST":
+        id = request.POST.get("year_id")
+
+        year = StudyYear.objects.get(id=id)
+        year.delete()
+        return redirect("study-years")
+    return render(request, "admissions/years/delete_year.html")
