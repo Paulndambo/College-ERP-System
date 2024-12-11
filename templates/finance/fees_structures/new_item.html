@@ -1,0 +1,32 @@
+<div class="modal fade" id="newFeeStructureItemModal{{structure.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Fees Structure Item</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="#" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" hidden readonly value="{{structure.id}}" id="structure_id" name="structure_id" />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Description/Name</label>
+                  <input type="text" id="description" name="description" class="form-control" />
+                </div>
+                </div>
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Amount</label>
+                      <input type="number" id="amount" name="amount" class="form-control" />
+                    </div>
+                  </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Submit Item</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>
