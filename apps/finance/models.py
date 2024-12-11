@@ -91,11 +91,16 @@ class FeeStructure(AbsoluteBaseModel):
     )
 
     def __str__(self):
-        return self.programme.name
+        return f"{str(self.programme)} - {self.year_of_study.name}, {self.semester.name}"
+
+    def total_amount(self):
+        return sum(list(self.feeitems.all().values_list("amount", flat=True)))
 
 
 class FeeStructureItem(AbsoluteBaseModel):
-    fee_structure = models.ForeignKey(FeeStructure, on_delete=models.CASCADE)
+    fee_structure = models.ForeignKey(
+        FeeStructure, on_delete=models.CASCADE, related_name="feeitems"
+    )
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 

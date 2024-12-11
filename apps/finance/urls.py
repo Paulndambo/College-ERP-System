@@ -7,6 +7,7 @@ from apps.finance.fees_structures.views import (
     new_fees_structure,
     edit_fees_structure,
     delete_fees_structure,
+    fees_structire_details
 )
 
 
@@ -27,4 +28,8 @@ urlpatterns = [
         FeeStructureListView.as_view(),
         name="fees-structures",
     ),
+    path("fees-structure-details/<int:id>/", fees_structire_details, name="fees-structure-details"),
+    path("new-fees-structure/", new_fees_structure, name="new-fees-structure"),
+    path("edit-fees-structure/", edit_fees_structure, name="edit-fees-structure"),
+    path("delete-fees-structure/", delete_fees_structure, name="delete-fees-structure"),
 ]
