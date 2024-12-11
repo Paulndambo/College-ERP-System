@@ -1,0 +1,23 @@
+<div class="modal fade" id="deleteFeeStrucureModal{{fee_structure.id}}" tabindex="-1" aria-labelledby="newTransactionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="newTransactionModalLabel">Delete Fees Structure</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'delete-fees-structure' %}">
+                    {% csrf_token %}
+                    <input type="number" id="fee_structure_id" name="fee_structure_id" value="{{fee_structure.id}}" hidden readonly required />
+                    <div class="mb-3">
+                        <p>Are you sure you want to delete fee structure for <b>{{fee_structure.year_of_study}}</b> <b>{{fee_structure.semester}}</b>?</p>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Close</button>
+                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

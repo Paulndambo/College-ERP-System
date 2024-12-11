@@ -24,6 +24,7 @@ LEAVE_STATUS_CHOICES = (
     ("Cancelled", "Cancelled"),
 )
 
+
 class Department(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
 
@@ -54,7 +55,15 @@ class StaffLeaveApplication(AbsoluteBaseModel):
     end_date = models.DateField()
     leave_type = models.CharField(max_length=255, choices=LEAVE_TYPES)
     reason = models.CharField(max_length=255)
-    status = models.CharField(max_length=255, choices=(("Pending", "Pending"), ("Approved", "Approved"), ("Declined", "Declined")), default="Pending")
+    status = models.CharField(
+        max_length=255,
+        choices=(
+            ("Pending", "Pending"),
+            ("Approved", "Approved"),
+            ("Declined", "Declined"),
+        ),
+        default="Pending",
+    )
     reason_declined = models.CharField(max_length=500, null=True)
 
     def __str__(self):
@@ -63,7 +72,9 @@ class StaffLeaveApplication(AbsoluteBaseModel):
 
 class StaffLeave(AbsoluteBaseModel):
     application = models.OneToOneField(StaffLeaveApplication, on_delete=models.CASCADE)
-    status = models.CharField(max_length=255, choices=LEAVE_STATUS_CHOICES, default="Active")
+    status = models.CharField(
+        max_length=255, choices=LEAVE_STATUS_CHOICES, default="Active"
+    )
     reason_cancelled = models.CharField(max_length=500, null=True)
 
     def __str__(self):

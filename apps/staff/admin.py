@@ -27,9 +27,8 @@ class StaffLeaveApplicationAdmin(admin.ModelAdmin):
         "status",
         "created_on",
     )
- 
+
 
 @admin.register(StaffLeave)
 class StaffLeaveAdmin(admin.ModelAdmin):
     list_display = ("id", "application", "status", "created_on")
-   
