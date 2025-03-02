@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.utils.timezone import now
 from datetime import timedelta, date
@@ -104,16 +105,16 @@ class Fine(AbsoluteBaseModel):
 
         if overdue_days > 0:
             if self.borrow_transaction.status == "Returned":
-                self.calculated_fine = overdue_days * self.fine_per_day
+                self.calculated_fine = Decimal(overdue_days) * Decimal(self.fine_per_day)
             elif self.borrow_transaction.status == "Lost":
                 self.calculated_fine = (
-                    overdue_days * self.fine_per_day
-                ) + self.borrow_transaction.book.unit_price
+                    Decimal(overdue_days) * Decimal(self.fine_per_day)
+                ) + Decimal(self.borrow_transaction.book.unit_price)
         else:
             if self.borrow_transaction.status == "Lost":
-                self.calculated_fine = self.borrow_transaction.book.unit_price
+                self.calculated_fine = Decimal(self.borrow_transaction.book.unit_price)
             else:
-                self.calculated_fine = 0.00
+                self.calculated_fine = Decimal(0.00)
 
         super().save(*args, **kwargs)
 

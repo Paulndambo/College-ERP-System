@@ -1,11 +1,10 @@
+from django.db import models
 from apps.core.models import AbsoluteBaseModel
 
 
 class SchoolFee(AbsoluteBaseModel):
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
-    semester = models.ForeignKey(
-        "schools.Semester", on_delete=models.SET_NULL, null=True
-    )
+    semester = models.ForeignKey("schools.Semester", on_delete=models.SET_NULL, null=True)
     amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     amount_expected = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 

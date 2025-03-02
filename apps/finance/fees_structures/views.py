@@ -93,7 +93,9 @@ def new_fees_structure(request):
         year_id = request.POST.get("year_id")
 
         FeeStructure.objects.create(
-            programme_id=programme_id, semester_id=semester_id, year_of_study_id=year_id
+            programme_id=programme_id, 
+            semester_id=semester_id, 
+            year_of_study_id=year_id
         )
         return redirect("fees-structures", programme_id=programme_id)
     return render(request, "finance/fees_structures/new_fee_structure.html")
