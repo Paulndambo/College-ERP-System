@@ -1,65 +1,167 @@
 {% extends "base1.html" %}
 
+{% block extra_css %}
+<style>
+    .table-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .search-wrapper {
+        min-width: 300px;
+    }
+    
+    .search-wrapper input {
+        border-radius: 20px;
+        border: 1px solid #e0e0e0;
+        padding: 8px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .search-wrapper input:focus {
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        border-color: #0d6efd;
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .loader {
+        height: 3px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background-color: #ddd;
+        visibility: hidden;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .loader.active {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .loader:before {
+        display: block;
+        position: absolute;
+        content: "";
+        left: -200px;
+        width: 200px;
+        height: 3px;
+        background-color: #0d6efd;
+        animation: loading 2s linear infinite;
+    }
+
+    @keyframes loading {
+        from {left: -200px; width: 30%;}
+        50% {width: 30%;}
+        70% {width: 70%;}
+        80% {left: 50%;}
+        95% {left: 120%;}
+        to {left: 100%;}
+    }
+    
+    .pagination {
+        margin-bottom: 0;
+    }
+    
+    .page-link {
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .page-info {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="table-card">
-    <div class="row py-2 px-2">
-      <div class="col">
-          <h3>Books</h3>
-      </div>
-      <div class="col">
-          <input type="text" class="form-control" placeholder="Search..." 
-          id="searchInput" value="{{ search_query }}">
-      </div>
-      <div class="col">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newBookModal">Record Book</button>
-      <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#uploadBooksModal">Upload Books</button>
+    <div class="d-flex justify-content-between align-items-center py-3 px-3">
+        <h3 class="mb-0">Books</h3>
+        
+        <div class="d-flex gap-3 align-items-center">
+            <div class="search-wrapper position-relative">
+                <i class="fas fa-search position-absolute top-50 translate-middle-y ms-3 text-muted"></i>
+                <input type="text" class="form-control ps-5" placeholder="Search books..." 
+                    id="searchInput" value="{{ search_query }}">
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newBookModal">
+                    <i class="fas fa-plus me-2"></i>Record Book
+                </button>
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#uploadBooksModal">
+                    <i class="fas fa-upload me-2"></i>Upload Books
+                </button>
+            </div>
         </div>
-  </div>
-  <!-- Table Toolbar --> 
-  <!-- Loading Bar -->
-  <div class="loader" id="loader"></div>
+    </div>
+
+    <!-- Loading Bar -->
+    <div class="loader" id="loader"></div>
 {% include "library/books/upload_books.html" %}
 
-      <div class="table-container px-2">
-        <table class="table data-table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Title</th>
-              <th scope="col">Author</th>
-              <th scope="col">ISBN</th>
-              <th scope="col">Category</th>
-              <th scope="col">Available</th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for book in books %}
-            <tr>
-              <td>{{forloop.counter}}</td>
-              <td>{{book.title}}</td>
-              <td>{{book.author}}</td>
-              <td>{{book.isbn}}</td>
-              <td>{{book.category}}</td>
-              <td>{{book.copies_available}}</td>
-              <td>
-                <div class="d-flex gap-1">
-                  <a href="{% url 'book-details' book.id %}" class="btn btn-info btn-sm"><i class="fas fa-eye"></i></a>
-                  <a class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editBookModal{{ book.id }}">
-                    <i class="fas fa-pencil"></i>
-                  </a>
-                  <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteBookModal{{ book.id }}">
-                    <i class="fas fa-trash"></i>
-                  </a>
-                </div>
-              </td>
-              
-              {% include "library/books/edit_book.html" %}
-              {% include "library/books/delete_book.html" %}
-            </tr>
-            {% endfor %}
-
-          </tbody>
+      <div class="table-container px-3">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="text-muted">#</th>
+                    <th scope="col" class="text-muted">Title</th>
+                    <th scope="col" class="text-muted">Author</th>
+                    <th scope="col" class="text-muted">ISBN</th>
+                    <th scope="col" class="text-muted">Category</th>
+                    <th scope="col" class="text-muted">Available</th>
+                    <th scope="col" class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td><strong>{{book.title}}</strong></td>
+                    <td>{{book.author}}</td>
+                    <td><span class="text-muted">{{book.isbn}}</span></td>
+                    <td><span class="badge bg-light text-dark">{{book.category}}</span></td>
+                    <td>
+                        <span class="badge {% if book.copies_available > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                            {{book.copies_available}}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'book-details' book.id %}" class="btn btn-sm btn-outline-info" 
+                               title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" 
+                                    data-bs-target="#editBookModal{{ book.id }}" title="Edit Book">
+                                <i class="fas fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" 
+                                    data-bs-target="#deleteBookModal{{ book.id }}" title="Delete Book">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                    
+                    {% include "library/books/edit_book.html" %}
+                    {% include "library/books/delete_book.html" %}
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
         <div class="table-footer">
           <div class="page-info">

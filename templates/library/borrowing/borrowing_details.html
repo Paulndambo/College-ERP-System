@@ -1,21 +1,31 @@
 <div class="modal fade" id="borrowingDetailsModal{{borrowing.id}}" tabindex="-1" aria-labelledby="newTransactionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="newTransactionModalLabel">Book Issue Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p><b>Member: </b> {{borrowing.member.user.name}}</p>
-                <p><b>Book Title: </b> {{borrowing.book.title}}</p>
-                <p><b>Book Number: </b> {{borrowing.book_number}}</p>
-                <p><b>Issue Date: </b> {{borrowing.borrow_date}}</p>
-                <p><b>Due Date: </b> <b>{{borrowing.due_date}}</b></p>
-                <p><b>Return Date: </b> <b>{{borrowing.return_date}}</b></p>
-                <p><b>Status: </b> {{borrowing.status}}</p>
-                <p><b>Days OverDue: </b> <b>{{borrowing.days_overdue}}</b></p>
+                <div class="row">
+                    <div class="col">
+                        <p><b>Member: </b> {{borrowing.member.user.name}}</p>
+                        <p><b>Book Title: </b> {{borrowing.book.title}}</p>
+                        <p><b>Book Number: </b> {{borrowing.book_number}}</p>
+                        <p><b>Issue Date: </b> {{borrowing.borrow_date}}</p>
+                        
+                    </div>
+                    <div class="col">
+                        <p><b>Due Date: </b> <b>{{borrowing.due_date}}</b></p>
+                        <p><b>Return Date: </b> <b>{{borrowing.return_date}}</b></p>
+                        <p><b>Status: </b> {{borrowing.status}}</p>
+                        <p><b>Days OverDue: </b> <b>{{borrowing.days_overdue}}</b></p>
+                    </div>
+                </div>
+               
                 <hr/>
-                <p><b>Issued By: </b> {{borrowing.issued_by.name}}</p>
+                <div class="text-center">
+                    <p><b>Issued By: </b> {{borrowing.issued_by.name}}</p>
+                </div>
             </div>
         </div>
     </div>
