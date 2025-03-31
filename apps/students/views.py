@@ -26,31 +26,6 @@ GRADUATION_STATUSES = ["Graduated", "Not Graduated"]
 GUARDIAN_RELATIONSHIPS = ["Parent", "Grand Parent", "Sibling", "Aunt/Uncle", "Other"]
 
 
-def students(request):
-    students = Student.objects.all().order_by("-created_on")
-
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        if search_text:
-            students = Student.objects.filter(
-                Q(user__first_name__icontains=search_text)
-                | Q(user__last_name__icontains=search_text)
-                | Q(registration_number__icontains=search_text)
-            )
-
-    paginator = Paginator(students, 8)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    programmes = Programme.objects.all().order_by("-created_on")
-
-    context = {
-        "page_obj": page_obj,
-        "programmes": programmes,
-        "relationship_choices": GUARDIAN_RELATIONSHIPS,
-    }
-    return render(request, "students/students.html", context)
-
 
 programmes = Programme.objects.all().order_by("-created_on")
 
@@ -59,7 +34,7 @@ class StudentListView(ListView):
     model = Student
     template_name = "students/students.html"
     context_object_name = "students"
-    paginate_by = 9
+    paginate_by = 10
 
     def get_queryset(self):
         queryset = super().get_queryset()

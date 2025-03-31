@@ -1,0 +1,227 @@
+{% extends "finance/base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h2>Finance Dashboard</h2>
+        <div class="action-buttons">
+            <button class="btn btn-primary"><i class="fas fa-file-export"></i> Export</button>
+            <button class="btn btn-secondary"><i class="fas fa-sync"></i> Refresh</button>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-card-icon revenue-icon">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3>Total Revenue</h3>
+                <p class="stat-value">$1,285,000</p>
+                <p class="stat-change positive"><i class="fas fa-arrow-up"></i> 12.5% since last month</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-icon expenses-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3>Total Expenses</h3>
+                <p class="stat-value">$876,400</p>
+                <p class="stat-change negative"><i class="fas fa-arrow-up"></i> 5.3% since last month</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-icon pending-icon">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3>Pending Fees</h3>
+                <p class="stat-value">$342,800</p>
+                <p class="stat-change negative"><i class="fas fa-arrow-up"></i> 8.7% since last month</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-card-icon balance-icon">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stat-card-info">
+                <h3>Current Balance</h3>
+                <p class="stat-value">$408,600</p>
+                <p class="stat-change positive"><i class="fas fa-arrow-up"></i> 3.2% since last month</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="charts-container">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Revenue vs Expenses</h3>
+                <div class="chart-actions">
+                    <select id="revenue-time-filter" class="chart-filter">
+                        <option value="yearly">Yearly</option>
+                        <option value="monthly" selected>Monthly</option>
+                        <option value="weekly">Weekly</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-body">
+                <div id="revenue-expenses-chart" class="chart-area"></div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Fee Collection Rate</h3>
+                <div class="chart-actions">
+                    <select id="collection-department-filter" class="chart-filter">
+                        <option value="all" selected>All Departments</option>
+                        <option value="engineering">Engineering</option>
+                        <option value="arts">Arts & Sciences</option>
+                        <option value="business">Business</option>
+                        <option value="medicine">Medicine</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-body">
+                <div id="fee-collection-chart" class="chart-area"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Transactions -->
+    <div class="transactions-section">
+        <div class="section-header">
+            <h3>Recent Transactions</h3>
+            <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#TRX-8792</td>
+                        <td>Mar 28, 2025</td>
+                        <td>Fee payment - John Anderson</td>
+                        <td>Fee Collection</td>
+                        <td class="amount positive">$2,500</td>
+                        <td><span class="status-pill completed">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td>#TRX-8791</td>
+                        <td>Mar 27, 2025</td>
+                        <td>Faculty salary payment</td>
+                        <td>Salary</td>
+                        <td class="amount negative">$12,850</td>
+                        <td><span class="status-pill completed">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td>#TRX-8790</td>
+                        <td>Mar 26, 2025</td>
+                        <td>Library equipment purchase</td>
+                        <td>Equipment</td>
+                        <td class="amount negative">$3,200</td>
+                        <td><span class="status-pill pending">Pending</span></td>
+                    </tr>
+                    <tr>
+                        <td>#TRX-8789</td>
+                        <td>Mar 26, 2025</td>
+                        <td>Scholarship disbursal - Emma Lee</td>
+                        <td>Scholarship</td>
+                        <td class="amount negative">$1,800</td>
+                        <td><span class="status-pill completed">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td>#TRX-8788</td>
+                        <td>Mar 25, 2025</td>
+                        <td>Fee payment - Sarah Williams</td>
+                        <td>Fee Collection</td>
+                        <td class="amount positive">$2,500</td>
+                        <td><span class="status-pill failed">Failed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Pending Approvals -->
+    <div class="approvals-section">
+        <div class="section-header">
+            <h3>Pending Approvals</h3>
+            <a href="#" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="approvals-container">
+            <div class="approval-card">
+                <div class="approval-header">
+                    <span class="approval-type expense">Expense</span>
+                    <span class="approval-date">Submitted: Mar 29, 2025</span>
+                </div>
+                <div class="approval-body">
+                    <h4>Computer Lab Equipment</h4>
+                    <p>Purchase of 20 new computers for Engineering lab.</p>
+                    <div class="approval-details">
+                        <span class="approval-amount">$32,000</span>
+                        <span class="approval-dept">Engineering Department</span>
+                    </div>
+                </div>
+                <div class="approval-actions">
+                    <button class="btn btn-approve">Approve</button>
+                    <button class="btn btn-reject">Reject</button>
+                </div>
+            </div>
+            
+            <div class="approval-card">
+                <div class="approval-header">
+                    <span class="approval-type refund">Refund</span>
+                    <span class="approval-date">Submitted: Mar 28, 2025</span>
+                </div>
+                <div class="approval-body">
+                    <h4>Student Fee Refund</h4>
+                    <p>Refund request for Michael Carter (ID: STU-2345).</p>
+                    <div class="approval-details">
+                        <span class="approval-amount">$1,200</span>
+                        <span class="approval-dept">Business School</span>
+                    </div>
+                </div>
+                <div class="approval-actions">
+                    <button class="btn btn-approve">Approve</button>
+                    <button class="btn btn-reject">Reject</button>
+                </div>
+            </div>
+            
+            <div class="approval-card">
+                <div class="approval-header">
+                    <span class="approval-type budget">Budget</span>
+                    <span class="approval-date">Submitted: Mar 27, 2025</span>
+                </div>
+                <div class="approval-body">
+                    <h4>Q2 Marketing Budget</h4>
+                    <p>Additional budget request for Q2 marketing activities.</p>
+                    <div class="approval-details">
+                        <span class="approval-amount">$15,000</span>
+                        <span class="approval-dept">Marketing Department</span>
+                    </div>
+                </div>
+                <div class="approval-actions">
+                    <button class="btn btn-approve">Approve</button>
+                    <button class="btn btn-reject">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

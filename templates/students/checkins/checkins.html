@@ -43,10 +43,7 @@
                     <td>{{ checkin.checked_out }}</td>
                     <td>
                         <div class="d-flex gap-1">
-                            <button class="btn btn-sm btn-outline-danger action-btn delete-btn" 
-                            data-bs-toggle="modal" data-bs-target="#deleteCheckInModal{{ checkin.id }}">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                          
                             {% if checkin.checked_out == "No" %}
                             <a href="{% url 'checkout-student' checkin.id %}" class="btn btn-sm btn-warning">
                                 <i class="fas fa-arrow-right"></i>

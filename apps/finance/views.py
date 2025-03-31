@@ -13,9 +13,37 @@ from django.db import transaction
 from django.views.generic import ListView
 from django.http import JsonResponse
 
-from apps.finance.models import LibraryFinePayment, Payment, FeePayment
+from apps.finance.models import LibraryFinePayment, Payment, FeePayment, Budget
 
 date_today = datetime.now().date()
+
+
+def finance_home(request):
+    return render(request, "finance/dashboard.html")
+
+
+class BudgetsListView(ListView):
+    model = Budget
+    template_name = "finance/budgets/budgets.html"
+    context_object_name = "budgets"
+    paginate_by = 10
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get("search", "")
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(id__icontains=search_query)
+                | Q(title__icontains=search_query)
+            )
+        # Get sort parameter
+        return queryset.order_by("-created_on")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["search_query"] = self.request.GET.get("search", "")
+        return context
 
 
 class LibraryFinePaymentListView(ListView):

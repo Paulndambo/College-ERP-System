@@ -22,6 +22,45 @@ PAYMENT_METHODS = (
     ("Cheque", "Cheque"),
 )
 
+BUDGET_STATUSES = (
+    ("Under Review", "Under Review"),
+    ("Approved", "Approved"),
+    ("Declined", "Declined"),
+)
+
+class Budget(AbsoluteBaseModel):
+    title = models.CharField(max_length=255)
+    school = models.ForeignKey("schools.School", on_delete=models.SET_NULL, null=True)
+    department = models.ForeignKey("schools.Department", on_delete=models.SET_NULL, null=True)
+    amount_requested = models.DecimalField(max_digits=100, decimal_places=2, default=0)
+    amount_approved = models.DecimalField(max_digits=100, decimal_places=2, default=0)
+    status = models.CharField(max_length=255, choices=BUDGET_STATUSES, default="Under Review")
+    submitted_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="budgetsubmitters")
+    approved_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="budgetapprovers")
+    description = models.TextField(null=True)
+
+    def __str__(self):
+        return self.title
+    
+
+class BudgetItem(AbsoluteBaseModel):
+    title = models.CharField(max_length=255)
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE)
+    description = models.TextField(null=True)
+    amount = models.DecimalField(max_digits=100, decimal_places=2)
+
+    def __str__(self):
+        return self.title
+    
+
+class BudgetDocument(AbsoluteBaseModel):
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE)
+    document_name = models.CharField(max_length=255)
+    document_file = models.FileField(upload_to="budget_documents/")
+
+    def __str__(self):
+        return self.document_name
+
 
 class Payment(AbsoluteBaseModel):
     payer = models.ForeignKey("users.User", on_delete=models.SET_NULL, related_name="payers", null=True)

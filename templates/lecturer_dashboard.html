@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lecturer Dashboard | College ERP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --secondary: #64748b;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #e2e8f0;
+      --sidebar-width: 250px;
+      --sidebar-width-collapsed: 70px;
+      --transition-speed: 0.3s;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f1f5f9;
+      color: var(--dark);
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: var(--sidebar-width);
+      background-color: var(--dark);
+      color: white;
+      transition: width var(--transition-speed);
+      z-index: 100;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      overflow-x: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-width-collapsed);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      height: 70px;
+      background-color: var(--primary-dark);
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: opacity var(--transition-speed);
+    }
+
+    .sidebar.collapsed .logo {
+      opacity: 0;
+      width: 0;
+    }
+
+    .logo-icon {
+      font-size: 24px;
+      min-width: 30px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .menu-item.active {
+      background-color: var(--primary);
+    }
+
+    .menu-icon {
+      font-size: 18px;
+      min-width: 30px;
+    }
+
+    .menu-text {
+      margin-left: 10px;
+      transition: opacity var(--transition-speed);
+    }
+
+    .sidebar.collapsed .menu-text {
+      opacity: 0;
+      width: 0;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: rgba(255, 255, 255, 0.1);
+      margin: 10px 0;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 15px 20px;
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar-footer .menu-text {
+      font-size: 14px;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      transition: margin-left var(--transition-speed);
+      padding: 20px;
+    }
+
+    .main-content.expanded {
+      margin-left: var(--sidebar-width-collapsed);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .toggle-sidebar {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 20px;
+      color: var(--dark);
+    }
+
+    .search-bar {
+      flex-grow: 1;
+      margin: 0 20px;
+      position: relative;
+    }
+
+    .search-bar input {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .search-bar i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--secondary);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-profile img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-info {
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .user-info {
+        display: block;
+      }
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: var(--secondary);
+    }
+
+    .notification-bell {
+      position: relative;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+
+    .notification-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: var(--danger);
+      color: white;
+      font-size: 10px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .bg-primary {
+      background-color: var(--primary);
+    }
+
+    .bg-success {
+      background-color: var(--success);
+    }
+
+    .bg-warning {
+      background-color: var(--warning);
+    }
+
+    .bg-danger {
+      background-color: var(--danger);
+    }
+
+    .bg-secondary {
+      background-color: var(--secondary);
+    }
+
+    .card-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .card-label {
+      font-size: 13px;
+      color: var(--secondary);
+    }
+
+    /* Table Styles */
+    .table-card {
+      grid-column: 1 / -1;
+    }
+
+    .responsive-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .responsive-table th,
+    .responsive-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .responsive-table th {
+      background-color: #f8fafc;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .responsive-table tbody tr:hover {
+      background-color: #f1f5f9;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-completed {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status-pending {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .status-overdue {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .action-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.2s;
+    }
+
+    .view-btn {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .view-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    /* Chart Container */
+    .chart-container {
+      grid-column: 1 / -1;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .chart-placeholder {
+      width: 100%;
+      height: 100%;
+      background-color: #f5f7fa;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--secondary);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 767px) {
+      .sidebar {
+        width: 0;
+      }
+
+      .sidebar.collapsed {
+        width: var(--sidebar-width);
+      }
+
+      .sidebar.collapsed .menu-text,
+      .sidebar.collapsed .logo {
+        opacity: 1;
+        width: auto;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .main-content.expanded {
+        margin-left: 0;
+      }
+
+      .responsive-table thead {
+        display: none;
+      }
+
+      .responsive-table tbody tr {
+        display: block;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .responsive-table tbody td {
+        display: block;
+        text-align: right;
+        padding: 10px;
+        position: relative;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .responsive-table tbody td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: 600;
+        color: var(--secondary);
+      }
+
+      .responsive-table tbody td:last-child {
+        border-bottom: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar">
+    <div class="logo-container">
+      <div class="logo-icon"><i class="fas fa-university"></i></div>
+      <div class="logo">EduPortal</div>
+    </div>
+    <div class="menu-item active">
+      <div class="menu-icon"><i class="fas fa-th-large"></i></div>
+      <div class="menu-text">Dashboard</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-book"></i></div>
+      <div class="menu-text">Courses</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-users"></i></div>
+      <div class="menu-text">Students</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-clipboard-list"></i></div>
+      <div class="menu-text">Attendance</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-tasks"></i></div>
+      <div class="menu-text">Assignments</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-chart-bar"></i></div>
+      <div class="menu-text">Grades</div>
+    </div>
+    <div class="divider"></div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-calendar-alt"></i></div>
+      <div class="menu-text">Timetable</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-comment-alt"></i></div>
+      <div class="menu-text">Messages</div>
+    </div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-file-alt"></i></div>
+      <div class="menu-text">Documents</div>
+    </div>
+    <div class="divider"></div>
+    <div class="menu-item">
+      <div class="menu-icon"><i class="fas fa-cog"></i></div>
+      <div class="menu-text">Settings</div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="menu-item">
+        <div class="menu-icon"><i class="fas fa-sign-out-alt"></i></div>
+        <div class="menu-text">Logout</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="main-content" class="main-content">
+    <div class="topbar">
+      <button id="toggle-sidebar" class="toggle-sidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="notification-bell">
+        <i class="fas fa-bell"></i>
+        <span class="notification-count">3</span>
+      </div>
+      <div class="user-profile">
+        <img src="/api/placeholder/40/40" alt="Profile Picture">
+        <div class="user-info">
+          <div class="user-name">Dr. Jane Smith</div>
+          <div class="user-role">Senior Lecturer</div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Dashboard</h2>
+    <p style="margin-bottom: 20px; color: var(--secondary);">Welcome back, Dr. Smith! Here's what's happening today.</p>
+
+    <div class="dashboard-grid">
+      <!-- Status Cards -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Courses</div>
+          <div class="card-icon bg-primary"><i class="fas fa-book"></i></div>
+        </div>
+        <div class="card-value">5</div>
+        <div class="card-label">Active courses this semester</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Students</div>
+          <div class="card-icon bg-success"><i class="fas fa-users"></i></div>
+        </div>
+        <div class="card-value">247</div>
+        <div class="card-label">Total enrolled students</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Assignments</div>
+          <div class="card-icon bg-warning"><i class="fas fa-tasks"></i></div>
+        </div>
+        <div class="card-value">12</div>
+        <div class="card-label">Pending reviews</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Today's Classes</div>
+          <div class="card-icon bg-danger"><i class="fas fa-calendar-day"></i></div>
+        </div>
+        <div class="card-value">3</div>
+        <div class="card-label">Next class: Data Structures at 11:30 AM</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Announcements</div>
+          <div class="card-icon bg-secondary"><i class="fas fa-bullhorn"></i></div>
+        </div>
+        <div class="card-value">2</div>
+        <div class="card-label">Unread announcements</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Office Hours</div>
+          <div class="card-icon bg-primary"><i class="fas fa-clock"></i></div>
+        </div>
+        <div class="card-value">4</div>
+        <div class="card-label">Student appointments this week</div>
+      </div>
+
+      <!-- Chart -->
+      <div class="card chart-container">
+        <div class="card-header" style="width: 100%;">
+          <div class="card-title">Student Performance Overview</div>
+        </div>
+        <div class="chart-placeholder">
+          <p>Performance chart will be displayed here</p>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card table-card">
+        <div class="card-header">
+          <div class="card-title">Recent Assignments</div>
+        </div>
+        <table class="responsive-table">
+          <thead>
+            <tr>
+              <th>Assignment Name</th>
+              <th>Course</th>
+              <th>Due Date</th>
+              <th>Submissions</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Assignment Name">Final Project Proposal</td>
+              <td data-label="Course">Software Engineering</td>
+              <td data-label="Due Date">Mar 28, 2025</td>
+              <td data-label="Submissions">34/42</td>
+              <td data-label="Status"><span class="status-badge status-pending">Pending</span></td>
+              <td data-label="Action"><button class="action-btn view-btn">View</button></td>
+            </tr>
+            <tr>
+              <td data-label="Assignment Name">Database Design Exercise</td>
+              <td data-label="Course">Database Systems</td>
+              <td data-label="Due Date">Mar 23, 2025</td>
+              <td data-label="Submissions">51/53</td>
+              <td data-label="Status"><span class="status-badge status-completed">Completed</span></td>
+              <td data-label="Action"><button class="action-btn view-btn">View</button></td>
+            </tr>
+            <tr>
+              <td data-label="Assignment Name">Algorithm Analysis</td>
+              <td data-label="Course">Data Structures</td>
+              <td data-label="Due Date">Mar 15, 2025</td>
+              <td data-label="Submissions">37/45</td>
+              <td data-label="Status"><span class="status-badge status-overdue">Overdue</span></td>
+              <td data-label="Action"><button class="action-btn view-btn">View</button></td>
+            </tr>
+            <tr>
+              <td data-label="Assignment Name">Research Paper Review</td>
+              <td data-label="Course">Advanced Research Methods</td>
+              <td data-label="Due Date">Mar 30, 2025</td>
+              <td data-label="Submissions">18/28</td>
+              <td data-label="Status"><span class="status-badge status-pending">Pending</span></td>
+              <td data-label="Action"><button class="action-btn view-btn">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+    const toggleButton = document.getElementById('toggle-sidebar');
+
+    toggleButton.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('expanded');
+    });
+
+    // Handle responsive behavior
+    function handleResponsive() {
+      if (window.innerWidth <= 767) {
+        sidebar.classList.add('collapsed');
+        mainContent.classList.remove('expanded');
+        
+        // For mobile, clicking sidebar items should close the sidebar
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+          item.addEventListener('click', () => {
+            if (window.innerWidth <= 767) {
+              sidebar.classList.add('collapsed');
+            }
+          });
+        });
+      }
+    }
+
+    // Initial call
+    handleResponsive();
+
+    // Listen for window resize events
+    window.addEventListener('resize', handleResponsive);
+
+    // Simulate active menu item
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+      item.addEventListener('click', () => {
+        // Remove active class from all menu items
+        menuItems.forEach(i => i.classList.remove('active'));
+        // Add active class to the clicked item
+        item.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

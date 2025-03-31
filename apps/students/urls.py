@@ -1,6 +1,5 @@
 from django.urls import path
 from apps.students.views import (
-    students,
     edit_student,
     student_details,
     new_student,

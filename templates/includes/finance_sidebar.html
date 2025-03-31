@@ -1,0 +1,41 @@
+<nav id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+        <h3>College ERP</h3>
+        
+        <button id="sidebar-close" class="sidebar-toggle">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+    </div>
+    
+    <ul class="sidebar-menu">
+        <li class="menu-item active">
+            <a href="{% url 'finance-home' %}"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+        </li>
+        <li class="menu-item">
+            <a href="#"><i class="fas fa-money-bill-wave"></i><span>Transactions</span></a>
+        </li>
+        <li class="menu-item">
+            <a href="{% url 'budgets' %}"><i class="fas fa-university"></i><span>Budgets</span></a>
+        </li>
+        <li class="menu-item">
+            <a href="#"><i class="fas fa-dollar-sign"></i><span>Fee Collection</span></a>
+        </li>
+        <li class="menu-item">
+            <a href="#"><i class="fas fa-file-invoice-dollar"></i><span>Expenses</span></a>
+        </li>
+        <li class="menu-item">
+            <a href="#"><i class="fas fa-hand-holding-usd"></i><span>Scholarships</span></a>
+        </li>
+        <li class="menu-item">
+            <a href="#"><i class="fas fa-chart-pie"></i><span>Reports</span></a>
+        </li>
+        <li class="menu-item">
+            <a href="#"><i class="fas fa-cog"></i><span>Settings</span></a>
+        </li>
+    </ul>
+    
+    <div class="sidebar-footer">
+        <a href="#"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+        <a href="#"><i class="fas fa-question-circle"></i><span>Help</span></a>
+    </div>
+</nav>
