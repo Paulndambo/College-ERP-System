@@ -1,69 +1,32 @@
 from django.urls import path
-from apps.students.views import (
-    edit_student,
-    student_details,
-    new_student,
-    delete_student,
-    edit_student_cohort,
-    create_education_history,
-    delete_education_history,
-    edit_education_history,
-    StudentListView,
-)
 
-from apps.students.uploads.views import upload_students
-from apps.students.attendance.views import (
-    AttendanceDashboardListView,
-    CohortAttendanceDetailView,
-)
-from apps.students.checkins.views import (
-    StudentCheckInListView,
-    checkin_student,
-    checkout_student,
-    delete_checkin_record,
-)
+from .views import StudentDocumentCreateView, StudentDocumentHistoryListView, StudentDocumentUpdateView, StudentEducationHistoryCreateView, StudentEducationHistoryListView, StudentEducationHistoryUpdateView, StudentMealCardCreateView, StudentMealCardListView, StudentMealCardUpdateView, StudentProgrameCreateView, StudentProgrameListView, StudentProgrammeUpdateView, StudentRegistrationView, StudentUpdateView
 
-from apps.students.mealcards.views import MealCardsListView, new_meal_card
+
 
 urlpatterns = [
-    path("", StudentListView.as_view(), name="students"),
-    path("<int:student_id>/details/", student_details, name="student-details"),
-    path("new-student/", new_student, name="new-student"),
-    path("edit-student/", edit_student, name="edit-student"),
-    path("edit-student-cohort/", edit_student_cohort, name="edit-student-cohort"),
-    path("delete-student/", delete_student, name="delete-student"),
-    path("upload-students/", upload_students, name="upload-students"),
-    path(
-        "create-education-history/",
-        create_education_history,
-        name="create-education-history",
-    ),
-    path(
-        "edit-student-education-history/",
-        edit_education_history,
-        name="edit-student-education-history",
-    ),
-    path(
-        "delete-education-history/",
-        delete_education_history,
-        name="delete-education-history",
-    ),
-    path(
-        "attendance-dashboard/",
-        AttendanceDashboardListView.as_view(),
-        name="attendance-dashboard",
-    ),
-    path(
-        "attendance-dashboard/<int:cohort_id>/",
-        CohortAttendanceDetailView.as_view(),
-        name="cohort-attendance-dashboard",
-    ),
-    path(
-        "student-checkins/", StudentCheckInListView.as_view(), name="student-checkins"
-    ),
-    path("checkin-student/", checkin_student, name="checkin-student"),
-    path("checkout-student/<int:id>/", checkout_student, name="checkout-student"),
-    path("delete-checkin-record/", delete_checkin_record, name="delete-checkin-record"),
-    path("meal-cards/", MealCardsListView.as_view(), name="meal-cards"),
-    path("new-mealcard/", new_meal_card, name="new-mealcard"),
+    path("create-student/", StudentRegistrationView.as_view(),  name="create-student" ),
+    path("update-student/",StudentUpdateView.as_view(),name="update-student" ),
+    
+    
+    #Eduaction history
+    path('education-history/create/', StudentEducationHistoryCreateView.as_view(), name='student-education-create'),
+    path('education-history/', StudentEducationHistoryListView.as_view(), name='student-education-history'),
+    path('education/update/<int:pk>/', StudentEducationHistoryUpdateView.as_view(), name='student-education-update'),
+     
+    #Documents
+    path('documents/create/', StudentDocumentCreateView.as_view(), name='student-document-create'),
+    path('documents/', StudentDocumentHistoryListView.as_view(), name='student-documents'),
+    path('documents/update/<int:pk>/', StudentDocumentUpdateView.as_view(), name='student-document-update'),
+    
+    #Programmes
+    path('programme/create/', StudentProgrameCreateView.as_view(), name='student-programme-create'),
+    path('programmes/', StudentProgrameListView.as_view(), name='student-programmes'),
+    path('programme/update/<int:pk>/', StudentProgrammeUpdateView.as_view(), name='student-programme-update'),
+    
+    #Meal Cards
+    path('mealcards/create/', StudentMealCardCreateView.as_view(), name='student-mealcard-create'),
+    path('mealcards/', StudentMealCardListView.as_view(), name='student-mealcards'),
+    path('mealcards/update/<int:pk>/', StudentMealCardUpdateView.as_view(), name='student-mealcard-update'),
+    
 ]

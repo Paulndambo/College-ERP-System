@@ -30,7 +30,7 @@ BUDGET_STATUSES = (
 
 class Budget(AbsoluteBaseModel):
     title = models.CharField(max_length=255)
-    school = models.ForeignKey("schools.School", on_delete=models.SET_NULL, null=True)
+    school = models.ForeignKey("schools.School", on_delete=models.CASCADE, null=True)
     department = models.ForeignKey("schools.Department", on_delete=models.SET_NULL, null=True)
     amount_requested = models.DecimalField(max_digits=100, decimal_places=2, default=0)
     amount_approved = models.DecimalField(max_digits=100, decimal_places=2, default=0)

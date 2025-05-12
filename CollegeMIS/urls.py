@@ -21,19 +21,22 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("apps.core.urls")),
-    path("users/", include("apps.users.urls")),
-    path("students/", include("apps.students.urls")),
-    path("staff/", include("apps.staff.urls")),
-    path("payments/", include("apps.payments.urls")),
-    path("hostels/", include("apps.hostels.urls")),
-    path("schools/", include("apps.schools.urls")),
-    path("exams/", include("apps.exams.urls")),
-    path("library/", include("apps.library.urls")),
-    path("admissions/", include("apps.admissions.urls")),
-    path("marketing/", include("apps.marketing.urls")),
-    path("finance/", include("apps.finance.urls")),
-    path("visitors/", include("apps.visitors.urls")),
+    # path("admin/", admin.site.urls),
+    # path("", include("apps.core.urls")),
+    # path("users/", include("apps.users.urls")),
+    # path("students/", include("apps.students.urls")),
+    # path("staff/", include("apps.staff.urls")),
+    # path("payments/", include("apps.payments.urls")),
+    # path("hostels/", include("apps.hostels.urls")),
+    # path("schools/", include("apps.schools.urls")),
+    # path("exams/", include("apps.exams.urls")),
+    # path("library/", include("apps.library.urls")),
+    # path("admissions/", include("apps.admissions.urls")),
+    # path("marketing/", include("apps.marketing.urls")),
+    # path("finance/", include("apps.finance.urls")),
+    # path("visitors/", include("apps.visitors.urls")),
+
+    #V2 - APIS
+    path("apis/", include("services.urls")),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
