@@ -10,8 +10,15 @@ from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+class UserRoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRole
+        fields = [
+            'id',
+            'name'
+        ]
 class UserSerializer(serializers.ModelSerializer):
+    role = UserRoleSerializer()
     class Meta:
         model = User
         fields = [
@@ -35,6 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'role', 'is_verified']
 class AdminUserSerializer(serializers.ModelSerializer):
+    role = UserRoleSerializer()
     class Meta:
         model = User
         fields = [
@@ -57,13 +65,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
             'is_verified'
         ]
         read_only_fields = ['id']
-class UserRoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserRole
-        fields = [
-            'id',
-            'name'
-        ]
+
 
 class CreateUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

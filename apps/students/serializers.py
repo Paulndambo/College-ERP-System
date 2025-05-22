@@ -1,8 +1,16 @@
+from apps.core.models import Campus
+from apps.core.serializers import CampusListSerializer
+from apps.hostels.serializers import HostelRoomSerializer, HostelSerializer
+from apps.schools.models import Programme, ProgrammeCohort
 from apps.users.serializers import UserSerializer
 from rest_framework import serializers
 from .models import *
-
+from apps.schools.serializers import ProgrammeCohortListSerializer, ProgrammeListSerializer
 class StudentCreateSerializer(serializers.ModelSerializer):
+    programme = serializers.PrimaryKeyRelatedField(queryset=Programme.objects.all(), required=False)
+    cohort = serializers.PrimaryKeyRelatedField(queryset=ProgrammeCohort.objects.all(), required=False)
+    campus = serializers.PrimaryKeyRelatedField(queryset=Campus.objects.all(), required=False)
+    
     class Meta:
         model = Student
         fields = [
@@ -19,10 +27,34 @@ class StudentCreateSerializer(serializers.ModelSerializer):
             'campus'
         ]
         extra_kwargs = {
-            'user': {'required': False}
+            'user': {'required': False},
+            'cohort': {'required': False},
+            'campus': {'required': False}
         }
+        
+class MinimalStudentSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    programme_name = serializers.CharField(source='programme.name', read_only=True)
+    cohort_name = serializers.CharField(source='cohort.name', read_only=True)
+    hostel_room_number = serializers.CharField(source='hostel_room.room_number', read_only=True)
+
+    class Meta:
+        model = Student
+        fields = [
+            'id', 
+            'user', 
+            'registration_number', 
+            'guardian_name',
+            'guardian_phone_number', 
+            'guardian_relationship', 
+            'guardian_email',
+            'status', 
+            'programme_name', 
+            'cohort_name',
+            'hostel_room_number', 
+        ]
 class StudentListSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True, many=True)
+    user = UserSerializer()
     programme_name = serializers.CharField(source='programme.name', read_only=True)
     cohort_name = serializers.CharField(source='cohort.name', read_only=True)
     hostel_room_number = serializers.CharField(source='hostel_room.room_number', read_only=True)
@@ -44,7 +76,30 @@ class StudentListSerializer(serializers.ModelSerializer):
             'hostel_room_number', 
             'campus_name'
         ]
-        
+class StudentDetailSerialzer(serializers.ModelSerializer):
+    user = UserSerializer()
+    programme = ProgrammeListSerializer()
+    hostel_room =HostelRoomSerializer()
+    campus = CampusListSerializer()
+    cohort = ProgrammeCohortListSerializer()
+    class Meta:
+        model = Student
+        fields = [
+            'id', 
+            'user', 
+            'registration_number', 
+            'guardian_name',
+            'guardian_phone_number', 
+            'guardian_relationship', 
+            'guardian_email',
+            'status', 
+            'programme', 
+            'hostel_room', 
+            'campus',
+            'cohort',
+            'created_on',
+            'updated_on'
+        ]
 class StudentEducationHistoryCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentEducationHistory

@@ -3,6 +3,8 @@ from datetime import datetime
 from django.utils.text import slugify
 from uuid import uuid4
 
+
+
 from apps.core.models import AbsoluteBaseModel
 
 date_today = datetime.now().date()
@@ -14,6 +16,7 @@ APPLICATION_STATUSES = (
     ("Accepted", "Accepted"),
     ("Draft", "Draft"),
     ("Enrolled", "Enrolled"),
+    ("Incomplete", "Incomplete")
 )
 EDUCATION_LEVEL_CHOICES = (
     ("Primary School", "Primary School"),
@@ -40,7 +43,7 @@ class Intake(AbsoluteBaseModel):
 
 
 class StudentApplication(AbsoluteBaseModel):
-    application_number = models.CharField(max_length=255, null=True)
+    application_number = models.CharField(max_length=255, null=True, blank=True)
     lead = models.ForeignKey(
         "marketing.Lead",
         on_delete=models.SET_NULL,
@@ -51,8 +54,8 @@ class StudentApplication(AbsoluteBaseModel):
     last_name = models.CharField(max_length=255)
     email = models.EmailField()
     phone_number = models.CharField(max_length=20)
-    id_number = models.CharField(max_length=255, null=True)
-    passport_number = models.CharField(max_length=255, null=True)
+    id_number = models.CharField(max_length=255, null=True, blank=True)
+    passport_number = models.CharField(max_length=255, null=True, blank=True)
     date_of_birth = models.DateField(null=True)
     gender = models.CharField(
         max_length=255, choices=[("Male", "Male"), ("Female", "Female")]
@@ -71,22 +74,22 @@ class StudentApplication(AbsoluteBaseModel):
         related_name="second_choice_programme",
     )
 
-    guardian_name = models.CharField(max_length=255, null=True)
-    guardian_email = models.EmailField(null=True)
-    guardian_relationship = models.CharField(max_length=255, null=True)
-    guardian_phone_number = models.CharField(max_length=255, null=True)
+    guardian_name = models.CharField(max_length=255, null=True, blank=True)
+    guardian_email = models.EmailField(null=True, blank=True)
+    guardian_relationship = models.CharField(max_length=255, null=True, blank=True)
+    guardian_phone_number = models.CharField(max_length=255, null=True, blank=True)
 
-    address = models.CharField(max_length=255, null=True)
-    postal_code = models.CharField(max_length=255, null=True)
-    city = models.CharField(max_length=255, null=True)
-    country = models.CharField(max_length=255, null=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    postal_code = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True , blank=True   )
     passport_photo = models.ImageField(
         upload_to="passport_photos/", null=True, blank=True
     )
 
     intake = models.ForeignKey(Intake, on_delete=models.SET_NULL, null=True)
     status = models.CharField(
-        max_length=255, choices=APPLICATION_STATUSES, default="Under Review"
+        max_length=255, choices=APPLICATION_STATUSES, default="Incomplete"
     )
     slug = models.SlugField(unique=True, null=True)
     campus = models.ForeignKey("core.Campus", on_delete=models.SET_NULL, null=True)
@@ -95,7 +98,9 @@ class StudentApplication(AbsoluteBaseModel):
         return f"{self.first_name} {self.last_name}"
 
     def save(self, *args, **kwargs):
-        # Automatically generate slug from title if it's not provided
+        from apps.admissions.admissions_utils import generate_application_number
+        if not self.application_number:
+            self.application_number = generate_application_number()
         if not self.slug:
             full_name = f"{self.first_name} {self.last_name}-{uuid4()}"
             self.slug = slugify(full_name)
@@ -123,5 +128,5 @@ class ApplicationEducationHistory(AbsoluteBaseModel):
     level = models.CharField(max_length=255, choices=EDUCATION_LEVEL_CHOICES)
     grade_or_gpa = models.CharField(max_length=255, null=True)
     year = models.CharField(max_length=255, null=True)
-    major = models.CharField(max_length=255, null=True)
+    major = models.CharField(max_length=255, null=True, blank=True)
     graduated = models.BooleanField(default=False)

@@ -1,112 +1,386 @@
-from datetime import datetime, timedelta
-import calendar
-from decimal import Decimal
-
-from django.shortcuts import render, redirect
-from django.db.models import Q
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.db.models import Case, When, Value, IntegerField
-from django.db import transaction
-
-from django.views.generic import ListView
-from django.http import JsonResponse
-
-from apps.exams.models import ExamData
-from apps.schools.models import Semester, Course
+from apps.exams.filters import ExamDataFilterSet, TranscriptsFilter
+from apps.schools.models import Course, ProgrammeCohort, Semester
 from apps.students.models import Student
+from apps.students.serializers import MinimalStudentSerializer, StudentDetailSerialzer, StudentListSerializer
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from services.constants import ALL_ROLES, ROLE_STUDENT
+from services.permissions import HasUserRole
+from .models import ExamData
+from .serializers import (
+    ExamDataCreateSerializer,
+    ExamDataListSerializer,
+    MarkSerializer,
+    MinimalSemesterSerializer,
+    StudentExamDataSerializer,
+)
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.parsers import MultiPartParser, FormParser
+import pandas as pd
+import io
+import csv
 
-students_list = Student.objects.all()
-semesters_list = Semester.objects.all()
-courses_list = Course.objects.all()
+
+class ExamDataCreateAPIView(generics.CreateAPIView):
+    # queryset = ExamData.objects.all()
+    serializer_class = ExamDataCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(recorded_by=self.request.user)
 
 
-class ExamMarksListView(ListView):
-    model = ExamData
-    template_name = "exams/student_marks.html"
-    context_object_name = "students-marks"
-    paginate_by = 12
+class BulkExamDataUploadAPIView(generics.CreateAPIView):
+    """
+    API endpoint for uploading multiple student exam marks via CSV or Excel file.
+    """
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
+    parser_classes = (MultiPartParser, FormParser)
+    serializer_class = ExamDataCreateSerializer
 
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(student__registration_number__icontains=search_query)
-                | Q(student__user__first_name__icontains=search_query)
+    def post(self, request, *args, **kwargs):
+        if "file" not in request.FILES:
+            return Response(
+                {"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Get sort parameter
-        return queryset.order_by("-created_on")
+        file_obj = request.FILES["file"]
+        course_id = request.data.get("course")
+        semester_id = request.data.get("semester")
+        cohort_id = request.data.get("cohort")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["students"] = students_list
-        context["semesters"] = semesters_list
-        context["courses"] = courses_list
-        return context
+        # if not course_id:
+        #     return Response({"error": "Course is required"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not semester_id:
+        #     return Response({"error": "Semester is required"}, status=status.HTTP_400_BAD_REQUEST)
+        # if not cohort_id:
+        #     return Response({"error": "Cohort is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        file_extension = file_obj.name.split(".")[-1].lower()
+
+        if file_extension not in ["csv", "xls", "xlsx"]:
+            raise CustomAPIException(
+                "Unsupported file format. Please upload a CSV or Excel file.",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+
+            if file_extension == "csv":
+                data = self._process_csv(file_obj)
+            else:
+                data = self._process_excel(file_obj)
+
+            if not data:
+                raise CustomAPIException(
+                    "File is empty or contains no valid data.",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Verify required columns
+            required_columns = [
+                "registration_number",
+                "cat_one",
+                "cat_two",
+                "exam_marks",
+            ]
+            for row in data:
+                missing_columns = [col for col in required_columns if col not in row]
+                if missing_columns:
+                    raise CustomAPIException(
+                        f"Missing required columns: {', '.join(missing_columns)}",
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            result = self._process_data(
+                data, course_id=course_id, semester_id=semester_id, cohort=cohort_id
+            )
+
+            if result["created"] == 0:
+                raise CustomAPIException(
+                    "Marks upload failed. Either all the marks already exist or no valid data was provided.",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+
+            return Response(
+                {
+                    "success": True,
+                    "count": result["created"],
+                    "failed_count": result["failed"],
+                    "errors": result["errors"] if result["errors"] else None,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        except CustomAPIException as e:
+
+            raise e
+        except Exception as e:
+            raise CustomAPIException(
+                f"Error processing file: {str(e)}",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def _process_csv(self, file_obj):
+        try:
+            decoded_file = file_obj.read().decode("utf-8").splitlines()
+            reader = csv.DictReader(decoded_file)
+            return list(reader)
+        except Exception as e:
+            raise CustomAPIException(
+                f"Error reading CSV file: {str(e)}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def _process_excel(self, file_obj):
+        try:
+            df = pd.read_excel(file_obj)
+            return df.to_dict("records")
+        except Exception as e:
+            raise CustomAPIException(
+                f"Error reading Excel file: {str(e)}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def _process_data(self, data, course_id, semester_id, cohort_id):
+
+        try:
+            course = Course.objects.get(id=course_id)
+            semester = Semester.objects.get(id=semester_id)
+            cohort = ProgrammeCohort.objects.get(id=cohort_id)
+        except (Course.DoesNotExist, Semester.DoesNotExist) as e:
+            raise CustomAPIException(
+                f"Invalid reference: {str(e)}", status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+        created_count = 0
+        errors = []
+
+        for index, row in enumerate(data):
+            try:
+
+                if "registration_number" not in row or not row["registration_number"]:
+                    raise ValueError(f"Missing registration number")
+
+                try:
+                    student = Student.objects.get(
+                        registration_number=row["registration_number"]
+                    )
+                except Student.DoesNotExist:
+                    raise ValueError(
+                        f"Student with registration number {row['registration_number']} not found"
+                    )
+
+                marks_data = {
+                    "student": student.id,
+                    "semester": semester.id,
+                    "course": course.id,
+                    "cohort": cohort.id,
+                    "cat_one": float(row.get("cat_one", 0)),
+                    "cat_two": float(row.get("cat_two", 0)),
+                    "exam_marks": float(row.get("exam_marks", 0)),
+                }
+
+                if ExamData.objects.filter(
+                    student=student, semester=semester, course=course, cohort=cohort
+                ).exists():
+                    raise ValueError(
+                        f"Marks for student {row['registration_number']} in this course and semester for given cohort/class already exist."
+                    )
+
+                with transaction.atomic():
+
+                    serializer = self.get_serializer(data=marks_data)
+                    serializer.is_valid(raise_exception=True)
+
+                    serializer.save(recorded_by=self.request.user)
+
+                created_count += 1
+
+            except Exception as e:
+
+                errors.append(
+                    {
+                        "row": index + 2,
+                        "registration_number": row.get(
+                            "registration_number", f"Row {index + 2}"
+                        ),
+                        "error": str(e),
+                    }
+                )
+
+        return {"created": created_count, "failed": len(errors), "errors": errors}
 
 
-@login_required(login_url="/users/login")
-def record_marks(request):
-    if request.method == "POST":
-        student_id = request.POST.get("student_id")
-        course_id = request.POST.get("course_id")
-        semester_id = request.POST.get("semester_id")
-        cat_one = Decimal(request.POST.get("cat_one"))
-        cat_two = Decimal(request.POST.get("cat_two"))
-        main_exam = Decimal(request.POST.get("main_exam"))
+class ExamDataListAPIView(generics.ListAPIView):
+    queryset = ExamData.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ExamDataListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ExamDataFilterSet
+    pagination_class = PageNumberPagination
 
-        marks = ExamData.objects.create(
-            student_id=student_id,
-            course_id=course_id,
-            semester_id=semester_id,
-            cat_one=cat_one,
-            cat_two=cat_two,
-            exam_marks=main_exam,
-            recorded_by=request.user,
+    def get_queryset(self):
+        user = self.request.user
+        base_queryset = ExamData.objects.select_related(
+            "student", "semester", "cohort", "course", "recorded_by"
         )
-        marks.total_marks = ((marks.cat_one + marks.cat_two) / 2) + marks.exam_marks
-        marks.save()
-        messages.success(request, "Marks recorded successfully")
-        return redirect("students-marks")
-    return render(request, "exams/record_marks.html")
+        if user.role.name == ROLE_STUDENT:
+            if user.role.name == ROLE_STUDENT:
+                return base_queryset.filter(student=user)
+
+            exam_data = base_queryset.order_by("-created_on")
+            return exam_data
+
+        exam_data = base_queryset.order_by("-created_on")
+        return exam_data
+
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            filtered_queryset = self.filter_queryset(queryset)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_exam_data = paginator.paginate_queryset(
+                    filtered_queryset, request
+                )
+                serializer = self.get_serializer(paginated_exam_data, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(filtered_queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
-@login_required(login_url="/users/login")
-def edit_marks(request):
-    if request.method == "POST":
-        marks_id = request.POST.get("marks_id")
-        course_id = request.POST.get("course_id")
-        semester_id = request.POST.get("semester_id")
-        cat_one = Decimal(request.POST.get("cat_one"))
-        cat_two = Decimal(request.POST.get("cat_two"))
-        main_exam = Decimal(request.POST.get("main_exam"))
+class ExamDatapdateAPIView(generics.RetrieveUpdateAPIView):
+    queryset = ExamData.objects.all()
+    serializer_class = ExamDataCreateSerializer
+    http_method_names = ["patch", "put"]
 
-        marks = ExamData.objects.get(id=marks_id)
-        marks.cat_one = cat_one
-        marks.cat_two = cat_two
-        marks.exam_marks = main_exam
-        marks.recorded_by = request.user
-        marks.semester_id = semester_id
-        marks.course_id = course_id
-        marks.save()
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save(recorded_by=self.request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        marks.total_marks = ((marks.cat_one + marks.cat_two) / 2) + marks.exam_marks
-        marks.save()
-        messages.success(request, "Marks updated successfully")
-        return redirect("students-marks")
-    return render(request, "exams/edit_marks.html")
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def delete_marks(request):
-    if request.method == "POST":
-        marks_id = request.POST.get("marks_id")
-        ExamData.objects.get(id=marks_id).delete()
-        messages.success(request, "Marks deleted successfully")
-        return redirect("students-marks")
-    return render(request, "exams/delete_marks.html")
+class TranscriptsDataView(generics.ListAPIView):
+    queryset = ExamData.objects.all().select_related(
+        'student',
+        'student__user',
+        'student__programme',
+        'semester',
+        'cohort',
+        'course',
+        'recorded_by'
+    )
+    serializer_class = StudentExamDataSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TranscriptsFilter
+    
+    def get_queryset(self):
+        base_queryset = ExamData.objects.select_related(
+            'student',
+            'student__user',
+            'student__programme',
+            'semester',
+            'cohort',
+            'course',
+            'recorded_by'
+        )
+
+        programme_id = self.request.query_params.get('programme')
+        semester_id = self.request.query_params.get('semester')
+        cohort_id = self.request.query_params.get('cohort')
+        reg_no = self.request.query_params.get('reg_no')
+        if not (programme_id and semester_id) and not (cohort_id and semester_id) and not (reg_no and semester_id):
+            raise CustomAPIException("You must provide either (programme and semester), or (cohort/class and semester), or (reg_no and semester).",
+                                     status_code=status.HTTP_400_BAD_REQUEST
+                                     )
+        if programme_id and semester_id:
+            base_queryset = base_queryset.filter(
+                student__programme_id=programme_id,
+                semester_id=semester_id
+            )
+        elif cohort_id and semester_id:
+            base_queryset = base_queryset.filter(
+                cohort_id=cohort_id,
+                semester_id=semester_id
+            )
+        elif reg_no and semester_id:
+            base_queryset = base_queryset.filter(
+                student__registration_number=reg_no,
+                semester_id=semester_id
+            )
+
+        return base_queryset.order_by('-created_on')
+    
+    def list(self, request, *args, **kwargs):
+        """
+        Override the default list method to structure the response with student, semester, and marks data.
+        Each student will have semester info and their corresponding marks appended to their data.
+        """
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            
+            
+            semester_id = self.request.query_params.get('semester')
+            
+           
+            student_data = {}
+            
+            for exam in queryset:
+                student_id = exam.student.id
+                
+           
+                if student_id not in student_data:
+                    student_serializer = StudentDetailSerialzer(exam.student)
+                    semester_serializer = MinimalSemesterSerializer(exam.semester)
+                    
+                    student_data[student_id] = {
+                        "student": student_serializer.data,
+                        "semester": semester_serializer.data,
+                        "marks": []
+                    }
+                
+             
+                mark_serializer = MarkSerializer(exam)
+                student_data[student_id]["marks"].append(mark_serializer.data)
+            
+          
+            response_data = list(student_data.values())
+            
+           
+            page = request.query_params.get('page', None)
+            if page:
+                paginator = self.pagination_class()
+                paginated_data = paginator.paginate_queryset(response_data, request)
+                return paginator.get_paginated_response(paginated_data)
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as exc:
+            return Response(
+                {"error": str(exc)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+

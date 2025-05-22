@@ -1,392 +1,523 @@
-from datetime import datetime
-from django.shortcuts import render, redirect
-from django.db.models import Q, F
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.db.models import Case, When, Value, IntegerField
+from apps.core.models import UserRole
+from apps.students.models import Student, StudentDocument, StudentEducationHistory
+from apps.students.serializers import StudentCreateSerializer, StudentListSerializer
+from apps.users.models import User
+from .filters import StudentApplicationFilter
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.exceptions import ValidationError
+from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
+from services.permissions import HasUserRole
+
 from django.db import transaction
-
-
-from django.views.generic import ListView
-from django.http import JsonResponse
-
-from apps.core.models import UserRole, Campus
-from apps.admissions.models import (
+from .models import (
+    Intake,
     StudentApplication,
     ApplicationDocument,
     ApplicationEducationHistory,
-    Intake,
 )
-from apps.schools.models import Programme, ProgrammeCohort
-from apps.users.models import User
-from apps.students.models import Student, StudentDocument, StudentEducationHistory
 
-date_today = datetime.now().date()
-education_levels = ["Primary School", "Secondary School", "Undergraduate", "Graduate"]
-DOCUMENT_TYPES = ["Transcript", "Certificate", "Identification"]
+from .serializers import (
+    IntakeCreateSerializer,
+    IntakeListDetailSerializer,
+    StudentApplicationCreateSerializer,
+    StudentApplicationListDetailSerializer,
+    ApplicationDocumentCreateSerializer,
+    ApplicationDocumentListDetailSerializer,
+    ApplicationEducationHistoryCreateSerializer,
+    ApplicationEducationHistoryListDetailSerializer,
+    StudentEnrollmentSerializer,
+)
 
 
-# Create your views here.
-class StudentApplicationsListView(ListView):
-    model = StudentApplication
-    template_name = "admissions/applications.html"
-    context_object_name = "applications"
-    paginate_by = 8
+class IntakeCreateView(generics.CreateAPIView):
+    queryset = Intake.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = IntakeCreateSerializer
 
-    programmes = Programme.objects.all()
-    intakes = Intake.objects.all()
-    campuses = Campus.objects.all()
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class IntakeUpdateView(generics.UpdateAPIView):
+    queryset = Intake.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = IntakeCreateSerializer
+    lookup_field = "pk"
+
+    def patch(self, request, *args, **kwargs):
+        intake = self.get_object()
+        serializer = self.get_serializer(intake, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IntakeListView(generics.ListAPIView):
+    queryset = Intake.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = IntakeListDetailSerializer
+    pagination_class = None
+    filter_backends = [DjangoFilterBackend]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
+        return Intake.objects.all().order_by("-start_date")
 
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query) | Q(id_number__icontains=search_query),
-                Q(first_name__icontains=search_query)
-                | Q(last_name__icontains=search_query),
-            )
-        # Get sort parameter
-        return queryset.order_by("-created_on")
+    def list(self, request, *args, **kwargs):
+        try:
+            intakes = self.get_queryset()
+            intakes = self.filter_queryset(intakes)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["programmes"] = self.programmes
-        context["intakes"] = self.intakes
-        context["campuses"] = self.campuses
-        return context
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_intakes = paginator.paginate_queryset(intakes, request)
+                serializer = self.get_serializer(paginated_intakes, many=True)
+                return paginator.get_paginated_response(serializer.data)
 
-
-def application_details(request, id):
-    application = StudentApplication.objects.get(id=id)
-
-    documents = ApplicationDocument.objects.filter(student_application=application)
-    education_history = ApplicationEducationHistory.objects.filter(
-        student_application=application
-    )
-
-    gender_choices = ["Male", "Female"]
-    GUARDIAN_RELATIONSHIPS = [
-        "Parent",
-        "Grand Parent",
-        "Sibling",
-        "Aunt/Uncle",
-        "Other",
-    ]
-    programmes = Programme.objects.all()
-    intakes = Intake.objects.all()
-
-    cohorts = ProgrammeCohort.objects.filter(
-        programme=application.first_choice_programme
-    ).order_by("-created_on")
-    campuses = Campus.objects.all()
-
-    context = {
-        "application": application,
-        "documents": documents,
-        "education_history": education_history,
-        "gender_choices": gender_choices,
-        "relationship_choices": GUARDIAN_RELATIONSHIPS,
-        "education_levels": education_levels,
-        "document_types": DOCUMENT_TYPES,
-        "programmes": programmes,
-        "intakes": intakes,
-        "cohorts": cohorts,
-        "campuses": campuses,
-    }
-    return render(request, "admissions/application_details.html", context)
-
-
-def edit_application(request):
-    if request.method == "POST":
-        application_id = request.POST.get("application_id")
-
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        phone_number = request.POST.get("phone_number")
-        id_number = request.POST.get("id_number")
-        passport_number = request.POST.get("passport_number")
-        date_of_birth = request.POST.get("date_of_birth")
-        gender = request.POST.get("gender")
-
-        guardian_name = request.POST.get("guardian_name")
-        guardian_email = request.POST.get("guardian_email")
-        guardian_relationship = request.POST.get("guardian_relationship")
-        guardian_phone_number = request.POST.get("guardian_phone_number")
-
-        address = request.POST.get("address")
-        postal_code = request.POST.get("postal_code")
-        city = request.POST.get("city")
-        country = request.POST.get("country")
-
-        intake_id = request.POST.get("intake_id")
-        first_choice_programme_id = request.POST.get("first_choice_programme_id")
-        second_choice_programme_id = request.POST.get("second_choice_programme_id")
-        campus_id = request.POST.get("campus_id")
-
-        a = StudentApplication.objects.get(id=application_id)
-        a.campus_id = campus_id if campus_id else a.campus_id
-        a.first_name = first_name if first_name else a.first_name
-        a.last_name = last_name if last_name else a.last_name
-        a.email = email if email else a.email
-        a.phone_number = phone_number if phone_number else a.phone_number
-        a.id_number = id_number if id_number else a.id_number
-        a.passport_number = passport_number if passport_number else a.passport_number
-        a.date_of_birth = date_of_birth if date_of_birth else a.date_of_birth
-        a.gender = gender if gender else a.gender
-
-        a.guardian_name = guardian_name if guardian_name else a.guardian_name
-        a.guardian_email = guardian_email if guardian_email else a.guardian_email
-        a.guardian_relationship = (
-            guardian_relationship if guardian_relationship else a.guardian_relationship
-        )
-        a.guardian_phone_number = (
-            guardian_phone_number if guardian_phone_number else a.guardian_phone_number
-        )
-
-        a.address = address if address else a.address
-        a.postal_code = postal_code if postal_code else a.postal_code
-        a.city = city if city else a.city
-        a.country = country if country else a.country
-
-        a.intake_id = intake_id if intake_id else a.intake_id
-        a.first_choice_programme_id = (
-            first_choice_programme_id
-            if first_choice_programme_id
-            else a.first_choice_programme_id
-        )
-        a.second_choice_programme_id = (
-            second_choice_programme_id
-            if second_choice_programme_id
-            else a.second_choice_programme_id
-        )
-
-        a.save()
-        return redirect("application-details", id=application_id)
-
-
-def upload_application_document(request):
-    if request.method == "POST":
-        application_id = request.POST.get("application_id")
-        document_type = request.POST.get("document_type")
-        document_name = request.POST.get("document_name")
-        document_file = request.FILES.get("document_file")
-
-        ApplicationDocument.objects.create(
-            student_application_id=application_id,
-            document_type=document_type,
-            document_name=document_name,
-            document_file=document_file,
-        )
-
-        return redirect("application-details", id=application_id)
-
-    return render(request, "admissions/info/upload_document.html")
-
-
-def edit_application_document(request):
-    if request.method == "POST":
-        document_id = request.POST.get("document_id")
-        document_type = request.POST.get("document_type")
-        document_name = request.POST.get("document_name")
-        document_file = request.FILES.get("document_file")
-
-        document = ApplicationDocument.objects.get(id=document_id)
-        document.document_name = (
-            document_name if document_name else document.document_name
-        )
-        document.document_file = (
-            document_file if document_file else document.document_file
-        )
-        document.document_type = (
-            document_type if document_type else document.document_type
-        )
-        document.save()
-
-        return redirect("application-details", id=document.student_application.id)
-    return render(request, "admissions/info/edit_document.html")
-
-
-def delete_application_document(request):
-    if request.method == "POST":
-        document_id = request.POST.get("document_id")
-        document = ApplicationDocument.objects.get(id=document_id)
-        document.delete()
-        return redirect("application-details", id=document.student_application.id)
-    return render(request, "admissions/info/delete_document.html")
-
-
-def create_education_history(request):
-    if request.method == "POST":
-        application_id = request.POST.get("application_id")
-        institution = request.POST.get("institution")
-        level = request.POST.get("level")
-        major = request.POST.get("major")
-        year = request.POST.get("year")
-        grade_or_gpa = request.POST.get("grade_or_gpa")
-
-        ApplicationEducationHistory.objects.create(
-            student_application_id=application_id,
-            institution=institution,
-            level=level,
-            major=major,
-            year=year,
-            grade_or_gpa=grade_or_gpa,
-        )
-        return redirect("application-details", id=application_id)
-    return render(request, "admissions/info/add_education_history.html")
-
-
-def edit_education_history(request):
-    if request.method == "POST":
-        history_id = request.POST.get("history_id")
-        institution = request.POST.get("institution")
-        level = request.POST.get("level")
-        major = request.POST.get("major")
-        year = request.POST.get("year")
-        grade_or_gpa = request.POST.get("grade_or_gpa")
-
-        history = ApplicationEducationHistory.objects.get(id=history_id)
-        history.institution = institution if institution else history.institution
-        history.level = level if level else history.level
-        history.major = major if major else history.major
-        history.year = year if year else history.year
-        history.grade_or_gpa = grade_or_gpa if grade_or_gpa else history.grade_or_gpa
-        history.save()
-        return redirect("application-details", id=history.student_application.id)
-    return render(request, "admissions/info/edit_education_history.html")
-
-
-def delete_education_history(request):
-    if request.method == "POST":
-        history_id = request.POST.get("history_id")
-        history = ApplicationEducationHistory.objects.get(id=history_id)
-        history.delete()
-        return redirect("application-details", id=history.student_application.id)
-    return render(request, "admissions/info/delete_education_history.html")
-
-
-def verify_document(request, document_id):
-    document = ApplicationDocument.objects.get(id=document_id)
-    document.verified = True
-    document.save()
-    return redirect("application-details", id=document.student_application.id)
-
-
-def start_student_application(request):
-    if request.method == "POST":
-        application = StudentApplication.objects.create(
-            first_name=request.POST.get("first_name"),
-            last_name=request.POST.get("last_name"),
-            email=request.POST.get("email"),
-            phone_number=request.POST.get("phone_number"),
-            id_number=request.POST.get("id_number"),
-            first_choice_programme_id=request.POST.get("programme_id"),
-            intake_id=request.POST.get("intake_id"),
-            status="Draft",
-            gender=request.POST.get("gender"),
-        )
-        application.application_number = (
-            f"APP-{application.id}/{date_today.month}/{date_today.year}"
-        )
-        application.save()
-        return redirect("applications")
-    return render(request, "admissions/start_application.html")
-
-
-def submit_application(request, id):
-    application = StudentApplication.objects.get(id=id)
-    application.status = "Under Review"
-    application.save()
-    return redirect("applications")
-
-
-def accept_application(request, id):
-    application = StudentApplication.objects.get(id=id)
-    application.status = "Accepted"
-    application.save()
-    return redirect("application-details", id=application.id)
-
-
-def apply_for_college(request):
-    return render(request, "admissions/apply_for_college.html")
-
-
-@transaction.atomic
-def enroll_applicant(request):
-    if request.method == "POST":
-        application_id = request.POST.get("application_id")
-        cohort_id = request.POST.get("cohort_id")
-        campus_id = request.POST.get("campus_id")
-        application = StudentApplication.objects.get(id=application_id)
-
-        documents = ApplicationDocument.objects.filter(student_application=application)
-        eduction_history = ApplicationEducationHistory.objects.filter(
-            student_application=application
-        )
-
-        role = UserRole.objects.get(name="Student")
-        # Create User
-        user = User.objects.create(
-            first_name=application.first_name,
-            last_name=application.last_name,
-            email=application.email,
-            phone_number=application.phone_number,
-            id_number=application.id_number,
-            passport_number=application.passport_number,
-            gender=application.gender,
-            date_of_birth=application.date_of_birth,
-            address=application.address,
-            postal_code=application.postal_code,
-            city=application.city,
-            country=application.country,
-            role=role,
-        )
-
-        # Create Student
-        student = Student.objects.create(
-            user=user,
-            registration_number=application.application_number,
-            guardian_name=application.guardian_name,
-            guardian_email=application.guardian_email,
-            guardian_phone_number=application.guardian_phone_number,
-            guardian_relationship=application.guardian_relationship,
-            programme=application.first_choice_programme,
-            status="Active",
-            cohort_id=cohort_id,
-            campus_id=campus_id,
-        )
-
-        # Create Student Documents
-        for document in documents:
-            StudentDocument.objects.create(
-                student=student,
-                document_name=document.document_name,
-                document_type=document.document_type,
-                document_file=document.document_file,
+            serializer = self.get_serializer(intakes, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        # Create Student Education History
-        for history in eduction_history:
-            StudentEducationHistory.objects.create(
-                student=student,
-                institution=history.institution,
-                level=history.level,
-                major=history.major,
-                year=history.year,
-                grade_or_gpa=history.grade_or_gpa,
+
+class IntakeDetailView(generics.RetrieveAPIView):
+    queryset = Intake.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = IntakeListDetailSerializer
+    lookup_field = "pk"
+
+
+# ================ StudentApplication Views ================
+
+
+class StudentApplicationCreateView(generics.CreateAPIView):
+    queryset = StudentApplication.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = StudentApplicationCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class StudentApplicationUpdateView(generics.UpdateAPIView):
+    queryset = StudentApplication.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = StudentApplicationCreateSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+
+            return StudentApplication.objects.filter(email=user.email)
+        return StudentApplication.objects.all()
+
+    def patch(self, request, *args, **kwargs):
+        application = self.get_object()
+        serializer = self.get_serializer(application, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StudentApplicationListView(generics.ListAPIView):
+    queryset = StudentApplication.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = StudentApplicationListDetailSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StudentApplicationFilter 
+    pagination_class = PageNumberPagination
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return StudentApplication.objects.filter(email=user.email).order_by(
+                "-created_on"
             )
 
-        # Update Lead if any
-        if application.lead:
-            application.lead.status = "Converted"
-            application.lead.save()
+        applications = (
+            StudentApplication.objects.all().order_by("-created_on")
+        )
+        return applications
 
-        application.status = "Enrolled"
-        application.save()
-        return redirect("applications")
-    return render(request, "admissions/enroll_applicant.html")
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+            filtered_queryset = self.filter_queryset(queryset)
+            page = self.request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_applications = paginator.paginate_queryset(filtered_queryset, request)
+                serializer = self.get_serializer(paginated_applications, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            
+
+            serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class StudentApplicationDetailView(generics.RetrieveAPIView):
+    queryset = StudentApplication.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = StudentApplicationListDetailSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+
+            return StudentApplication.objects.filter(email=user.email)
+        return StudentApplication.objects.all()
+
+
+class ApplicationDocumentCreateView(generics.CreateAPIView):
+    queryset = ApplicationDocument.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationDocumentCreateSerializer
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            application_id = self.request.data.get("student_application")
+            try:
+                application = StudentApplication.objects.get(id=application_id)
+                if application.email != user.email:
+                    raise ValidationError(
+                        {
+                            "error": "You can only upload documents to your own application."
+                        }
+                    )
+            except StudentApplication.DoesNotExist:
+                raise ValidationError({"error": "Application not found."})
+        try:
+            student_application = self.request.data.get("student_application")
+            student_application = int(student_application)
+        except (TypeError, ValueError):
+                return Response(
+                    {"error": "Invalid application ."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        serializer.save()
+
+
+class ApplicationDocumentUpdateView(generics.UpdateAPIView):
+    queryset = ApplicationDocument.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationDocumentCreateSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return ApplicationDocument.objects.filter(
+                student_application__email=user.email
+            )
+        return ApplicationDocument.objects.all()
+
+    def patch(self, request, *args, **kwargs):
+        document = self.get_object()
+
+        if "verified" in request.data and request.user.role.name not in ALL_STAFF_ROLES:
+            return Response(
+                {"error": "Only staff can verify documents"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        serializer = self.get_serializer(document, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApplicationDocumentListView(generics.ListAPIView):
+    queryset = ApplicationDocument.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationDocumentListDetailSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return ApplicationDocument.objects.filter(
+                student_application__email=user.email
+            ).order_by("-created_at")
+
+        application_id = self.request.query_params.get("application_id", None)
+        if application_id:
+            return ApplicationDocument.objects.filter(
+                student_application_id=application_id
+            ).order_by("-created_at")
+        return (
+            ApplicationDocument.objects.all()
+            .select_related("student_application")
+            .order_by("-created_at")
+        )
+
+
+class ApplicationDocumentDetailView(generics.RetrieveDestroyAPIView):
+    queryset = ApplicationDocument.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationDocumentListDetailSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return ApplicationDocument.objects.filter(
+                student_application__email=user.email
+            )
+        return ApplicationDocument.objects.all()
+
+
+# ================ ApplicationEducationHistory Views ================
+
+
+class ApplicationEducationHistoryCreateView(generics.CreateAPIView):
+    queryset = ApplicationEducationHistory.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationEducationHistoryCreateSerializer
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            application_id = self.request.data.get("student_application")
+            try:
+                application = StudentApplication.objects.get(id=application_id)
+                if application.email != user.email:
+                    raise ValidationError(
+                        {
+                            "error": "You can only add education history to your own application."
+                        }
+                    )
+            except StudentApplication.DoesNotExist:
+                raise ValidationError({"error": "Application not found."})
+
+        serializer.save()
+
+
+class ApplicationEducationHistoryUpdateView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ApplicationEducationHistory.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationEducationHistoryCreateSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return ApplicationEducationHistory.objects.filter(
+                student_application__email=user.email
+            )
+        return ApplicationEducationHistory.objects.all()
+
+    def patch(self, request, *args, **kwargs):
+        print("request=========", request.data)
+        education_history = self.get_object()
+        serializer = self.get_serializer(
+            education_history, data=request.data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ApplicationEducationHistoryListView(generics.ListAPIView):
+    queryset = ApplicationEducationHistory.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationEducationHistoryListDetailSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return ApplicationEducationHistory.objects.filter(
+                student_application__email=user.email
+            ).order_by("-created_at")
+
+        application_id = self.request.query_params.get("application_id", None)
+        if application_id:
+            return ApplicationEducationHistory.objects.filter(
+                student_application_id=application_id
+            ).order_by("-created_at")
+
+        return (
+            ApplicationEducationHistory.objects.all()
+            .select_related("student_application")
+            .order_by("-created_at")
+        )
+
+
+class ApplicationEducationHistoryDetailView(generics.RetrieveAPIView):
+    queryset = ApplicationEducationHistory.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ApplicationEducationHistoryListDetailSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return ApplicationEducationHistory.objects.filter(
+                student_application__email=user.email
+            )
+        return ApplicationEducationHistory.objects.all()
+
+class StudentEnrollmentView(generics.CreateAPIView):
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = StudentEnrollmentSerializer
+    
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        application_id = data.get("application")
+        cohort_id = data.get("cohort")
+        campus_id = data.get("campus")
+        
+        try:
+            application = StudentApplication.objects.get(id=application_id)
+            documents = ApplicationDocument.objects.filter(student_application=application)
+            education_history = ApplicationEducationHistory.objects.filter(student_application=application)
+
+            try:
+                role = UserRole.objects.get(name="Student")
+            except UserRole.DoesNotExist:
+                raise CustomAPIException(
+                    message="UserRole 'Student' not found.",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+
+            registration_number = application.application_number
+
+           
+            try:
+                with transaction.atomic():
+                    user = User.objects.create(
+                        username=registration_number,
+                        first_name=application.first_name,
+                        last_name=application.last_name,
+                        email=application.email,
+                        phone_number=application.phone_number,
+                        id_number=application.id_number,
+                        passport_number=application.passport_number,
+                        gender=application.gender,
+                        date_of_birth=application.date_of_birth,
+                        address=application.address,
+                        postal_code=application.postal_code,
+                        city=application.city,
+                        country=application.country,
+                        is_verified=True,
+                        role=role
+                    )
+                    
+                   
+                    user.set_password(registration_number)
+                    user.save()
+
+                 
+                    student = Student.objects.create(
+                        user=user,
+                        registration_number=registration_number,
+                        guardian_name=application.guardian_name,
+                        guardian_email=application.guardian_email,
+                        guardian_phone_number=application.guardian_phone_number,
+                        guardian_relationship=application.guardian_relationship,
+                        programme=application.first_choice_programme,
+                        status="Active",
+                        cohort_id=cohort_id,
+                        campus_id=campus_id,
+                    )
+
+                    
+                    for document in documents:
+                        StudentDocument.objects.create(
+                            student=student,
+                            document_name=document.document_name,
+                            document_type=document.document_type,
+                            document_file=document.document_file,
+                        )
+
+                   
+                    for history in education_history:
+                        StudentEducationHistory.objects.create(
+                            student=student,
+                            institution=history.institution,
+                            level=history.level,
+                            major=history.major,
+                            year=history.year,
+                            grade_or_gpa=history.grade_or_gpa,
+                        )
+
+                   
+                    if application.lead:
+                        application.lead.status = "Converted"
+                        application.lead.save()
+
+                    
+                    application.status = "Enrolled"
+                    application.save()
+
+                student_data = StudentListSerializer(student).data
+
+                return Response({
+                    "message": "Student enrolled successfully",
+                    "student": student_data
+                }, status=status.HTTP_201_CREATED)
+            
+            except Exception as e:
+                raise CustomAPIException(
+                    message=f"Error creating user or enrolling student: {str(e)}",
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+        
+        except StudentApplication.DoesNotExist:
+            raise CustomAPIException(
+                message="Student application not found.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        except CustomAPIException as exc:
+            raise
+        except Exception as e:
+            raise CustomAPIException(
+                message=f"Error enrolling student: {str(e)}",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )

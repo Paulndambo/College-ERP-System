@@ -1,13 +1,18 @@
 from django.urls import path
 
-from .views import StudentDocumentCreateView, StudentDocumentHistoryListView, StudentDocumentUpdateView, StudentEducationHistoryCreateView, StudentEducationHistoryListView, StudentEducationHistoryUpdateView, StudentMealCardCreateView, StudentMealCardListView, StudentMealCardUpdateView, StudentProgrameCreateView, StudentProgrameListView, StudentProgrammeUpdateView, StudentRegistrationView, StudentUpdateView
+from .views import AssessmentList, StudentAccountUpdateView, StudentDetailView, StudentDocumentCreateView, StudentDocumentHistoryListView, StudentDocumentUpdateView, StudentEducationHistoryCreateView, StudentEducationHistoryListView, StudentEducationHistoryUpdateView, StudentListView, StudentMealCardCreateView, StudentMealCardListView, StudentMealCardUpdateView, StudentProgrameCreateView, StudentProgrameListView, StudentProgrammeUpdateView, StudentRegistrationView, StudentUpdateView,BulkStudentUploadView
 
 
 
 urlpatterns = [
+    #Students
     path("create-student/", StudentRegistrationView.as_view(),  name="create-student" ),
-    path("update-student/",StudentUpdateView.as_view(),name="update-student" ),
-    
+    path("update-student/<int:pk>/",StudentUpdateView.as_view(),name="update-student" ),
+    path("update-student-account/<int:pk>/",StudentAccountUpdateView.as_view(),name="update-student-account" ),
+    path("list/",StudentListView.as_view(),name="students-list" ),
+    path("assessment-list/",AssessmentList.as_view(),name="assessment-list" ),
+    path("<int:pk>/",StudentDetailView.as_view(),name="students-details" ),
+    path('upload/', BulkStudentUploadView.as_view(), name='student-bulk-upload'),
     
     #Eduaction history
     path('education-history/create/', StudentEducationHistoryCreateView.as_view(), name='student-education-create'),

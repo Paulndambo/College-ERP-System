@@ -1,4 +1,6 @@
 from apps.finance.models import Budget
+from services.constants import ALL_ROLES, ROLE_STUDENT
+from services.permissions import HasUserRole
 from .filters import CourseFilter, CourseSessionFilter, DepartmentFilter, ProgrammeFilter, SchoolFilter, SemesterFilter
 from apps.schools.filters import CohortsFilter
 from rest_framework import generics, status
@@ -6,7 +8,7 @@ from rest_framework.response import Response
 from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
 from .models import School, Department, Programme, Course, Semester, ProgrammeCohort, CourseSession
 from .serializers import (
-    SchoolCreateSerializer, SchoolListSerializer,
+    ProgrammeListDetailSerializer, SchoolCreateSerializer, SchoolListSerializer,
     DepartmentCreateSerializer, DepartmentListSerializer,
     ProgrammeCreateSerializer, ProgrammeListSerializer,
     CourseCreateSerializer, CourseListSerializer,
@@ -211,7 +213,22 @@ class ProgrammeUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         except Exception as exc:
             raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+class ProgammeDetailView(generics.RetrieveAPIView):
+    queryset = Programme.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    serializer_class = ProgrammeListDetailSerializer
+    lookup_field = "pk"
+    
+    def get_queryset(self):
+        return Programme.objects.prefetch_related(
+            'course_set'  
+        ).select_related(
+            'school',     
+            'department'  
+        )
 
+   
 
 class CourseCreateView(generics.CreateAPIView):
     queryset = Course.objects.all()
@@ -234,14 +251,21 @@ class CourseListView(generics.ListAPIView):
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = CourseFilter
+    pagination_class = None 
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
     def get(self, request, *args, **kwargs):
         try:
             courses = self.get_queryset()
             courses = self.filter_queryset(courses)
-            page = self.paginate_queryset(courses)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
+            page = request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_courses = paginator.paginate_queryset(courses, request)
+                serializer = self.get_serializer(paginated_courses, many=True)
+                return paginator.get_paginated_response(serializer.data)
             serializer = self.get_serializer(courses, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as exc:

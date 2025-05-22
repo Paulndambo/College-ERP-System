@@ -19,6 +19,7 @@ class StudentApplicationAdmin(admin.ModelAdmin):
         "phone_number",
         "gender",
         "status",
+        "intake"
     ]
 
 
@@ -48,4 +49,6 @@ class ApplicationEducationHistoryAdmin(admin.ModelAdmin):
         "level",
         "major",
         "year",
+        "grade_or_gpa",
+        "graduated"
     ]
