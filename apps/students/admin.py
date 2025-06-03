@@ -6,8 +6,9 @@ from apps.students.models import Student, StudentDocument, StudentAttendance
 # Register your models here.
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "registration_number", "status")
-    list_filter = ("status",)
+    list_display = ("id", "user", "registration_number", "status", "cohort", "hostel_room")
+    list_filter = ("status", "hostel_room")
+    search_fields = ("registration_number",)
 
 
 @admin.register(StudentDocument)

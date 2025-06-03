@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from django.utils import timezone
-
+from django.contrib.auth.models import AnonymousUser
 from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
 
@@ -316,6 +316,8 @@ class TaskUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return Task.objects.none()
         # Users can only update their own tasks unless they're in ALL_STAFF_ROLES
         if user.role.name in ALL_STAFF_ROLES:
             return Task.objects.all()
@@ -402,6 +404,8 @@ class TaskDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return Task.objects.none()
         if user.role.name in ALL_STAFF_ROLES:
             return Task.objects.all()
         return Task.objects.filter(user=user)

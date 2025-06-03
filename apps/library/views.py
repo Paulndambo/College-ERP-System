@@ -1,397 +1,478 @@
-from datetime import datetime
-from django.shortcuts import render, redirect
-from django.db.models import Q, F
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.db.models import Case, When, Value, IntegerField
-from django.db import transaction
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from apps.library.filters import BookFilter, BorrowTransactionFilter, FineFilter, MemberFilter
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
 
-
-from django.views.generic import ListView
-from django.http import JsonResponse
-
-from apps.library.models import Book, BorrowTransaction, Member, Fine
+from rest_framework.exceptions import ValidationError
+from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
+from services.permissions import HasUserRole
+from .models import Book, BorrowTransaction, Fine, Member
+from apps.library.serializers import (
+    BookCreateSerializer,
+    BookListSerializer,
+    BorrowTransactionCreateSerializer,
+    BorrowTransactionListSerializer,
+    BorrowTransactionUpdateSerializer,
+    FineCreateSerializer,
+    FineListSerializer,
+    FinePaymentRequestSerializer,
+    FineUpdateSerializer,
+    LibraryFinePaymentSerializer,
+    MemberCreateSerializer,
+    MemberDeactivateSerializer,
+    MemberListSerializer,
+    MemberReactivateSerializer,
+)
 from apps.users.models import User
-from apps.finance.models import LibraryFinePayment
-
-date_today = datetime.now().date()
-
-# Create your views here.
-BOOK_CATEGORIES = ["Book", "Journal", "Digital"]
+from apps.students.models import Student
+from apps.staff.models import Staff
 
 
-class BooksListView(ListView):
-    model = Book
-    template_name = "library/books/books.html"
-    context_object_name = "books"
-    paginate_by = 8
+class MemberListAPIView(generics.ListAPIView):
+    """API view for listing all members"""
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(title__icontains=search_query)
-                | Q(author__icontains=search_query)
-            )
-
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["book_categories"] = BOOK_CATEGORIES
-        return context
-
-
-class BookDetailView(ListView):
-    model = BorrowTransaction
-    template_name = "library/books/book_details.html"
-    context_object_name = "borrowings"
-    paginate_by = 6
-
-    book = Book.objects.none()
-    members = Member.objects.all()
+    queryset = Member.objects.all().select_related("user")
+    serializer_class = MemberListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MemberFilter
+    pagination_class = None
 
     def get_queryset(self):
-        book_id = self.kwargs["id"]  # Access the 'id' parameter from the URL
-        queryset = super().get_queryset().filter(book_id=book_id)
-        search_query = self.request.GET.get("search", "")
+        return Member.objects.all().order_by("-created_on")
 
-        self.book = Book.objects.get(id=book_id)
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
 
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(member__user__first_name__icontains=search_query)
+    def list(self, request, *args, **kwargs):
+        try:
+            members = self.get_queryset()
+            members = self.filter_queryset(members)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_members = paginator.paginate_queryset(members, request)
+                serializer = self.get_serializer(paginated_members, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(members, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        return queryset.order_by("-created_on")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get(
-            "search", ""
-        )  # Pass the search query back to the template
-        context["book"] = self.book
-        context["members"] = self.members
-        return context
+class MemberCreateAPIView(generics.CreateAPIView):
+    """API view for creating a new member"""
+
+    serializer_class = MemberCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+
+    def create(self, request, *args, **kwargs):
+        try:
+
+            serializer = self.get_serializer(data=request.data)
+
+            serializer.is_valid(raise_exception=True)
+
+            self.perform_create(serializer)
+
+            return Response(
+                {"message": "Member created successfully!", "data": serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            raise
 
 
-def new_book(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        author = request.POST.get("author")
-        category = request.POST.get("category")
-        isbn = request.POST.get("isbn")
-        publication_date = request.POST.get("publication_date")
-        copies_available = request.POST.get("copies_available")
-        total_copies = request.POST.get("total_copies")
-        unit_price = request.POST.get("unit_price")
+class MemberUpdateAPIView(generics.RetrieveUpdateAPIView):
+    """API view for updating a member"""
 
-        Book.objects.create(
-            title=title,
-            author=author,
-            category=category,
-            isbn=isbn,
-            publication_date=publication_date,
-            copies_available=copies_available,
-            total_copies=total_copies,
-            unit_price=unit_price,
+    queryset = Member.objects.all()
+    serializer_class = MemberCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = "pk"
+    http_method_names = ["patch", "put"]
+
+
+class MemberDeactivateView(generics.UpdateAPIView):
+    """View for deactivating members"""
+
+    queryset = Member.objects.all()
+    serializer_class = MemberDeactivateSerializer
+    lookup_field = "pk"
+    http_method_names = ["patch", "put"]
+
+
+class MemberReactivateView(generics.UpdateAPIView):
+    """View for reactivating members"""
+
+    queryset = Member.objects.all()
+    serializer_class = MemberReactivateSerializer
+    lookup_field = "pk"
+    http_method_names = ["patch", "put"]
+
+
+class MemberDetailAPIView(generics.RetrieveAPIView):
+    """API view for retrieving a single member"""
+
+    queryset = Member.objects.all().select_related("user")
+    serializer_class = MemberListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = "pk"
+
+
+class BookCreateAPIView(generics.CreateAPIView):
+    """API view for creating a new book"""
+
+    serializer_class = BookCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+
+    def create(self, request, *args, **kwargs):
+        try:
+
+            serializer = self.get_serializer(data=request.data)
+
+            serializer.is_valid(raise_exception=True)
+
+            self.perform_create(serializer)
+
+            return Response(
+                {"message": "Book added successfully!", "data": serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            raise
+
+
+class BookUpdateAPIView(generics.RetrieveUpdateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = "pk"
+    http_method_names = ["patch", "put"]
+
+
+class BookListAPIView(generics.ListAPIView):
+    """API view for listing all books"""
+
+    queryset = Book.objects.all().order_by("-created_on")
+    serializer_class = BookListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = BookFilter
+    pagination_class = None
+
+    def get_queryset(self):
+        return Book.objects.all().order_by("-created_on")
+
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            books = self.get_queryset()
+            books = self.filter_queryset(books)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_books = paginator.paginate_queryset(books, request)
+                serializer = self.get_serializer(paginated_books, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(books, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class BookDetailAPIView(generics.RetrieveAPIView):
+    """API view for retrieving a single book"""
+
+    queryset = Book.objects.all()
+    serializer_class = BookListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = "pk"
+
+
+class BorrowTransactionCreateView(generics.CreateAPIView):
+    """Create a new borrow transaction."""
+
+    queryset = BorrowTransaction.objects.all()
+    serializer_class = BorrowTransactionCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+
+    def perform_create(self, serializer):
+        """Set the current user as issued_by when creating a borrow transaction"""
+        serializer.save(issued_by=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        """Custom create method with custom response format"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(
+            {"message": "Book borrowed successfully", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
         )
 
-        return redirect("books")
-    return render(request, "library/books/new_book.html")
 
+class BorrowTransactionListView(generics.ListAPIView):
+    """
+    List all borrow transactions with filtering options.
+    """
 
-def edit_book(request):
-    if request.method == "POST":
-        book_id = request.POST.get("book_id")
-        title = request.POST.get("title")
-        author = request.POST.get("author")
-        category = request.POST.get("category")
-        isbn = request.POST.get("isbn")
-        publication_date = request.POST.get("publication_date")
-        copies_available = request.POST.get("copies_available")
-        total_copies = request.POST.get("total_copies")
-        unit_price = request.POST.get("unit_price")
+    queryset = BorrowTransaction.objects.all()
+    serializer_class = BorrowTransactionListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = BorrowTransactionFilter
+    pagination_class = None
 
-        book = Book.objects.get(id=book_id)
-        book.title = title
-        book.author = author
-        book.category = category
-        book.isbn = isbn
-        book.publication_date = publication_date
-        book.copies_available = copies_available
-        book.total_copies = total_copies
-        book.unit_price = unit_price
-        book.save()
-        return redirect("books")
-    return render(request, "library/books/edit_book.html")
-
-
-def delete_book(request):
-    if request.method == "POST":
-        book_id = request.POST.get("book_id")
-        book = Book.objects.get(id=book_id)
-        book.delete()
-        return redirect("books")
-    return render(request, "library/books/delete_book.html")
-
-
-def issue_book(request):
-    if request.method == "POST":
-        book_id = request.POST.get("book_id")
-        member_id = request.POST.get("member_id")
-        book_number = request.POST.get("book_number")
-        due_date = request.POST.get("due_date")
-
-        issued_book = BorrowTransaction.objects.create(
-            book_id=book_id, member_id=member_id
+    def get_queryset(self):
+        return (
+            BorrowTransaction.objects.all().order_by("-created_on")
         )
-        issued_book.book.copies_available -= 1
-        issued_book.book.save()
 
-        issued_book.book_number = book_number if book_number else issued_book.book.isbn
-        issued_book.due_date = due_date if due_date else None
-        issued_book.save()
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
 
-        return redirect(f"/library/books/{book_id}/details")
-    return render(request, "library/books/issue_book.html")
-
-
-def issue_member_book(request):
-    if request.method == "POST":
-        book_id = request.POST.get("book_id")
-        member_id = request.POST.get("member_id")
-        book_number = request.POST.get("book_number")
-        due_date = request.POST.get("due_date")
-
-        issued_book = BorrowTransaction.objects.create(
-            book_id=book_id, member_id=member_id
-        )
-        issued_book.book.copies_available -= 1
-        issued_book.book.save()
-
-        issued_book.book_number = book_number if book_number else issued_book.book.isbn
-        issued_book.due_date = due_date if due_date else None
-        issued_book.save()
-
-        return redirect(f"/library/members/{member_id}/details")
-    return render(request, "library/members/issue_member_book.html")
-
-
-class MembersListView(ListView):
-    model = Member
-    template_name = "library/members/members.html"
-    context_object_name = "members"
-    paginate_by = 6
-
-    users = User.objects.all()
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(user__first_name__icontains=search_query)
-            )
-
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get(
-            "search", ""
-        )  # Pass the search query back to the template
-        context["users"] = self.users
-        return context
-
-
-class MembersBooksListView(ListView):
-    model = BorrowTransaction
-    template_name = "library/members/member_details.html"
-    context_object_name = "borrowings"
-    paginate_by = 8
-
-    member = Member.objects.all()
-    books = Book.objects.all()
-
-    def get_queryset(self):
-        member_id = self.kwargs["id"]
-        queryset = super().get_queryset().filter(member_id=member_id)
-        search_query = self.request.GET.get("search", "")
-
-        self.member = Member.objects.get(id=member_id)
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query) | Q(book__title__icontains=search_query)
-            )
-
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get(
-            "search", ""
-        )  # Pass the search query back to the template
-        context["member"] = self.member
-        context["books"] = self.books
-        return context
-
-
-def new_member(request):
-    if request.method == "POST":
-        user_id = request.POST.get("user_id")
-        role = request.POST.get("role")
-
-        Member.objects.create(user_id=user_id, role=role)
-        return redirect("members")
-    return render(request, "library/members/new_member.html")
-
-
-def deactivate_member(request):
-    if request.method == "POST":
-        member_id = request.POST.get("member_id")
-        member = Member.objects.get(id=member_id)
-        member.active = False
-        member.save()
-        return redirect("members")
-    return render(request, "library/members/deactivate_member.html")
-
-
-def reactivate_member(request):
-    if request.method == "POST":
-        member_id = request.POST.get("member_id")
-        member = Member.objects.get(id=member_id)
-        member.active = True
-        member.save()
-        return redirect("members")
-    return render(request, "library/members/reactivate_member.html")
-
-
-class BooksIssuedListView(ListView):
-    model = BorrowTransaction
-    template_name = "library/borrowing/books_issued.html"
-    context_object_name = "borrowings"
-    paginate_by = 9
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(member__user__first_name__icontains=search_query)
-                | Q(book__title__icontains=search_query)
-            )
-
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get(
-            "search", ""
-        )  # Pass the search query back to the template
-        return context
-
-
-def return_issued_book(request):
-    if request.method == "POST":
-        borrowing_id = request.POST.get("borrowing_id")
-
-        borrowing = BorrowTransaction.objects.get(id=borrowing_id)
-        borrowing.status = "Returned"
-        borrowing.return_date = date_today
-        borrowing.save()
-
-        if borrowing.is_overdue:
-            Fine.objects.create(borrow_transaction=borrowing)
-            return redirect("issued-books")
-        return redirect("issued-books")
-    return render(request, "library/borrowing/return_book.html")
-
-
-def mark_issued_book_as_lost(request):
-    if request.method == "POST":
-        borrowing_id = request.POST.get("borrowing_id")
-
-        borrowing = BorrowTransaction.objects.get(id=borrowing_id)
-        borrowing.status = "Lost"
-        borrowing.save()
-
-        Fine.objects.create(borrow_transaction=borrowing)
-        return redirect("issued-books")
-    return render(request, "library/borrowing/lost_book.html")
-
-
-def reset_borrowed_book(request):
-    if request.method == "POST":
-        borrowing_id = request.POST.get("borrowing_id")
-
-        borrowing = BorrowTransaction.objects.get(id=borrowing_id)
-        borrowing.status = "Pending Return"
-        borrowing.save()
-
-        fines = Fine.objects.filter(borrow_transaction=borrowing)
-        fines.delete()
-        return redirect("issued-books")
-    return render(request, "library/borrowing/reset_borrowing.html")
-
-
-class BorrowingFinesListView(ListView):
-    model = Fine
-    template_name = "library/fines/fines.html"
-    context_object_name = "fines"
-    paginate_by = 9
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(
-                    borrowing_transaction__member__user__first_name__icontains=search_query
+    def list(self, request, *args, **kwargs):
+        try:
+            borrow_transactions = self.get_queryset()
+            borrow_transactions = self.filter_queryset(borrow_transactions)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_borrow_transactions = paginator.paginate_queryset(
+                    borrow_transactions, request
                 )
-                | Q(borrowing_transaction__book__title__icontains=search_query)
+                serializer = self.get_serializer(
+                    paginated_borrow_transactions, many=True
+                )
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(borrow_transactions, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        return queryset.order_by("-created_on")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get(
-            "search", ""
-        )  # Pass the search query back to the template
-        return context
+class BorrowTransactionUpdateView(generics.UpdateAPIView):
+    """Update a borrow transaction (mainly for returning books)."""
 
+    queryset = BorrowTransaction.objects.all()
+    serializer_class = BorrowTransactionUpdateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    look_up_field = "pk"
 
-@transaction.atomic
-def request_fine_payment(request):
-    if request.method == "POST":
-        fine_id = request.POST.get("fine_id")
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        old_status = instance.status
+        partial = kwargs.pop("partial", False)
 
-        fine = Fine.objects.get(id=fine_id)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
 
-        LibraryFinePayment.objects.create(
-            member=fine.borrow_transaction.member,
-            fine=fine,
-            amount=fine.calculated_fine,
-            paid=False,
+        new_status = serializer.validated_data.get("status", old_status)
+        self.perform_update(serializer)
+
+        if new_status in ["Returned", "Lost"] and old_status not in [
+            "Returned",
+            "Lost",
+        ]:
+            updated_instance = self.get_object()
+
+            if updated_instance.is_overdue() or new_status == "Lost":
+                fine, created = Fine.objects.get_or_create(
+                    borrow_transaction=updated_instance,
+                    defaults={"fine_per_day": 0.50, "paid": False},
+                )
+                fine.save()
+
+        return Response(
+            {
+                "message": "Borrowing record updated successfully",
+                "data": serializer.data,
+            },
+            status=status.HTTP_200_OK,
         )
 
-        fine.paid = False
-        fine.save()
 
-        return redirect("borrowing-fines")
-    return render(request, "library/fines/request_fine_payment.html")
+class BorrowedBookTransactionDetailAPIView(generics.RetrieveAPIView):
+    """API view for retrieving a single borrow record"""
+
+    queryset = BorrowTransaction.objects.all()
+    serializer_class = BorrowTransactionListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = "pk"
+
+
+class FineCreateView(generics.CreateAPIView):
+
+    queryset = Fine.objects.all()
+    serializer_class = FineCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+
+    def create(self, request, *args, **kwargs):
+        """Custom create method with validation"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        transaction = serializer.validated_data.get("transaction")
+        if Fine.objects.filter(transaction=transaction).exists():
+            return Response(
+                {"error": "A fine already exists for this book."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not transaction.is_overdue and transaction.status != "Lost":
+            return Response(
+                {"error": "Cannot create fine for non-overdue, non-lost books."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(
+            {"message": "Fine created successfully", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
+
+class FineListView(generics.ListAPIView):
+    """
+    List all fines with filtering options.
+    """
+
+    queryset = Fine.objects.all()
+    serializer_class = FineListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = FineFilter
+    pagination_class = None
+
+    def get_queryset(self):
+        return Fine.objects.all().order_by("-created_on")
+
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            fines = self.get_queryset()
+            fines = self.filter_queryset(fines)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_fines = paginator.paginate_queryset(fines, request)
+                serializer = self.get_serializer(paginated_fines, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(fines, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+
+class FineUpdateView(generics.UpdateAPIView):
+    """
+    Update a fine (mainly for marking as paid).
+    """
+
+    queryset = Fine.objects.all()
+    serializer_class = FineUpdateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+
+    def update(self, request, *args, **kwargs):
+        """Custom update method"""
+        instance = self.get_object()
+        partial = kwargs.pop("partial", False)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_update(serializer)
+
+        return Response(
+            {"message": "Fine updated successfully", "data": serializer.data}
+        )
+
+
+class FinePaymentRequestView(generics.CreateAPIView):
+    serializer_class = FinePaymentRequestSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        payment_request = serializer.save()
+
+       
+        output_serializer = LibraryFinePaymentSerializer(payment_request)
+
+        return Response(
+            {
+                "message": "Fine payment request created successfully",
+                "data": {
+                    "payment_request": output_serializer.data,
+                    "member": payment_request.member.user.first_name,
+                    "amount": str(payment_request.amount),
+                    "status": "requested",
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )

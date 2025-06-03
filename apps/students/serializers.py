@@ -1,6 +1,6 @@
 from apps.core.models import Campus
 from apps.core.serializers import CampusListSerializer
-from apps.hostels.serializers import HostelRoomSerializer, HostelSerializer
+from apps.hostels.serializers import HostelRoomListSerializer
 from apps.schools.models import Programme, ProgrammeCohort
 from apps.users.serializers import UserSerializer
 from rest_framework import serializers
@@ -79,7 +79,7 @@ class StudentListSerializer(serializers.ModelSerializer):
 class StudentDetailSerialzer(serializers.ModelSerializer):
     user = UserSerializer()
     programme = ProgrammeListSerializer()
-    hostel_room =HostelRoomSerializer()
+    hostel_room =HostelRoomListSerializer()
     campus = CampusListSerializer()
     cohort = ProgrammeCohortListSerializer()
     class Meta:

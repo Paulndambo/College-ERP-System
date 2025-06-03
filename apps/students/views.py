@@ -22,7 +22,7 @@ from apps.users.serializers import AdminUserSerializer, UserSerializer
 from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
 from services.permissions import HasUserRole
 from .models import Student, StudentProgramme
-
+from django.contrib.auth.models import AnonymousUser
 from .serializers import (
     MealCardCreateSerializer,
     MealCardListSerializer,
@@ -292,6 +292,8 @@ class StudentEducationHistoryUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return StudentEducationHistory.objects.none()
         if user.role.name == ROLE_STUDENT:
             student = Student.objects.get(user=user)
             return StudentEducationHistory.objects.filter(student=student)
@@ -337,6 +339,8 @@ class StudentDocumentUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return StudentDocument.objects.none()
         if user.role.name == ROLE_STUDENT:
             student = Student.objects.get(user=user)
             return StudentDocument.objects.filter(student=student)
@@ -382,6 +386,8 @@ class StudentMealCardUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return MealCard.objects.none()
         if user.role.name == ROLE_STUDENT:
             student = Student.objects.get(user=user)
             return MealCard.objects.filter(student=student)
@@ -427,6 +433,8 @@ class StudentProgrammeUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return StudentProgramme.objects.none()
         if user.role.name == ROLE_STUDENT:
             student = Student.objects.get(user=user)
             return StudentProgramme.objects.filter(student=student)

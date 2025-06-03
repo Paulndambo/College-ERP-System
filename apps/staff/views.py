@@ -1,266 +1,218 @@
-from datetime import datetime, timedelta
-import calendar
-from decimal import Decimal
-
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.db.models import Case, When, Value, IntegerField
-from django.db import transaction
 
+from apps.staff.models import Staff
+from apps.staff.serializers import StaffCreateSerializer, StaffListDetailSerializer
+from .filters import StaffFilter
+from rest_framework.exceptions import ValidationError
 from django.views.generic import ListView
 from django.http import JsonResponse
+from django.db.models import Q
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.db import transaction
+import pandas as pd
+import io
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+from apps.users.models import User, UserRole
+from apps.users.serializers import AdminUserSerializer, UserSerializer
+from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
+from services.permissions import HasUserRole
 
-from apps.staff.models import Staff, Department, StaffLeaveApplication, StaffLeave
+from django.contrib.auth.models import AnonymousUser
+
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+
+
 from apps.users.models import User
 from apps.core.models import UserRole
 
-from apps.core.constants import LEAVE_TYPES
 
+class CreateStaffView(generics.CreateAPIView):
+    queryset = Staff.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = StaffCreateSerializer
 
-# Create your views here.
-def staff(request):
-    staff = Staff.objects.all().order_by("-created_on")
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        first_name = data.get("first_name")
+        last_name = data.get("last_name")
+        email = data.get("email")
+        gender = data.get("gender")
+        phone_number = data.get("phone_number")
+        id_number = data.get("id_number", None)
+        passport_number = data.get("passport_number", None)
+        address = data.get("address")
+        postal_code = data.get("postal_code", None)
+        city = data.get("city")
+        state = data.get("state", None)
+        country = data.get("country", None)
+        date_of_birth = data.get("date_of_birth")
+        role = data.get("role")
+        is_verified = (
+            True
+            if request.user.role.name in ALL_STAFF_ROLES
+            else data.get("is_verified", False)
+        )
+        staff_number = data.get("staff_number")
 
-    paginator = Paginator(staff, 10)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    user_roles = UserRole.objects.exclude(name__in=["Student", "Admin"]).all()
-    departments = Department.objects.all()
-
-    context = {
-        "page_obj": page_obj,
-        "user_roles": user_roles,
-        "departments": departments,
-    }
-    return render(request, "staff/staff.html", context)
-
-
-class StaffListView(ListView):
-    model = Staff
-    template_name = "staff/staff.html"
-    context_object_name = "staffs"
-    paginate_by = 9
-
-    user_roles = UserRole.objects.exclude(name__in=["Student", "Admin"]).all()
-    departments = Department.objects.all()
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(user__first_name__icontains=search_query)
+        try:
+            user = User.objects.create(
+                username=staff_number,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                gender=gender,
+                phone_number=phone_number,
+                id_number=id_number,
+                passport_number=passport_number,
+                address=address,
+                postal_code=postal_code,
+                city=city,
+                state=state,
+                country=country,
+                date_of_birth=date_of_birth,
+                is_verified=is_verified,
+                role=role,
             )
 
-        # Get sort parameter
-        return queryset.order_by("-created_on")
+            user.set_password(staff_number)
+            user.save()
+        except Exception as e:
+            raise CustomAPIException(
+                message=f"Error creating user: {str(e)}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["user_roles"] = self.user_roles
-        context["departments"] = self.departments
-        return context
-
-
-def staff_details(request, id):
-    staff = Staff.objects.get(id=id)
-    context = {"staff": staff}
-    return render(request, "staff/staff_details.html", context)
-
-
-def new_staff(request):
-    if request.method == "POST":
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        gender = request.POST.get("gender")
-        phone_number = request.POST.get("phone_number")
-        address = request.POST.get("address")
-        city = request.POST.get("city")
-        country = request.POST.get("country")
-        department = request.POST.get("department")
-        role = request.POST.get("role")
-        position = request.POST.get("position")
-        state = request.POST.get("state")
-        postal_code = request.POST.get("postal_code")
-
-        user_role = UserRole.objects.get(id=role)
-
-        user = User.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            username=email,
-            role=user_role,
-            phone_number=phone_number,
-            address=address,
-            postal_code=postal_code,
-            city=city,
-            state=state,
-            country=country,
-            gender=gender,
+        staff_serializer = self.get_serializer(
+            data={**data, "user": user.id, "status": "Active"}
         )
-
-        staff = Staff.objects.create(
-            user=user,
-            staff_number=phone_number,
-            department_id=department,
-            position=position,
-        )
-        return redirect("staff")
-    return render(request, "staff/new_staff.html")
+        staff_serializer.is_valid(raise_exception=True)
+        self.perform_create(staff_serializer)
+        return Response(staff_serializer.data, status=status.HTTP_201_CREATED)
 
 
-class LeaveApplicationListView(ListView):
-    model = StaffLeaveApplication
-    template_name = "staff/leaves/applications.html"
-    context_object_name = "applications"
-    paginate_by = 8
+class StaffUpdateView(generics.UpdateAPIView):
+    queryset = Staff.objects.all()
+    serializer_class = StaffCreateSerializer
+    lookup_field = "pk"
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
-    staffs = Staff.objects.all()
+    def get_object(self):
+        staff = super().get_object()
+        return super().get_object()
+
+    def patch(self, request, *args, **kwargs):
+        staff = self.get_object()
+        data = request.data
+
+        staff_serializer = self.get_serializer(staff, data=data, partial=True)
+
+        if staff_serializer.is_valid():
+            staff_serializer.save()
+            return Response(staff_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(staff_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StaffAccountUpdateView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = AdminUserSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = "pk"
+
+    
+
+class StaffUpdateView(generics.UpdateAPIView):
+    queryset = Staff.objects.all()
+    serializer_class = StaffCreateSerializer
+    lookup_field = "pk"
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    @transaction.atomic
+    def patch(self, request, *args, **kwargs):
+        staff = self.get_object()
+        data = request.data
+
+        
+        if staff.user:
+            user = staff.user
+            user_fields = [
+                "first_name",
+                "last_name",
+                "email",
+                "gender",
+                "phone_number",
+                "id_number",
+                "passport_number",
+                "address",
+                "postal_code",
+                "city",
+                "state",
+                "country",
+                "date_of_birth",
+                "role",
+                "is_verified",
+            ]
+
+            for field in user_fields:
+                if field in data:
+                    setattr(user, field, data[field])
+
+            if "staff_number" in data:
+                user.username = data["staff_number"]
+
+            user.save()
+
+        staff_serializer = self.get_serializer(staff, data=data, partial=True)
+        staff_serializer.is_valid(raise_exception=True)
+        staff_serializer.save()
+
+        return Response(staff_serializer.data, status=status.HTTP_200_OK)
+
+
+class StaffListView(generics.ListAPIView):
+    queryset = Staff.objects.all()
+    serializer_class = StaffListDetailSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StaffFilter
+    pagination_class = None
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
+        return Staff.objects.all().order_by("-created_on")
 
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(staff__user__first_name__icontains=search_query)
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            staff = self.get_queryset()
+            staff = self.filter_queryset(staff)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_staff = paginator.paginate_queryset(staff, request)
+                serializer = self.get_serializer(paginated_staff, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(staff, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["staffs"] = self.staffs
-        context["leave_types"] = LEAVE_TYPES
-        return context
-
-
-def leave_application_details(request, id):
-    application = StaffLeaveApplication.objects.get(id=id)
-    context = {"application": application}
-    return render(request, "staff/leaves/details.html", context)
-
-
-def new_leave_application(request):
-    if request.method == "POST":
-        staff = request.POST.get("staff_id")
-        start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
-        leave_type = request.POST.get("leave_type")
-        reason = request.POST.get("reason")
-
-        StaffLeaveApplication.objects.create(
-            staff_id=staff,
-            start_date=start_date,
-            end_date=end_date,
-            reason=reason,
-            leave_type=leave_type,
-            status="Pending",
-        )
-        return redirect("leave-applications")
-    return render(request, "staff/leaves/new_application.html")
-
-
-def edit_leave_application(request):
-    if request.method == "POST":
-        id = request.POST.get("application_id")
-        start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
-        leave_type = request.POST.get("leave_type")
-        reason = request.POST.get("reason")
-
-        application = StaffLeaveApplication.objects.get(id=id)
-        application.start_date = start_date
-        application.end_date = end_date
-        application.reason = reason
-        application.leave_type = leave_type
-        application.save()
-        return redirect("leave-applications")
-    return render(request, "staff/leaves/edit_application.html")
-
-
-def approve_leave_application(request):
-    if request.method == "POST":
-        id = request.POST.get("application_id")
-        application = StaffLeaveApplication.objects.get(id=id)
-        application.status = "Approved"
-        application.save()
-
-        StaffLeave.objects.create(application=application)
-        return redirect("leave-applications")
-    return render(request, "staff/leaves/approve_application.html")
-
-
-def decline_leave_application(request):
-    if request.method == "POST":
-        id = request.POST.get("application_id")
-        decline_reason = request.POST.get("decline_reason")
-        application = StaffLeaveApplication.objects.get(id=id)
-        application.status = "Declined"
-        application.reason_declined = decline_reason
-        application.save()
-        return redirect("leave-applications")
-    return render(request, "staff/leaves/decline_application.html")
-
-
-class LeavesListView(ListView):
-    model = StaffLeave
-    template_name = "staff/leaves/leaves.html"
-    context_object_name = "leaves"
-    paginate_by = 8
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(application__staff__user__first_name__icontains=search_query)
-            )
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        return context
-
-
-def leave_details(request, id):
-    leave = StaffLeave.objects.get(id=id)
-    context = {"leave": leave}
-    return render(request, "staff/leaves/leave_details.html", context)
-
-
-def complete_leave(request):
-    if request.method == "POST":
-        id = request.POST.get("leave_id")
-        leave = StaffLeave.objects.get(id=id)
-        leave.status = "Completed"
-        leave.save()
-        return redirect("leaves")
-    return render(request, "staff/leaves/complete_leave.html")
-
-
-def cancel_leave(request):
-    if request.method == "POST":
-        id = request.POST.get("leave_id")
-        reason_cancelled = request.POST.get("reason_cancelled")
-        leave = StaffLeave.objects.get(id=id)
-        leave.status = "Cancelled"
-        leave.reason_cancelled = reason_cancelled
-        leave.save()
-        return redirect("leaves")
-    return render(request, "staff/leaves/cancel_leave.html")

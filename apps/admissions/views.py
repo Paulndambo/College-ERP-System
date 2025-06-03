@@ -19,7 +19,7 @@ from .models import (
     ApplicationDocument,
     ApplicationEducationHistory,
 )
-
+from django.contrib.auth.models import AnonymousUser
 from .serializers import (
     IntakeCreateSerializer,
     IntakeListDetailSerializer,
@@ -123,6 +123,8 @@ class StudentApplicationUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return StudentApplication.objects.none()
         if user.role.name == ROLE_STUDENT:
 
             return StudentApplication.objects.filter(email=user.email)
@@ -185,15 +187,16 @@ class StudentApplicationListView(generics.ListAPIView):
 
 class StudentApplicationDetailView(generics.RetrieveAPIView):
     queryset = StudentApplication.objects.all()
+    serializer_class = StudentApplicationListDetailSerializer
     permission_classes = [HasUserRole]
     allowed_roles = ALL_ROLES
-    serializer_class = StudentApplicationListDetailSerializer
     lookup_field = "pk"
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return StudentApplication.objects.none()
         if user.role.name == ROLE_STUDENT:
-
             return StudentApplication.objects.filter(email=user.email)
         return StudentApplication.objects.all()
 
@@ -236,13 +239,16 @@ class ApplicationDocumentUpdateView(generics.UpdateAPIView):
     serializer_class = ApplicationDocumentCreateSerializer
     lookup_field = "pk"
 
-    def get_queryset(self):
-        user = self.request.user
-        if user.role.name == ROLE_STUDENT:
-            return ApplicationDocument.objects.filter(
-                student_application__email=user.email
-            )
-        return ApplicationDocument.objects.all()
+    # def get_queryset(self):
+    #     user = self.request.user
+    #     if isinstance(user, AnonymousUser):
+    #         return ApplicationDocument.objects.none()
+    #     if user.role.name == ROLE_STUDENT:
+            
+    #         return ApplicationDocument.objects.filter(
+    #             student_application__email=user.email
+    #         )
+    #     return ApplicationDocument.objects.all()
 
     def patch(self, request, *args, **kwargs):
         document = self.get_object()
@@ -290,13 +296,15 @@ class ApplicationDocumentListView(generics.ListAPIView):
 
 class ApplicationDocumentDetailView(generics.RetrieveDestroyAPIView):
     queryset = ApplicationDocument.objects.all()
+    serializer_class = ApplicationDocumentListDetailSerializer
     permission_classes = [HasUserRole]
     allowed_roles = ALL_ROLES
-    serializer_class = ApplicationDocumentListDetailSerializer
     lookup_field = "pk"
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return ApplicationDocument.objects.none()
         if user.role.name == ROLE_STUDENT:
             return ApplicationDocument.objects.filter(
                 student_application__email=user.email
@@ -333,13 +341,15 @@ class ApplicationEducationHistoryCreateView(generics.CreateAPIView):
 
 class ApplicationEducationHistoryUpdateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ApplicationEducationHistory.objects.all()
+    serializer_class = ApplicationEducationHistoryCreateSerializer
     permission_classes = [HasUserRole]
     allowed_roles = ALL_ROLES
-    serializer_class = ApplicationEducationHistoryCreateSerializer
     lookup_field = "pk"
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return ApplicationEducationHistory.objects.none()
         if user.role.name == ROLE_STUDENT:
             return ApplicationEducationHistory.objects.filter(
                 student_application__email=user.email
@@ -396,6 +406,8 @@ class ApplicationEducationHistoryDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return ApplicationEducationHistory.objects.none()
         if user.role.name == ROLE_STUDENT:
             return ApplicationEducationHistory.objects.filter(
                 student_application__email=user.email
