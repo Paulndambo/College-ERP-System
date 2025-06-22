@@ -3,11 +3,21 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
-
+from rest_framework.exceptions import ValidationError
 from django.views.generic import ListView
 from django.http import JsonResponse
 from django.db.models import Q
-
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+from apps.users.models import User, UserRole
+from apps.users.serializers import UserSerializer
+from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
+from services.permissions import HasUserRole
+from .models import Student, StudentProgramme
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from .serializers import MealCardCreateSerializer, MealCardListSerializer, StudentCreateSerializer, StudentDocumentCreateSerializer, StudentDocumentListSerializer, StudentEducationHistoryCreateSerializer, StudentEducationHistoryListSerializer, StudentProgrammeCreateSerializer, StudentProgrammeListSerializer
 
 from apps.students.models import (
     Student,
@@ -19,242 +29,248 @@ from apps.users.models import User
 from apps.core.models import UserRole
 from apps.schools.models import Programme, ProgrammeCohort
 
+class StudentRegistrationView(generics.CreateAPIView):
+    queryset = Student.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = StudentCreateSerializer
 
-# Create your views here.
-EDUCATION_LEVELS = ["Primary School", "Secondary School", "College", "University"]
-GRADUATION_STATUSES = ["Graduated", "Not Graduated"]
-GUARDIAN_RELATIONSHIPS = ["Parent", "Grand Parent", "Sibling", "Aunt/Uncle", "Other"]
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        first_name = data.get("first_name")
+        last_name = data.get("last_name")
+        email = data.get("email")
+        username = data.get("username")
+        password = data.get("password")
+        gender = data.get("gender")
+        phone_number = data.get("phone_number")
+        id_number = data.get("id_number")
+        passport_number = data.get("passport_number")
+        address = data.get("address")
+        postal_code = data.get("postal_code")
+        city = data.get("city")
+        state = data.get("state")
+        country = data.get("country")
+        date_of_birth = data.get("date_of_birth")
+        is_verified = True if request.user.role.name in ALL_STAFF_ROLES else data.get("is_verified", False)
 
-
-
-programmes = Programme.objects.all().order_by("-created_on")
-
-
-class StudentListView(ListView):
-    model = Student
-    template_name = "students/students.html"
-    context_object_name = "students"
-    paginate_by = 10
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(registration_number__icontains=search_query)
-                | Q(user__first_name__icontains=search_query)
+     
+        try:
+            role = UserRole.objects.get(name="Student")
+        except UserRole.DoesNotExist:
+            raise CustomAPIException(
+                message="UserRole 'Student' not found.",
+                status_code=status.HTTP_400_BAD_REQUEST
             )
 
-        # Get sort parameter
-        return queryset.order_by("-created_on")
+     
+        user_serializer = UserSerializer(data={
+            "first_name": first_name,
+            "last_name": last_name,
+            "email": email,
+            "username": username,
+            "password": password,
+            "gender": gender,
+            "phone_number": phone_number,
+            "id_number": id_number,
+            "passport_number": passport_number,
+            "address": address,
+            "postal_code": postal_code,
+            "city": city,
+            "state": state,
+            "country": country,
+            "date_of_birth": date_of_birth,
+            "is_verified": is_verified,
+            "role": role.id  
+        })
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["relationship_choices"] = GUARDIAN_RELATIONSHIPS
-        context["programmes"] = programmes
-        return context
+        if user_serializer.is_valid():
+            user = user_serializer.save()
+        else:
+            raise ValidationError(user_serializer.errors)
 
+        
+        student_serializer = self.get_serializer(data={**data, "user": user.id})
+        student_serializer.is_valid(raise_exception=True)
+        self.perform_create(student_serializer)
+        return Response(student_serializer.data, status=status.HTTP_201_CREATED)
 
-def student_details(request, student_id):
-    student = Student.objects.get(id=student_id)
+class StudentUpdateView(generics.UpdateAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentCreateSerializer
+    lookup_field = 'pk'
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
-    cohorts = ProgrammeCohort.objects.all().order_by("-created_on")
-    documents = StudentDocument.objects.filter(student=student)
+    def get_object(self):
+        student = super().get_object()
+        return super().get_object()
+        
+    def patch(self, request, *args, **kwargs):
+        student = self.get_object()
+        data = request.data
 
-    education_history = StudentEducationHistory.objects.filter(
-        student_id=student_id
-    ).order_by("-created_on")
-    context = {
-        "student": student,
-        "education_history": education_history,
-        "cohorts": cohorts,
-        "levels": EDUCATION_LEVELS,
-        "statuses": GRADUATION_STATUSES,
-        "documents": documents,
-    }
+        student_serializer = self.get_serializer(student, data=data, partial=True)
 
-    return render(request, "students/student_details.html", context)
+    
+        if student_serializer.is_valid():
+            student_serializer.save()
+            return Response(student_serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(student_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class StudentEducationHistoryListView(generics.ListAPIView):
+    serializer_class = StudentEducationHistoryListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return StudentEducationHistory.objects.filter(student__user=user)
+        return StudentEducationHistory.objects.all()
 
-def new_student(request):
-    if request.method == "POST":
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        gender = request.POST.get("gender")
-        phone_number = request.POST.get("phone_number")
-        address = request.POST.get("address")
-        city = request.POST.get("city")
-        country = request.POST.get("country")
+class StudentEducationHistoryCreateView(generics.CreateAPIView):
+    serializer_class = StudentEducationHistoryCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
-        registration_number = request.POST.get("registration_number")
-        guardian_name = request.POST.get("guardian_name")
-        guardian_phone_number = request.POST.get("guardian_phone_number")
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+        else:
+            student_id = self.request.data.get("student")
+            if not student_id:
+                raise ValidationError({"error": "Student  is required for staff users."})
+            student = Student.objects.get(id=student_id)
+        serializer.save(student=student)
 
-        programme_id = request.POST.get("programme_id")
+class StudentEducationHistoryUpdateView(generics.UpdateAPIView):
+    serializer_class = StudentEducationHistoryCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    lookup_field = 'pk'
 
-        user_role = UserRole.objects.get(name="Student")
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+            return StudentEducationHistory.objects.filter(student=student)
+        return StudentEducationHistory.objects.all()
 
-        user = User.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            username=registration_number,
-            role=user_role,
-            phone_number=phone_number,
-            address=address,
-            city=city,
-            country=country,
-            gender=gender,
-        )
+    
+class StudentDocumentHistoryListView(generics.ListAPIView):
+    serializer_class = StudentDocumentListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
-        student = Student.objects.create(
-            user=user,
-            registration_number=registration_number,
-            guardian_name=guardian_name,
-            guardian_phone_number=guardian_phone_number,
-            programme_id=programme_id,
-            status="Active",
-        )
-        messages.success(request, "Student created successfully.")
-        return redirect("students")
-    return render(request, "students/new_student.html")
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return StudentDocument.objects.filter(student__user=user)
+        return StudentDocument.objects.all()
+class StudentDocumentCreateView(generics.CreateAPIView):
+    serializer_class = StudentDocumentCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+        else:
+            student_id = self.request.data.get("student")
+            if not student_id:
+                raise ValidationError({"student": "Student  is required for staff users."})
+            student = Student.objects.get(id=student_id)
+        serializer.save(student=student)
+class StudentDocumentUpdateView(generics.UpdateAPIView):
+    serializer_class = StudentDocumentCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    lookup_field = 'pk'
 
-def edit_student(request):
-    if request.method == "POST":
-        student_id = request.POST.get("student_id")
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        gender = request.POST.get("gender")
-        phone_number = request.POST.get("phone_number")
-        address = request.POST.get("address")
-        postal_code = request.POST.get("postal_code")
-        city = request.POST.get("city")
-        state = request.POST.get("state")
-        country = request.POST.get("country")
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+            return StudentDocument.objects.filter(student=student)
+        return StudentDocument.objects.all()
 
-        registration_number = request.POST.get("registration_number")
-        guardian_name = request.POST.get("guardian_name")
-        guardian_phone_number = request.POST.get("guardian_phone_number")
-        guardian_email = request.POST.get("guardian_email")
-        guardian_relationship = request.POST.get("guardian_relationship")
+class StudentMealCardListView(generics.ListAPIView):
+    serializer_class = MealCardListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
-        student = Student.objects.get(id=student_id)
-        user = User.objects.get(id=student.user.id)
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return MealCard.objects.filter(student__user=user)
+        return MealCard.objects.all()
+class StudentMealCardCreateView(generics.CreateAPIView):
+    serializer_class = MealCardCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
-        user.first_name = first_name if first_name else user.first_name
-        user.last_name = last_name if last_name else user.last_name
-        user.email = email if email else user.email
-        user.phone_number = phone_number if phone_number else user.phone_number
-        user.address = address if address else user.address
-        user.city = city if city else user.city
-        user.country = country if country else user.country
-        user.gender = gender if gender else user.gender
-        user.postal_code = postal_code if postal_code else user.postal_code
-        user.state = state if state else user.state
-        user.save()
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+        else:
+            student_id = self.request.data.get("student")
+            if not student_id:
+                raise ValidationError({"student": "Student  is required for staff users."})
+            student = Student.objects.get(id=student_id)
+        serializer.save(student=student)
+        
+class StudentMealCardUpdateView(generics.UpdateAPIView):
+    serializer_class = MealCardCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    lookup_field = 'pk'
 
-        student.registration_number = (
-            registration_number if registration_number else student.registration_number
-        )
-        student.guardian_name = (
-            guardian_name if guardian_name else student.guardian_name
-        )
-        student.guardian_phone_number = (
-            guardian_phone_number
-            if guardian_phone_number
-            else student.guardian_phone_number
-        )
-        student.guardian_email = (
-            guardian_email if guardian_email else student.guardian_email
-        )
-        student.guardian_relationship = (
-            guardian_relationship
-            if guardian_relationship
-            else student.guardian_relationship
-        )
-        student.save()
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+            return MealCard.objects.filter(student=student)
+        return MealCard.objects.all()
 
-        return redirect(f"/students/{student.id}/details")
-    return render(request, "students/edit_student.html")
+class StudentProgrameListView(generics.ListAPIView):
+    serializer_class = StudentProgrammeListSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            return StudentProgramme.objects.filter(student__user=user)
+        return StudentProgramme.objects.all()
+class StudentProgrameCreateView(generics.CreateAPIView):
+    serializer_class = StudentProgrammeCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
 
-def edit_student_cohort(request):
-    if request.method == "POST":
-        student_id = request.POST.get("student_id")
-        cohort_id = request.POST.get("cohort_id")
+    def perform_create(self, serializer):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+        else:
+            student_id = self.request.data.get("student")
+            if not student_id:
+                raise ValidationError({"student": "Student  is required for staff users."})
+            student = Student.objects.get(id=student_id)
+        serializer.save(student=student)
+class StudentProgrammeUpdateView(generics.UpdateAPIView):
+    serializer_class = StudentProgrammeCreateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_ROLES
+    lookup_field = 'pk'
 
-        student = Student.objects.get(id=student_id)
-        cohort = ProgrammeCohort.objects.get(id=cohort_id)
-        student.cohort = cohort
-        student.programme = cohort.programme
-        student.save()
-        return redirect(f"/students/{student.id}/details")
-    return render(request, "students/edit_student_cohort.html")
-
-
-def delete_student(request):
-    if request.method == "POST":
-        student_id = request.POST.get("student_id")
-        student = Student.objects.get(id=student_id)
-        student.delete()
-
-        return redirect("students")
-    return render(request, "students/delete_student.html")
-
-
-# Education History
-def create_education_history(request):
-    if request.method == "POST":
-        student_id = request.POST.get("student_id")
-        institution = request.POST.get("institution")
-        level = request.POST.get("level")
-        major = request.POST.get("major")
-        year = request.POST.get("year")
-        grade_or_gpa = request.POST.get("grade_or_gpa")
-
-        StudentEducationHistory.objects.create(
-            student_id=student_id,
-            institution=institution,
-            level=level,
-            major=major,
-            year=year,
-            grade_or_gpa=grade_or_gpa,
-        )
-        return redirect(f"/students/{student_id}/details/")
-    return render(request, "education_history/create_education_history.html")
-
-
-def edit_education_history(request):
-    if request.method == "POST":
-        education_history_id = request.POST.get("education_history_id")
-        institution = request.POST.get("institution")
-        level = request.POST.get("level")
-        major = request.POST.get("major")
-        year = request.POST.get("year")
-        grade_or_gpa = request.POST.get("grade_or_gpa")
-
-        education_history = StudentEducationHistory.objects.get(id=education_history_id)
-        education_history.institution = institution
-        education_history.level = level
-        education_history.year = year
-        education_history.grade_or_gpa = grade_or_gpa
-        education_history.major = major
-
-        education_history.save()
-        return redirect(f"/students/{education_history.student.id}/details/")
-    return render(request, "education_history/edit_education_history.html")
-
-
-def delete_education_history(request):
-    if request.method == "POST":
-        education_history_id = request.POST.get("education_history_id")
-        education_history = StudentEducationHistory.objects.get(id=education_history_id)
-        education_history.delete()
-        return redirect(f"/students/{education_history.student.id}/details/")
-    return render(request, "education_history/delete_education_history.html")
+    def get_queryset(self):
+        user = self.request.user
+        if user.role.name == ROLE_STUDENT:
+            student = Student.objects.get(user=user)
+            return StudentProgramme.objects.filter(student=student)
+        return StudentProgramme.objects.all()

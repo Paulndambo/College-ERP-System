@@ -1,89 +1,47 @@
 from django.urls import path
-from apps.schools.views import (
-    schools,
-    school_details,
-    new_school,
-    delete_school,
-    edit_school,
-    CoursesListView,
-    new_course,
-    edit_course,
-    delete_course,
-    ProgrammesListView,
-    programme_details,
-    new_programme,
-    edit_programme,
-    delete_programme,
-    departments,
-    department_details,
-    new_department,
-    edit_department,
-    delete_department,
-    SemestersListView,
-    new_semester,
-    edit_semester,
-    delete_semester,
+from .views import (
+    SchoolCreateView, SchoolListView, SchoolUpdateDeleteView,
+    DepartmentCreateView, DepartmentListView, DepartmentUpdateDeleteView,
+    ProgrammeCreateView, ProgrammeListView, ProgrammeUpdateDeleteView,
+    CourseCreateView, CourseListView, CourseUpdateDeleteView,
+    SemesterCreateView, SemesterListView, SemesterUpdateDeleteView,
+    ProgrammeCohortCreateView, ProgrammeCohortListView, ProgrammeCohortUpdateDeleteView,
+    CourseSessionCreateView, CourseSessionListView, CourseSessionUpdateDeleteView
 )
-
-from apps.schools.courses.views import (
-    CourseSessionsListView,
-    new_session,
-    edit_session,
-    delete_session,
-    session_attendance,
-    CourseSessionAttendancesListView,
-    mark_student_absent,
-    mark_student_present,
-    CohortsListView,
-    new_cohort,
-    edit_cohort,
-    delete_cohort,
-    attendance_sheet,
-)
-
-from apps.schools.uploads.views import upload_cohorts
 
 urlpatterns = [
-    path("", schools, name="schools"),
-    path("<int:id>/", school_details, name="school-details"),
-    path("new-school/", new_school, name="new-school"),
-    path("delete-school/", delete_school, name="delete-school"),
-    path("edit-school/", edit_school, name="edit-school"),
-    path("courses/", CoursesListView.as_view(), name="courses"),
-    path("edit-course/", edit_course, name="edit-course"),
-    path("new-course/", new_course, name="new-course"),
-    path("delete-course/", delete_course, name="delete-course"),
-    path("programmes/", ProgrammesListView.as_view(), name="programmes"),
-    path("programmes/<int:id>/details/", programme_details, name="programme-details"),
-    path("edit-programme/", edit_programme, name="edit-programme"),
-    path("new-programme/", new_programme, name="new-programme"),
-    path("delete-programme/", delete_programme, name="delete-programme"),
-    path("departments/", departments, name="departments"),
-    path(
-        "departments/<int:id>/details/", department_details, name="department-details"
-    ),
-    path("new-department/", new_department, name="new-department"),
-    path("edit-department/", edit_department, name="edit-department"),
-    path("delete-department/", delete_department, name="delete-department"),
-    path("semesters/", SemestersListView.as_view(), name="semesters"),
-    path("new-semester/", new_semester, name="new-semester"),
-    path("edit-semester/", edit_semester, name="edit-semester"),
-    path("delete-semester/", delete_semester, name="delete-semester"),
-    path("sessions/", CourseSessionsListView.as_view(), name="sessions"),
-    path(
-        "sessions/<int:id>/attendances/",
-        CourseSessionAttendancesListView.as_view(),
-        name="session-attendance",
-    ),
-    path("mark-student-absent/", mark_student_absent, name="mark-student-absent"),
-    path("mark-student-present/", mark_student_present, name="mark-student-present"),
-    path("new-session/", new_session, name="new-session"),
-    path("edit-session/", edit_session, name="edit-session"),
-    path("delete-session/", delete_session, name="delete-session"),
-    path("attendance/<int:id>/sheet/", attendance_sheet, name="attendance-sheet"),
-    path("cohorts/", CohortsListView.as_view(), name="cohorts"),
-    path("new-cohort/", new_cohort, name="new-cohort"),
-    path("edit-cohort/", edit_cohort, name="edit-cohort"),
-    path("delete-cohort/", delete_cohort, name="delete-cohort"),
-    path("upload-cohorts/", upload_cohorts, name="upload-cohorts"),
+   
+    path('school/create/', SchoolCreateView.as_view(), name='school-create'),
+    path('school/list/', SchoolListView.as_view(), name='school-list'),
+    path('school/update-delete/<int:pk>/', SchoolUpdateDeleteView.as_view(), name='school-update-delete'),
+
+ 
+    path('department/create/', DepartmentCreateView.as_view(), name='department-create'),
+    path('department/list/', DepartmentListView.as_view(), name='department-list'),
+    path('department/update-delete/<int:pk>/', DepartmentUpdateDeleteView.as_view(), name='department-update-delete'),
+
+    
+    path('programme/create/', ProgrammeCreateView.as_view(), name='programme-create'),
+    path('programme/list/', ProgrammeListView.as_view(), name='programme-list'),
+    path('programme/update-delete/<int:pk>/', ProgrammeUpdateDeleteView.as_view(), name='programme-update-delete'),
+
+  
+    path('course/create/', CourseCreateView.as_view(), name='course-create'),
+    path('course/list/', CourseListView.as_view(), name='course-list'),
+    path('course/update-delete/<int:pk>/', CourseUpdateDeleteView.as_view(), name='course-update-delete'),
+
+   
+    path('semester/create/', SemesterCreateView.as_view(), name='semester-create'),
+    path('semester/list/', SemesterListView.as_view(), name='semester-list'),
+    path('semester/update-delete/<int:pk>/', SemesterUpdateDeleteView.as_view(), name='semester-update-delete'),
+
+ 
+    path('programme-cohort/create/', ProgrammeCohortCreateView.as_view(), name='programme-cohort-create'),
+    path('programme-cohort/list/', ProgrammeCohortListView.as_view(), name='programme-cohort-list'),
+    path('programme-cohort/update-delete/<int:pk>/', ProgrammeCohortUpdateDeleteView.as_view(), name='programme-cohort-update-delete'),
+
+  
+    path('course-session/create/', CourseSessionCreateView.as_view(), name='course-session-create'),
+    path('course-session/list/', CourseSessionListView.as_view(), name='course-session-list'),
+    path('course-session/update-delete/<int:pk>/', CourseSessionUpdateDeleteView.as_view(), name='course-session-update-delete'),
 ]

@@ -1,71 +1,137 @@
 {% extends "base1.html" %}
 
+{% block additional_css %}
+<style>
+    .table-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .loader {
+        height: 3px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background-color: #ddd;
+        visibility: hidden;
+    }
+    
+    .loader.active {
+        visibility: visible;
+    }
+    
+    .loader:before{
+        display: block;
+        position: absolute;
+        content: "";
+        left: -200px;
+        width: 200px;
+        height: 3px;
+        background-color: #007bff;
+        animation: loading 2s linear infinite;
+    }
+    
+    @keyframes loading {
+        from {left: -200px; width: 30%;}
+        50% {width: 30%;}
+        70% {width: 70%;}
+        80% { left: 50%;}
+        95% {left: 120%;}
+        to {left: 100%;}
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .table td, .table th {
+        padding: 0.75rem;
+        vertical-align: middle;
+    }
+</style>
+{% endblock additional_css %}
 
 {% block content %}
 <div class="table-card">
-    <div class="row py-2 px-2">
-      <div class="col">
-          <h3>Students Marks</h3>
-      </div>
-      <div class="col">
-          <input type="text" class="form-control" placeholder="Search..." 
-          id="searchInput" value="{{ search_query }}">
-      </div>
-      <div class="col">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordMarksModal">Record Marks</button>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadMarksModal">Upload Marks</button>
-      </div>
-  </div>
-  <!-- Table Toolbar --> 
-  <!-- Loading Bar -->
-  <div class="loader" id="loader"></div>
+    <div class="row py-3 px-3 align-items-center">
+        <div class="col-md-4">
+            <h3 class="mb-0">Students Marks</h3>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-light">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" class="form-control" placeholder="Search students, courses..." 
+                    id="searchInput" value="{{ search_query }}">
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordMarksModal">
+                <i class="fas fa-plus-circle me-1"></i> Record Marks
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadMarksModal">
+                <i class="fas fa-upload me-1"></i> Upload Marks
+            </button>
+        </div>
+    </div>
 
-      <div class="table-container px-2">
-        <table class="table data-table table-sm">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Student</th>
-              <th scope="col">Semester</th>
-              <th scope="col">Course</th>
-              <th scope="col">Cat</th>
-              <th scope="col">Exam</th>
-              <th scope="col">Marks</th>
-              <th scope="col">Grade</th>
-              <th scope="col" colspan="3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for mark in page_obj %}
-            <tr>
-              <td>{{forloop.counter}}</td>
-              <td>{{mark.student}}</td>
-              <td><b>{{mark.semester}}-{{mark.semester.academic_year}}</b></td>
-              <td>{{mark.course}}</td>
-              <td>{{mark.cat_marks}}</td>
-              <td>{{mark.exam_marks}}</td>
-              <td>{{mark.total_marks}}</td>
-              <td><b>{{mark.grade}}</b></td>
-              <td>
-                <div class="d-flex gap-1">
-                  <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editMarksModal{{ mark.id }}">
-                    <i class="fas fa-pencil"></i>
-                  </a>
-                  <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMarksModal{{ mark.id }}">
-                    <i class="fas fa-trash"></i>
-                  </a>
-                </div>
-              </td>
-              
-              {% include "exams/edit_marks.html" %}
-              {% include "exams/delete_marks.html" %}
-            </tr>
-            
-            {% endfor %}
+    <!-- Loading Bar -->
+    <div class="loader" id="loader"></div>
 
-          </tbody>
+    <div class="table-container px-3">
+        <table class="table table-hover data-table table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="text-muted">#</th>
+                    <th scope="col">Student</th>
+                    <th scope="col">Semester</th>
+                    <th scope="col">Course</th>
+                    <th scope="col" class="text-center">Cat</th>
+                    <th scope="col" class="text-center">Exam</th>
+                    <th scope="col" class="text-center">Total</th>
+                    <th scope="col" class="text-center">Grade</th>
+                    <th scope="col" class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mark in page_obj %}
+                <tr>
+                    <td class="text-muted">{{forloop.counter}}</td>
+                    <td>{{mark.student}}</td>
+                    <td><span class="badge bg-light text-dark">{{mark.semester}}-{{mark.semester.academic_year}}</span></td>
+                    <td>{{mark.course}}</td>
+                    <td class="text-center">{{mark.cat_marks}}</td>
+                    <td class="text-center">{{mark.exam_marks}}</td>
+                    <td class="text-center"><strong>{{mark.total_marks}}</strong></td>
+                    <td class="text-center">
+                        <span class="badge {% if mark.grade == 'A' %}bg-success{% elif mark.grade == 'F' %}bg-danger{% else %}bg-primary{% endif %}">
+                            {{mark.grade}}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group">
+                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editMarksModal{{ mark.id }}" title="Edit">
+                                <i class="fas fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteMarksModal{{ mark.id }}" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                    
+                    {% include "exams/edit_marks.html" %}
+                    {% include "exams/delete_marks.html" %}
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
-        
+        <!--
         <div class="table-footer">
           <div class="page-info">
               Showing 
@@ -76,10 +142,46 @@
               {{ paginator.count }} 
               entries
           </div>
-       
+          {% if is_paginated %}
+          <nav>
+              <ul class="pagination mb-0">
+                  {% if page_obj.has_previous %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          Previous
+                      </a>
+                  </li>
+                  {% else %}
+                  <li class="page-item disabled">
+                      <span class="page-link">Previous</span>
+                  </li>
+                  {% endif %}
+  
+                  {% for num in paginator.page_range %}
+                  <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                      <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          {{ num }}
+                      </a>
+                  </li>
+                  {% endfor %}
+  
+                  {% if page_obj.has_next %}
+                  <li class="page-item">
+                      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">
+                          Next
+                      </a>
+                  </li>
+                  {% else %}
+                  <li class="page-item disabled">
+                      <span class="page-link">Next</span>
+                  </li>
+                  {% endif %}
+              </ul>
+          </nav>
+          {% endif %}
       </div>
-    
-      </div>
+    -->
+    </div>
 {% endblock content %}
 
 {% block additional_scripts %}

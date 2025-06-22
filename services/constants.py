@@ -1,0 +1,19 @@
+
+ROLE_ADMIN = 'Admin'
+ROLE_STUDENT = 'Student'
+ROLE_LECTURER = 'Lecturer'
+ROLE_ADMISSIONS = 'Admissions Admin'
+ROLE_HOSTELS = 'Hostels Admin'
+ROLE_FINANCE = 'Finance Admin'
+ROLE_SYSTEM_ADMIN = 'Administrators'
+
+ALL_STAFF_ROLES = [
+    ROLE_ADMIN,
+    ROLE_LECTURER,
+    ROLE_ADMISSIONS,
+    ROLE_HOSTELS,
+    ROLE_FINANCE,
+    ROLE_SYSTEM_ADMIN,
+]
+
+ALL_ROLES = [ROLE_STUDENT] + ALL_STAFF_ROLES

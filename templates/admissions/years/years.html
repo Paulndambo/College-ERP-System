@@ -1,0 +1,59 @@
+{% extends "base1.html" %}
+
+
+{% block content %}
+<div class="table-card">
+  <div class="row py-2 px-2">
+    <div class="col">
+        <h3>Study Years</h3>
+    </div>
+   
+    <div class="col">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newStudyYearModal">New Study Year</button>
+        </div>
+</div>
+<!-- Table Toolbar --> 
+<!-- Loading Bar -->
+<div class="loader" id="loader"></div>
+      <div class="table-container px-2">
+        <table class="table data-table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Added On</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for year in years %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>{{year.name}}</td>
+              <td>{{year.created_on}}</td>
+              
+              <td>
+                <div class="d-flex gap-1">
+                  <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editStudyYearModal{{ year.id }}">
+                    <i class="fas fa-pencil"></i>
+                  </a>
+                  <a class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteStudyYearModal{{ year.id }}">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </div>
+              </td>
+             
+             {% include "admissions/years/edit_year.html" %}
+             {% include "admissions/years/delete_year.html" %}
+            </tr>
+            
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <div class="page-info">
+            </div>
+        </div>
+{% endblock content %}

@@ -1,415 +1,445 @@
-from django.shortcuts import render, redirect
-from django.db.models import Q, F
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.db.models import Case, When, Value, IntegerField
+from apps.finance.models import Budget
+from .filters import CourseFilter, CourseSessionFilter, DepartmentFilter, ProgrammeFilter, SchoolFilter, SemesterFilter
+from apps.schools.filters import CohortsFilter
+from rest_framework import generics, status
+from rest_framework.response import Response
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from .models import School, Department, Programme, Course, Semester, ProgrammeCohort, CourseSession
+from .serializers import (
+    SchoolCreateSerializer, SchoolListSerializer,
+    DepartmentCreateSerializer, DepartmentListSerializer,
+    ProgrammeCreateSerializer, ProgrammeListSerializer,
+    CourseCreateSerializer, CourseListSerializer,
+    SemesterCreateSerializer, SemesterListSerializer,
+    ProgrammeCohortCreateSerializer, ProgrammeCohortListSerializer,
+    CourseSessionCreateSerializer, CourseSessionListSerializer
+)
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
-
-from django.views.generic import ListView
-from django.http import JsonResponse
-
-from apps.schools.models import School, Department, Programme, Course, Semester
-
-# Create your views here.
-PROGRAMME_TYPES = ["Artisan", "Certificate", "Diploma", "Bachelor", "Masters", "PhD"]
-
-SEMESTER_STATUSES = ["Active", "Closed"]
-
-
-### Schools
-def schools(request):
-    schools = School.objects.all().order_by("-created_on")
-
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        schools = School.objects.filter(Q(name__icontains=search_text))
-
-    paginator = Paginator(schools, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"page_obj": page_obj}
-    return render(request, "schools/schools.html", context)
-
-
-def school_details(request, id):
-    school = School.objects.get(id=id)
-
-    departments = Department.objects.filter(school=school)
-
-    paginator = Paginator(departments, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"school": school, "page_obj": page_obj}
-    return render(request, "schools/school_details.html", context)
-
-
-def new_school(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        phone = request.POST.get("phone")
-        location = request.POST.get("location")
-
-        School.objects.create(name=name, email=email, phone=phone, location=location)
-
-        return redirect("schools")
-
-    return render(request, "schools/new_school.html")
-
-
-def edit_school(request):
-    if request.method == "POST":
-        school_id = request.POST.get("school_id")
-        name = request.POST.get("name")
-        email = request.POST.get("email")
-        phone = request.POST.get("phone")
-        location = request.POST.get("location")
-
-        school = School.objects.get(id=school_id)
-
-        school.name = name
-        school.email = email
-        school.phone = phone
-        school.location = location
-        school.save()
-
-        return redirect("schools")
-    return render(request, "schools/edit_school.html")
-
-
-def delete_school(request):
-    if request.method == "POST":
-        school_id = request.POST.get("school_id")
-        school = School.objects.get(id=school_id)
-        school.delete()
-
-        return redirect("schools")
-    return render(request, "schools/delete_school.html")
-
-
-### Departments
-def departments(request):
-    departments = Department.objects.all().order_by("-created_on")
-
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        departments = Department.objects.filter(
-            Q(name__icontains=search_text) | Q(school__name__icontains=search_text)
-        )
-
-    paginator = Paginator(departments, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"page_obj": page_obj}
-    return render(request, "departments/departments.html", context)
-
-
-def department_details(request, id):
-    department = Department.objects.get(id=id)
-
-    programmes = Programme.objects.filter(department=department).order_by("-created_on")
-
-    if request.method == "POST":
-        search_text = request.POST.get("search_text")
-        programmes = Programme.objects.filter(Q(name__icontains=search_text))
-
-    paginator = Paginator(programmes, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        "department": department,
-        "levels": PROGRAMME_TYPES,
-        "page_obj": page_obj,
-    }
-    return render(request, "departments/department_details.html", context)
-
-
-def new_department(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        school_id = request.POST.get("school_id")
-        office = request.POST.get("office")
-
-        Department.objects.create(name=name, school_id=school_id, office=office)
-
-        return redirect(f"/schools/{school_id}")
-
-    return render(request, "departments/new_department.html")
-
-
-def edit_department(request):
-    if request.method == "POST":
-        department_id = request.POST.get("department_id")
-        name = request.POST.get("name")
-        school_id = request.POST.get("school_id")
-        office = request.POST.get("office")
-
-        department = Department.objects.get(id=department_id)
-
-        department.name = name
-        department.school_id = school_id
-        department.office = office
-        department.save()
-
-        return redirect("departments")
-    return render(request, "departments/edit_department.html")
-
-
-def delete_department(request):
-    if request.method == "POST":
-        department_id = request.POST.get("department_id")
-        department = Department.objects.get(id=department_id)
-        department.delete()
-
-        return redirect("departments")
-    return render(request, "departments/delete_department.html")
-
-
-### Programmes
-class ProgrammesListView(ListView):
-    model = Programme
-    template_name = "programmes/programmes.html"
-    context_object_name = "programmes"
-    paginate_by = 8
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query) | Q(name__icontains=search_query)
-            )
-
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["levels"] = PROGRAMME_TYPES
-        return context
-
-
-def programme_details(request, id):
-    programme = Programme.objects.get(id=id)
-
-    courses = Course.objects.filter(programme=programme).order_by("-created_on")
-
-    paginator = Paginator(courses, 6)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"programme": programme, "page_obj": page_obj}
-    return render(request, "programmes/programme_details.html", context)
-
-
-def new_programme(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        department_id = request.POST.get("department_id")
-        level = request.POST.get("level")
-        code = request.POST.get("code")
-
-        department = Department.objects.get(id=department_id)
-        Programme.objects.create(
-            name=name,
-            department=department,
-            school=department.school,
-            level=level,
-            code=code,
-        )
-        return redirect(f"/schools/departments/{department_id}/details")
-
-    return render(request, "programmes/new_programme.html")
-
-
-def edit_programme(request):
-    if request.method == "POST":
-        programme_id = request.POST.get("programme_id")
-        name = request.POST.get("name")
-        level = request.POST.get("level")
-        code = request.POST.get("code")
-
-        programme = Programme.objects.get(id=programme_id)
-
-        programme.name = name
-        programme.department = programme.department
-        programme.school = programme.department.school
-        programme.level = level
-        programme.code = code
-        programme.save()
-
-        return redirect("programmes")
-    return render(request, "programmes/edit_programme.html")
-
-
-def delete_programme(request):
-    if request.method == "POST":
-        programme_id = request.POST.get("programme_id")
-        programme = Programme.objects.get(id=programme_id)
-        programme.delete()
-
-        return redirect("programmes")
-    return render(request, "programmes/delete_programme.html")
-
-
-### Courses
-class CoursesListView(ListView):
-    model = Course
-    template_name = "courses/courses.html"
-    context_object_name = "courses"
-    paginate_by = 8
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(name__icontains=search_query)
-                | Q(course_code__icontains=search_query)
-                | Q(programme__name__icontains=search_query)
-            )
-
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        return context
-
-
-def new_course(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        course_code = request.POST.get("course_code")
-        programme_id = request.POST.get("programme_id")
-
-        programme = Programme.objects.get(id=programme_id)
-        Course.objects.create(
-            name=name,
-            department=programme.department,
-            programme=programme,
-            school=programme.department.school,
-            course_code=course_code,
-        )
-        return redirect(f"/schools/programmes/{programme_id}/details")
-
-    return render(request, "courses/new_course.html")
-
-
-def edit_course(request):
-    if request.method == "POST":
-        course_id = request.POST.get("course_id")
-        name = request.POST.get("name")
-        course_code = request.POST.get("course_code")
-        programme_id = request.POST.get("programme_id")
-
-        programme = Programme.objects.get(id=programme_id)
-        course = Course.objects.get(id=course_id)
-
-        course.name = name
-        course.department = programme.department
-        course.school = programme.department.school
-        course.programme = programme
-        course.code = course_code
-        course.save()
-
-        return redirect("courses")
-    return render(request, "courses/edit_course.html")
-
-
-def delete_course(request):
-    if request.method == "POST":
-        course_id = request.POST.get("course_id")
-        course = Course.objects.get(id=course_id)
-        course.delete()
-
-        return redirect("courses")
-    return render(request, "courses/delete_course.html")
-
-
-# Semesters
-class SemestersListView(ListView):
-    model = Semester
-    template_name = "semesters/semesters.html"
-    context_object_name = "semesters"
-    paginate_by = 8
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query) | Q(name__icontains=search_query)
-            )
-
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["semester_statuses"] = SEMESTER_STATUSES
-        return context
-
-
-def new_semester(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        academic_year = request.POST.get("academic_year")
-        status = request.POST.get("status")
-        start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
-
-        Semester.objects.create(
-            name=name,
-            academic_year=academic_year,
-            status=status,
-            start_date=start_date,
-            end_date=end_date,
-        )
-        return redirect("semesters")
-
-    return render(request, "semesters/new_semester.html")
-
-
-def edit_semester(request):
-    if request.method == "POST":
-        semester_id = request.POST.get("semester_id")
-        name = request.POST.get("name")
-        academic_year = request.POST.get("academic_year")
-        status = request.POST.get("status")
-        start_date = request.POST.get("start_date")
-        end_date = request.POST.get("end_date")
-
-        semester = Semester.objects.get(id=semester_id)
-
-        semester.name = name
-        semester.academic_year = academic_year
-        semester.status = status
-        semester.start_date = start_date
-        semester.end_date = end_date
-        semester.save()
-
-        return redirect("semesters")
-    return render(request, "semesters/edit_semester.html")
-
-
-def delete_semester(request):
-    if request.method == "POST":
-        semester_id = request.POST.get("semester_id")
-        semester = Semester.objects.get(id=semester_id)
-        semester.delete()
-
-        return redirect("semesters")
-    return render(request, "semesters/delete_semester.html")
+class SchoolCreateView(generics.CreateAPIView):
+    queryset = School.objects.all()
+    serializer_class = SchoolCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SchoolListView(generics.ListAPIView):
+    queryset = School.objects.all()
+    serializer_class = SchoolListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SchoolFilter
+    pagination_class = None 
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    def list(self, request, *args, **kwargs):
+        try:
+            schools = self.get_queryset()
+            schools = self.filter_queryset(schools)
+           
+            
+            page = request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_schools = paginator.paginate_queryset(schools, request)
+                serializer = self.get_serializer(paginated_schools, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            
+            serializer = self.get_serializer(schools, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SchoolUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = School.objects.all()
+    serializer_class = SchoolCreateSerializer
+    lookup_field = 'pk'
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, *args, **kwargs):
+        try:
+           with transaction.atomic():
+                school = self.get_object()
+
+                Budget.objects.filter(school=school).update(school=None)
+
+        
+                school.delete()
+
+                
+                return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class DepartmentCreateView(generics.CreateAPIView):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DepartmentListView(generics.ListAPIView):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentListSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = DepartmentFilter
+    pagination_class = None 
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    def get(self, request, *args, **kwargs):
+        try:
+            departments = self.get_queryset()
+            departments = self.filter_queryset(departments)
+            page = request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_departments = paginator.paginate_queryset(departments, request)
+                serializer = self.get_serializer(paginated_departments, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(departments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class DepartmentUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentCreateSerializer
+    lookup_field = 'pk'
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProgrammeCreateView(generics.CreateAPIView):
+    queryset = Programme.objects.all()
+    serializer_class = ProgrammeCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProgrammeListView(generics.ListAPIView):
+    queryset = Programme.objects.all()
+    serializer_class = ProgrammeListSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ProgrammeFilter
+    pagination_class = None 
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    def list(self, request, *args, **kwargs):
+        try:
+            programmes = self.get_queryset()
+            programmes = self.filter_queryset(programmes)
+            page = request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_programmes = paginator.paginate_queryset(programmes, request)
+                serializer = self.get_serializer(paginated_programmes, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(programmes, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProgrammeUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Programme.objects.all()
+    serializer_class = ProgrammeCreateSerializer
+    lookup_field = 'pk'
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class CourseCreateView(generics.CreateAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CourseListView(generics.ListAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseListSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CourseFilter
+    def get(self, request, *args, **kwargs):
+        try:
+            courses = self.get_queryset()
+            courses = self.filter_queryset(courses)
+            page = self.paginate_queryset(courses)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(courses, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CourseUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Course.objects.all()
+    serializer_class = CourseCreateSerializer
+    lookup_field = 'pk'
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class SemesterCreateView(generics.CreateAPIView):
+    queryset = Semester.objects.all()
+    serializer_class = SemesterCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SemesterListView(generics.ListAPIView):
+    queryset = Semester.objects.all()
+    serializer_class = SemesterListSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SemesterFilter
+    pagination_class = None 
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    def get(self, request, *args, **kwargs):
+        try:
+            semesters = self.get_queryset()
+            semesters = self.filter_queryset(semesters)
+            page = request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_semesters = paginator.paginate_queryset(semesters, request)
+                serializer = self.get_serializer(paginated_semesters, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(semesters, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class SemesterUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Semester.objects.all()
+    serializer_class = SemesterCreateSerializer
+    lookup_field = 'pk'
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProgrammeCohortCreateView(generics.CreateAPIView):
+    queryset = ProgrammeCohort.objects.all()
+    serializer_class = ProgrammeCohortCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProgrammeCohortListView(generics.ListAPIView):
+    queryset = ProgrammeCohort.objects.all()
+    serializer_class = ProgrammeCohortListSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CohortsFilter
+    pagination_class = None 
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    def get(self, request, *args, **kwargs):
+        try:
+            cohorts = self.get_queryset()
+            cohorts = self.filter_queryset(cohorts)
+            page = request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_schools = paginator.paginate_queryset(cohorts, request)
+                serializer = self.get_serializer(paginated_schools, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(cohorts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ProgrammeCohortUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProgrammeCohort.objects.all()
+    serializer_class = ProgrammeCohortCreateSerializer
+    lookup_field = 'pk'
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+class CourseSessionCreateView(generics.CreateAPIView):
+    queryset = CourseSession.objects.all()
+    serializer_class = CourseSessionCreateSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CourseSessionListView(generics.ListAPIView):
+    queryset = CourseSession.objects.all()
+    serializer_class = CourseSessionListSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CourseSessionFilter
+    def get(self, request, *args, **kwargs):
+        try:
+            sessions = self.get_queryset()
+            sessions = self.filter_queryset(sessions)
+            page = self.paginate_queryset(sessions)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(sessions, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CourseSessionUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = CourseSession.objects.all()
+    serializer_class = CourseSessionCreateSerializer
+    lookup_field = 'pk'
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

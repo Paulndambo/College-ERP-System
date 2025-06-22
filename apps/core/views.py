@@ -1,99 +1,126 @@
-from datetime import datetime, timedelta
-import calendar
+from apps.core.filters import AcademicYearsFilter, CampusFilter
+from rest_framework import generics, status
+from rest_framework.response import Response
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from .models import Campus, StudyYear
+from .serializers import CampusCreateSerializer, CampusListSerializer, StudyYearCreateSerializer, StudyYearListSerializer
 
-from django.shortcuts import render, redirect
-from django.db.models import Q
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.db.models import Case, When, Value, IntegerField
-from django.db import transaction
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+class CampusCreateView(generics.CreateAPIView):
+    queryset = Campus.objects.all()
+    serializer_class = CampusCreateSerializer
 
-from apps.students.models import Student, MealCard
-from apps.staff.models import Staff
-from apps.hostels.models import Booking
-from apps.core.models import UserRole, Campus
-
-from django.views.generic import ListView
-from django.http import JsonResponse
-
-
-# Create your views here.
-@login_required
-def home(request):
-    students_count = Student.objects.count()
-    staff_count = Staff.objects.count()
-    meal_cards_count = MealCard.objects.count()
-    bookings_count = Booking.objects.count()
-
-    context = {
-        "students_count": students_count,
-        "staff_count": staff_count,
-        "meal_cards_count": meal_cards_count,
-        "bookings_count": bookings_count,
-    }
-    return render(request, "home.html", context)
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def campuses(request):
-    campuses = Campus.objects.all().order_by("-created_on")
+class CampusListView(generics.ListAPIView):
+    queryset = Campus.objects.all()
+    serializer_class = CampusListSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CampusFilter
+    def get(self, request, *args, **kwargs):
+        try:
+            campuses = self.get_queryset()
+            campuses = self.filter_queryset(campuses)
+            page = self.paginate_queryset(campuses)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(campuses, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-    paginator = Paginator(campuses, 8)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class CampusUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Campus.objects.all()
+    serializer_class = CampusCreateSerializer
+    lookup_field = "pk"  
+    http_method_names = ['patch', 'delete']  
 
-    context = {"page_obj": page_obj}
-    return render(request, "campuses/campuses.html", context)
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-def new_campus(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        city = request.POST.get("city")
-        address = request.POST.get("address")
-        phone_number = request.POST.get("phone_number")
-        email = request.POST.get("email")
-        population = request.POST.get("population")
-
-        Campus.objects.create(
-            name=name,
-            city=city,
-            address=address,
-            phone_number=phone_number,
-            email=email,
-            population=population,
-        )
-
-        return redirect("campuses")
-    return render(request, "campuses/new_campus.html")
-
-
-def edit_campus(request):
-    if request.method == "POST":
-        campus_id = request.POST.get("campus_id")
-        name = request.POST.get("name")
-        city = request.POST.get("city")
-        address = request.POST.get("address")
-        phone_number = request.POST.get("phone_number")
-        email = request.POST.get("email")
-        population = request.POST.get("population")
-
-        Campus.objects.filter(id=campus_id).update(
-            name=name,
-            city=city,
-            address=address,
-            phone_number=phone_number,
-            email=email,
-            population=population,
-        )
-
-        return redirect("campuses")
-    return render(request, "campuses/edit_campus.html")
+class StudyYearCreateView(generics.CreateAPIView):
+    queryset = StudyYear.objects.all()
+    serializer_class = StudyYearCreateSerializer
+    
+    def create(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-def delete_campus(request):
-    if request.method == "POST":
-        campus_id = request.POST.get("campus_id")
-        Campus.objects.get(id=campus_id).delete()
-        return redirect("campuses")
-    return render(request, "campuses/delete_campus.html")
+class StudyYearListView(generics.ListAPIView):
+    queryset = StudyYear.objects.all()
+    serializer_class = StudyYearListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = AcademicYearsFilter
+    pagination_class = None 
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+    def list(self, request, *args, **kwargs):
+        try:
+            study_years = self.get_queryset()
+            study_years = self.filter_queryset(study_years)
+            page = request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_study_years = paginator.paginate_queryset(study_years, request)
+                serializer = self.get_serializer(paginated_study_years, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(study_years, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+class StudyYearUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = StudyYear.objects.all()
+    serializer_class = StudyYearCreateSerializer
+    lookup_field = "pk"  
+    http_method_names = ['patch', 'delete']  
+
+    def patch(self, request, *args, **kwargs):
+        try:
+            return super().patch(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super().delete(request, *args, **kwargs)
+        except Exception as exc:
+            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)

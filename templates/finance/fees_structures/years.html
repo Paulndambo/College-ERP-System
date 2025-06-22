@@ -1,0 +1,45 @@
+{% extends "base1.html" %}
+
+{% block content %}
+<div class="table-card">
+  <div class="row py-2 px-2">
+    <div class="col">
+        <h3>Study Years</h3>
+    </div>
+</div>
+<div class="loader" id="loader"></div>
+      <div class="table-container px-2">
+        <table class="table data-table table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Added On</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for year in years %}
+            <tr>
+              <td>{{forloop.counter}}</td>
+              <td>{{year.name}}</td>
+              <td>{{year.created_on}}</td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#deleteStudyYearModal{{ year.id }}">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            
+            {% endfor %}
+
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <div class="page-info">
+            </div>
+        </div>
+{% endblock content %}

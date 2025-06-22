@@ -30,7 +30,7 @@ BUDGET_STATUSES = (
 
 class Budget(AbsoluteBaseModel):
     title = models.CharField(max_length=255)
-    school = models.ForeignKey("schools.School", on_delete=models.SET_NULL, null=True)
+    school = models.ForeignKey("schools.School", on_delete=models.CASCADE, null=True)
     department = models.ForeignKey("schools.Department", on_delete=models.SET_NULL, null=True)
     amount_requested = models.DecimalField(max_digits=100, decimal_places=2, default=0)
     amount_approved = models.DecimalField(max_digits=100, decimal_places=2, default=0)
@@ -114,14 +114,18 @@ class LibraryFinePayment(AbsoluteBaseModel):
 
 class FeeStructure(AbsoluteBaseModel):
     programme = models.ForeignKey("schools.Programme", on_delete=models.CASCADE)
-    year_of_study = models.CharField(max_length=255)
+    year_of_study = models.ForeignKey("core.StudyYear", on_delete=models.SET_NULL, null=True)
     semester = models.ForeignKey("schools.Semester", on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return self.programme.name
-    
+        return f"{str(self.programme)} - {self.year_of_study.name}, {self.semester.name}"
+
+    def total_amount(self):
+        return sum(list(self.feeitems.all().values_list("amount", flat=True)))
+
+
 class FeeStructureItem(AbsoluteBaseModel):
-    fee_structure = models.ForeignKey(FeeStructure, on_delete=models.CASCADE)
+    fee_structure = models.ForeignKey(FeeStructure, on_delete=models.CASCADE, related_name="feeitems")
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 

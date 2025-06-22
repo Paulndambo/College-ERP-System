@@ -1,0 +1,46 @@
+<div class="modal fade" id="editFeeStructureModal{{fee_structure.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">Edit Fees Structure</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'edit-fees-structure' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" id="fee_structure_id" name="fee_structure_id" hidden readonly value="{{fee_structure.id}}" />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Year of Study</label>
+                  <select class="form-select" id="year_id" name="year_id">
+                    <option value="{{fee_structure.year_of_study.id}}">{{fee_structure.year_of_study}}</option>
+                    {% for year in years_of_study %}
+                        {% if year.id != fee_structure.year_of_study.id %}
+                            <option value="{{year.id}}">{{year}}</option>
+                        {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+                </div>
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Semester</label>
+                      <select class="form-select" id="semester_id" name="semester_id" required>
+                        <option value="{{fee_structure.semester.id}}">{{fee_structure.semester}}</option>
+                        {% for semester in semesters %}
+                            {% if semester.id != fee_structure.semester.id %}
+                                <option value="{{ semester.id }}">{{ semester.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Edit Fee Structure</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>

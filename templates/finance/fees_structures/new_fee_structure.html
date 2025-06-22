@@ -1,0 +1,42 @@
+<div class="modal fade" id="newFeeStructureModal{{programme.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5 text-center">New Fees Structure</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+            <form action="{% url 'new-fees-structure' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="number" id="programme_id" name="programme_id" hidden readonly value="{{programme.id}}" />
+                  <div class="row mb-3">
+                <div class="col">
+                  <label for="exampleInputPassword1" class="form-label fw-bold">Year of Study</label>
+                  <select class="form-select" id="year_id" name="year_id">
+                    <option></option>
+                    {% for year in years_of_study %}
+                        <option value="{{year.id}}">{{year}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                </div>
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="exampleInputPassword1" class="form-label fw-bold">Semester</label>
+                      <select class="form-select" id="semester_id" name="semester_id" required>
+                        {% for semester in semesters %}
+                        <option value="{{ semester.id }}">{{ semester.name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    
+                  </div>
+                           
+                <div class="text-center mt-2">
+                  <button type="submit" class="btn btn-primary">Create Fee Structure</button>
+                </div>
+              </div>
+              </form>
+      </div>
+    </div>
+  </div>
