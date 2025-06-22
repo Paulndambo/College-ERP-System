@@ -4,9 +4,9 @@ from apps.core.models import AbsoluteBaseModel
 
 # Create your models here.
 BOOKING_STATUSES = (
-    ("Pending Check-In", "Pending Check-In"),
-    ("Checked In", "Checked In"),
-    ("Checked Out", "Checked Out"),
+    ("Pending", "Pending"),     
+    ("Confirmed", "Confirmed"),  
+    ("Cancelled", "Cancelled"), 
 )
 
 GENDER_CHOICES = (
@@ -37,16 +37,23 @@ class HostelRoom(AbsoluteBaseModel):
     def __str__(self):
         return self.room_number
 
-    def fully_booked(self):
-        return True if self.students_assigned >= self.room_capacity else False
+    def fully_occupied(self):
+        return self.students_assigned >= self.room_capacity
 
     def status(self):
-        return "Fully Booked" if self.fully_booked else "Available"
+        return "Fully Occupied" if self.fully_occupied() else "Available"
+    
+    def get_current_bookings_count(self):
+        """Helper method to get actual booking count"""
+        return Booking.objects.filter(hostel_room=self).count()
+    
+   
 
     def occupancy(self):
+        if self.room_capacity == 0:
+            return "-"  
         amount = (self.students_assigned / self.room_capacity) * 100
-
-        return f"{amount} %"
+        return f"{amount:.1f}%"
 
 
 class Booking(AbsoluteBaseModel):
@@ -61,4 +68,7 @@ class Booking(AbsoluteBaseModel):
     )
 
     def __str__(self):
+        if self.student is None:
+            return "No student assigned"
         return f"{self.student.user.first_name} {self.student.user.last_name}"
+

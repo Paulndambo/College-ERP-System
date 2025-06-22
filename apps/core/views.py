@@ -29,14 +29,21 @@ class CampusListView(generics.ListAPIView):
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = CampusFilter
+    pagination_class = None
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
     def get(self, request, *args, **kwargs):
         try:
             campuses = self.get_queryset()
             campuses = self.filter_queryset(campuses)
-            page = self.paginate_queryset(campuses)
-            if page is not None:
-                serializer = self.get_serializer(page, many=True)
-                return self.get_paginated_response(serializer.data)
+            page = self.request.query_params.get('page', None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_campuses = paginator.paginate_queryset(campuses, request)
+                serializer = self.get_serializer(paginated_campuses, many=True)
+                return paginator.get_paginated_response(serializer.data)
             serializer = self.get_serializer(campuses, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 

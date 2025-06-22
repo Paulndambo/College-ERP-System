@@ -1,276 +1,491 @@
-from datetime import datetime, timedelta
-import calendar
+from rest_framework import generics, status, filters
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from django.utils import timezone
+from django.contrib.auth.models import AnonymousUser
+from services.constants import ALL_STAFF_ROLES
+from services.permissions import HasUserRole
 
-from django.shortcuts import render, redirect
-from django.db.models import Q
-from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.contrib import messages
-from django.db.models import Case, When, Value, IntegerField
-from django.db import transaction
+from .models import Lead, Interaction, Campaign, Task, LeadStage
+from .serializers import (
+    LeadCreateSerializer,
+    LeadListDetailSerializer,
+    InteractionCreateSerializer,
+    InteractionListDetailSerializer,
+    CampaignCreateSerializer,
+    CampaignListDetailSerializer,
+    TaskCreateSerializer,
+    TaskListDetailSerializer,
+    LeadStageCreateSerializer,
+    LeadStageListDetailSerializer,
+)
 
-
-from apps.marketing.models import Lead, Interaction, Task, LeadStage
-from apps.schools.models import Department, Programme, Course
-from apps.users.models import User
-from apps.core.models import UserRole
-from apps.admissions.models import StudentApplication, Intake
-
-from django.views.generic import ListView
-from django.http import JsonResponse
-
-from apps.core.constants import GENDER_CHOICES, SOURCES, INTERACTION_TYPES, LEAD_STAGES
-
-programmes = Programme.objects.all()
-users_role = UserRole.objects.get(name="Student")
-users = User.objects.exclude(role=users_role)
+from apps.core.exceptions import CustomAPIException
 
 
-date_today = datetime.now().date()
+class LeadCreateView(generics.CreateAPIView):
+    queryset = Lead.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadCreateSerializer
+
+    def perform_create(self, serializer):
+        if "assigned_to" not in self.request.data:
+            serializer.save(assigned_to=self.request.user)
+        else:
+            serializer.save()
 
 
-class LeadsListView(ListView):
-    model = Lead
-    template_name = "marketing/leads/leads.html"
-    context_object_name = "leads"
-    paginate_by = 8
+class LeadUpdateView(generics.UpdateAPIView):
+    queryset = Lead.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadCreateSerializer
+    lookup_field = "pk"
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
+    def patch(self, request, *args, **kwargs):
+        lead = self.get_object()
+        serializer = self.get_serializer(lead, data=request.data, partial=True)
 
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(phone_number__icontains=search_query)
-                | Q(first_name__icontains=search_query)
-                | Q(email__icontains=search_query)
-            )
+        if serializer.is_valid():
+            if "status" in request.data and request.data["status"] != lead.status:
+                LeadStage.objects.create(
+                    lead=lead, stage=request.data["status"], added_by=request.user
+                )
 
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        context["users"] = users
-        context["sources"] = SOURCES
-        context["gender_choices"] = GENDER_CHOICES
-        context["programmes"] = programmes
-        return context
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@login_required
-def lead_details(request, lead_id):
-    lead = Lead.objects.get(id=lead_id)
-
-    interactions = Interaction.objects.filter(lead=lead).order_by("created_on")
-    users_role = UserRole.objects.get(name="Student")
-    users = User.objects.exclude(role=users_role)
-    tasks = Task.objects.filter(lead=lead).order_by("-created_on")
-
-    lead_stages = LeadStage.objects.filter(lead=lead).order_by("-created_on")
-    intakes = Intake.objects.all()
-
-    print(users)
-
-    context = {
-        "lead": lead,
-        "interaction_types": INTERACTION_TYPES,
-        "interactions": interactions,
-        "users": users,
-        "tasks": tasks,
-        "stages": LEAD_STAGES,
-        "lead_stages": lead_stages,
-        "intakes": intakes,
-    }
-    return render(request, "marketing/leads/lead_details.html", context)
-
-
-@login_required
-def capture_lead(request):
-    if request.method == "POST":
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        phone_number = request.POST.get("phone")
-        gender = request.POST.get("gender")
-        source = request.POST.get("source")
-        programme = request.POST.get("programme")
-        city = request.POST.get("city")
-        country = request.POST.get("country")
-
-        lead = Lead.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            email=email,
-            phone_number=phone_number,
-            gender=gender,
-            source=source,
-            programme_id=programme,
-            city=city,
-            country=country,
-        )
-
-        LeadStage.objects.create(lead=lead, stage="New", added_by=request.user)
-
-        return redirect("leads")
-
-    return render(request, "marketing/leads/capture_lead.html")
-
-
-@login_required
-def edit_lead(request):
-    if request.method == "POST":
-        lead_id = request.POST.get("lead_id")
-        first_name = request.POST.get("first_name")
-        last_name = request.POST.get("last_name")
-        email = request.POST.get("email")
-        phone_number = request.POST.get("phone")
-        gender = request.POST.get("gender")
-        source = request.POST.get("source")
-        programme = request.POST.get("programme")
-        city = request.POST.get("city")
-        country = request.POST.get("country")
-        assigned_to = request.POST.get("assigned_to")
-
-        lead = Lead.objects.get(id=lead_id)
-        lead.first_name = first_name
-        lead.last_name = last_name
-        lead.email = email
-        lead.phone_number = phone_number
-        lead.gender = gender
-        lead.source = source
-        lead.programme_id = programme
-        lead.assigned_to_id = assigned_to
-        lead.city = city
-        lead.country = country
-        lead.save()
-
-        return redirect("leads")
-    return render(request, "marketing/leads/edit_lead.html")
-
-
-@login_required
-def new_lead_interaction(request):
-    if request.method == "POST":
-        lead_id = request.POST.get("lead_id")
-        interaction_type = request.POST.get("interaction_type")
-        notes = request.POST.get("notes")
-
-        Interaction.objects.create(
-            interaction_type=interaction_type,
-            notes=notes,
-            lead_id=lead_id,
-            added_by=request.user,
-        )
-        return redirect("lead-details", lead_id=lead_id)
-    return render(request, "marketing/leads/new_lead_interaction.html")
-
-
-@login_required
-def add_lead_stage(request):
-    if request.method == "POST":
-        lead_id = request.POST.get("lead_id")
-        stage = request.POST.get("stage")
-
-        lead_stage = LeadStage.objects.create(
-            lead_id=lead_id, added_by=request.user, stage=stage
-        )
-        lead_stage.lead.status = lead_stage.stage
-        lead_stage.lead.save()
-        return redirect("lead-details", lead_id=lead_id)
-    return render(request, "marketing/leads/new_lead_stage.html")
-
-
-class TasksListView(ListView):
-    model = Task
-    template_name = "marketing/leads/tasks/tasks.html"
-    context_object_name = "tasks"
-    paginate_by = 8
+class LeadListView(generics.ListAPIView):
+    queryset = Lead.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadListDetailSerializer
+    pagination_class = None
+    # filter_backends = [
+    #     DjangoFilterBackend,
+    #     filters.SearchFilter,
+    #     filters.OrderingFilter,
+    # ]
+    # filterset_class = LeadFilter
+    # search_fields = ["first_name", "last_name", "email", "phone_number"]
+    # ordering_fields = ["created_on", "score", "status"]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
+        queryset = (
+            Lead.objects.all()
+            .select_related("programme", "assigned_to", "campaign")
+            .order_by("-created_on")
+        )
 
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query) | Q(title__icontains=search_query)
+
+        user_id = self.request.query_params.get("assigned_to", None)
+        if user_id and user_id.isdigit():
+            queryset = queryset.filter(assigned_to_id=int(user_id))
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        try:
+            leads = self.get_queryset()
+            leads = self.filter_queryset(leads)
+
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_leads = paginator.paginate_queryset(leads, request)
+                serializer = self.get_serializer(paginated_leads, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(leads, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-        # Get sort parameter
-        return queryset.order_by("-created_on")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        return context
+class LeadDetailView(generics.RetrieveAPIView):
+    queryset = Lead.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadListDetailSerializer
+    lookup_field = "pk"
 
 
-@login_required
-def add_lead_task(request):
-    if request.method == "POST":
-        lead_id = request.POST.get("lead_id")
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        due_date = request.POST.get("due_date")
+# ================ Interaction Views ================
 
-        Task.objects.create(
-            lead_id=lead_id,
-            user=request.user,
-            title=title,
-            description=description,
-            due_date=due_date,
+
+class InteractionCreateView(generics.CreateAPIView):
+    queryset = Interaction.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = InteractionCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(added_by=self.request.user)
+
+
+class InteractionUpdateView(generics.UpdateAPIView):
+    queryset = Interaction.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = InteractionCreateSerializer
+    lookup_field = "pk"
+
+    def patch(self, request, *args, **kwargs):
+        interaction = self.get_object()
+        serializer = self.get_serializer(interaction, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class InteractionListView(generics.ListAPIView):
+    queryset = Interaction.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = InteractionListDetailSerializer
+    pagination_class = None
+    # filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class = InteractionFilter
+    # ordering_fields = ["date", "created_on"]
+
+    def get_queryset(self):
+        queryset = (
+            Interaction.objects.all()
+            .select_related("lead", "added_by")
+            .order_by("-date")
         )
 
-        return redirect("lead-details", lead_id=lead_id)
-    return render(request, "marketing/leads/new_lead_task.html")
+     
+        lead_id = self.request.query_params.get("lead", None)
+        if lead_id and lead_id.isdigit():
+            queryset = queryset.filter(lead_id=int(lead_id))
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        try:
+            interactions = self.get_queryset()
+            interactions = self.filter_queryset(interactions)
+
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_interactions = paginator.paginate_queryset(
+                    interactions, request
+                )
+                serializer = self.get_serializer(paginated_interactions, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(interactions, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
-@login_required
-def mark_task_as_complete(request):
-    if request.method == "POST":
-        task_id = request.POST.get("task_id")
-        task = Task.objects.get(id=task_id)
-        task.completed = True
-        task.save()
-        return redirect("lead-details", lead_id=task.lead.id)
-    return render(request, "marketing/leads/mark_as_complete.html")
+class InteractionDetailView(generics.RetrieveAPIView):
+    queryset = Interaction.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = InteractionListDetailSerializer
+    lookup_field = "pk"
 
 
-@login_required
-def delete_lead_task(request):
-    if request.method == "POST":
-        task_id = request.POST.get("task_id")
-        task = Task.objects.get(id=task_id)
-        task.delete()
-        return redirect("lead-details", lead_id=task.lead.id)
-    return render(request, "marketing/leads/delete_task.html")
+# ================ Campaign Views ================
 
 
-def create_application_with_lead(request):
-    if request.method == "POST":
-        lead_id = request.POST.get("lead_id")
-        id_number = request.POST.get("id_number")
+class CampaignCreateView(generics.CreateAPIView):
+    queryset = Campaign.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = CampaignCreateSerializer
 
-        lead = Lead.objects.get(id=lead_id)
-        application = StudentApplication.objects.create(
-            first_name=lead.first_name,
-            last_name=lead.last_name,
-            id_number=id_number,
-            gender=lead.gender,
-            email=lead.email,
-            first_choice_programme=lead.programme,
-            city=lead.city,
-            country=lead.country,
-            phone_number=lead.phone_number,
-            status="Draft",
-        )
-        application.application_number = (
-            f"APP-{application.id}/{date_today.month}/{date_today.year}"
-        )
-        application.save()
-        lead.status = "Application in Progress"
-        lead.save()
-        return redirect("lead-details", lead_id=lead.id)
-    return render(request, "marketing/leads/start_application.html")
+    def perform_create(self, serializer):
+        serializer.save()
+
+
+class CampaignUpdateView(generics.UpdateAPIView):
+    queryset = Campaign.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = CampaignCreateSerializer
+    lookup_field = "pk"
+
+    def patch(self, request, *args, **kwargs):
+        campaign = self.get_object()
+        serializer = self.get_serializer(campaign, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CampaignListView(generics.ListAPIView):
+    queryset = Campaign.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = CampaignListDetailSerializer
+    pagination_class = None
+    # filter_backends = [
+    #     DjangoFilterBackend,
+    #     filters.SearchFilter,
+    #     filters.OrderingFilter,
+    # ]
+    # filterset_class = CampaignFilter
+    # search_fields = ["name", "description"]
+    # ordering_fields = ["start_date", "end_date", "created_on"]
+
+    def get_queryset(self):
+        return Campaign.objects.all().order_by("-start_date")
+
+    def list(self, request, *args, **kwargs):
+        try:
+            campaigns = self.get_queryset()
+            campaigns = self.filter_queryset(campaigns)
+
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_campaigns = paginator.paginate_queryset(campaigns, request)
+                serializer = self.get_serializer(paginated_campaigns, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(campaigns, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class CampaignDetailView(generics.RetrieveAPIView):
+    queryset = Campaign.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = CampaignListDetailSerializer
+    lookup_field = "slug"
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Increment view count on retrieval
+        instance.views += 1
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+# ================ Task Views ================
+
+
+class TaskCreateView(generics.CreateAPIView):
+    queryset = Task.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = TaskCreateSerializer
+
+    def perform_create(self, serializer):
+        # If user not specified, assign to current user
+        if "user" not in self.request.data:
+            serializer.save(user=self.request.user)
+        else:
+            serializer.save()
+
+
+class TaskUpdateView(generics.UpdateAPIView):
+    queryset = Task.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = TaskCreateSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return Task.objects.none()
+        # Users can only update their own tasks unless they're in ALL_STAFF_ROLES
+        if user.role.name in ALL_STAFF_ROLES:
+            return Task.objects.all()
+        return Task.objects.filter(user=user)
+
+    def patch(self, request, *args, **kwargs):
+        task = self.get_object()
+        serializer = self.get_serializer(task, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TaskListView(generics.ListAPIView):
+    queryset = Task.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = TaskListDetailSerializer
+    pagination_class = None
+    # filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class = TaskFilter
+    # ordering_fields = ["due_date", "created_on"]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Task.objects.all().select_related("user", "lead")
+
+        my_tasks_only = self.request.query_params.get("my_tasks", None)
+        if my_tasks_only == "true":
+            queryset = queryset.filter(user=user)
+
+        
+        lead_id = self.request.query_params.get("lead", None)
+        if lead_id and lead_id.isdigit():
+            queryset = queryset.filter(lead_id=int(lead_id))
+
+      
+        completed = self.request.query_params.get("completed", None)
+        if completed in ["true", "false"]:
+            queryset = queryset.filter(completed=(completed == "true"))
+
+        
+        due_filter = self.request.query_params.get("due", None)
+        today = timezone.now().date()
+
+        if due_filter == "today":
+            queryset = queryset.filter(due_date__date=today)
+        elif due_filter == "upcoming":
+            queryset = queryset.filter(due_date__date__gt=today)
+        elif due_filter == "overdue":
+            queryset = queryset.filter(due_date__date__lt=today, completed=False)
+
+        return queryset.order_by("due_date")
+
+    def list(self, request, *args, **kwargs):
+        try:
+            tasks = self.get_queryset()
+            tasks = self.filter_queryset(tasks)
+
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_tasks = paginator.paginate_queryset(tasks, request)
+                serializer = self.get_serializer(paginated_tasks, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(tasks, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class TaskDetailView(generics.RetrieveAPIView):
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = TaskListDetailSerializer
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, AnonymousUser):
+            return Task.objects.none()
+        if user.role.name in ALL_STAFF_ROLES:
+            return Task.objects.all()
+        return Task.objects.filter(user=user)
+
+
+# ================ LeadStage Views ================
+
+
+class LeadStageCreateView(generics.CreateAPIView):
+    queryset = LeadStage.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadStageCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(added_by=self.request.user)
+
+
+class LeadStageUpdateView(generics.UpdateAPIView):
+    queryset = LeadStage.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadStageCreateSerializer
+    lookup_field = "pk"
+
+    def patch(self, request, *args, **kwargs):
+        lead_stage = self.get_object()
+        serializer = self.get_serializer(lead_stage, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LeadStageListView(generics.ListAPIView):
+    queryset = LeadStage.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadStageListDetailSerializer
+    pagination_class = None
+    # filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    # filterset_class = LeadStageFilter
+    # ordering_fields = ["date_reached", "created_on"]
+
+    def get_queryset(self):
+        queryset = LeadStage.objects.all().select_related("lead", "added_by")
+
+        # Filter by lead if specified
+        lead_id = self.request.query_params.get("lead", None)
+        if lead_id and lead_id.isdigit():
+            queryset = queryset.filter(lead_id=int(lead_id))
+
+        return queryset.order_by("-date_reached")
+
+    def list(self, request, *args, **kwargs):
+        try:
+            stages = self.get_queryset()
+            stages = self.filter_queryset(stages)
+
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_stages = paginator.paginate_queryset(stages, request)
+                serializer = self.get_serializer(paginated_stages, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(stages, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class LeadStageDetailView(generics.RetrieveAPIView):
+    queryset = LeadStage.objects.all()
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    serializer_class = LeadStageListDetailSerializer
+    lookup_field = "pk"

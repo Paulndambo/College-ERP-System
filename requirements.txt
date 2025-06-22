@@ -1,0 +1,10 @@
+django
+djangorestframework
+django-cors-headers
+django-filter
+drf-yasg
+django-environ
+djangorestframework-simplejwt
+whitenoise
+dotenev
+pandas

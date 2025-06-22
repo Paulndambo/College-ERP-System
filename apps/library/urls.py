@@ -1,52 +1,25 @@
 from django.urls import path
 
-from apps.library.views import (
-    BooksListView,
-    new_book,
-    edit_book,
-    delete_book,
-    issue_book,
-    issue_member_book,
-    BookDetailView,
-    new_member,
-    MembersListView,
-    MembersBooksListView,
-    BooksIssuedListView,
-    mark_issued_book_as_lost,
-    return_issued_book,
-    reset_borrowed_book,
-    BorrowingFinesListView,
-    request_fine_payment,
-    deactivate_member,
-    reactivate_member,
-)
+from .views import BookCreateAPIView, BookDetailAPIView, BookListAPIView, BookUpdateAPIView, BorrowTransactionCreateView, BorrowTransactionListView, BorrowTransactionUpdateView, FineListView, FinePaymentRequestView, MemberCreateAPIView, MemberDeactivateView, MemberDetailAPIView, MemberListAPIView, MemberReactivateView, MemberUpdateAPIView
 
-from apps.library.uploads.views import upload_books
 
 urlpatterns = [
-    path("books/", BooksListView.as_view(), name="books"),
-    path("books/<int:id>/details/", BookDetailView.as_view(), name="book-details"),
-    path("new-book/", new_book, name="new-book"),
-    path("edit-book/", edit_book, name="edit-book"),
-    path("delete-book/", delete_book, name="delete-book"),
-    path("upload-books/", upload_books, name="upload-books"),
-    path("issue-book/", issue_book, name="issue-book"),
-    path("issue-member-book/", issue_member_book, name="issue-member-book"),
-    path("members/", MembersListView.as_view(), name="members"),
-    path(
-        "members/<int:id>/details/",
-        MembersBooksListView.as_view(),
-        name="member-details",
-    ),
-    path("new-member/", new_member, name="new-member"),
-    path("deactivate-member/", deactivate_member, name="deactivate-member"),
-    path("reactivate-member/", reactivate_member, name="reactivate-member"),
-    path("issued-books/", BooksIssuedListView.as_view(), name="issued-books"),
-    path("return-issued-book/", return_issued_book, name="return-issued-book"),
-    path(
-        "mark-issued-book-lost/", mark_issued_book_as_lost, name="mark-issued-book-lost"
-    ),
-    path("reset-issued-book/", reset_borrowed_book, name="reset-issued-book"),
-    path("borrowing-fines/", BorrowingFinesListView.as_view(), name="borrowing-fines"),
-    path("request-fine-payment/", request_fine_payment, name="request-fine-payment"),
+    path("members/list/", MemberListAPIView.as_view(), name="members"),
+    path("members/create/", MemberCreateAPIView.as_view(), name="create-member"),
+    path("members/update/<int:pk>/", MemberUpdateAPIView.as_view(), name="update-member"),
+    path("members/details/<int:pk>/", MemberDetailAPIView.as_view(), name="member-details"),
+    path("members/deactivate/<int:pk>/", MemberDeactivateView.as_view(), name="deactivate-member"),
+    path("members/activate/<int:pk>/", MemberReactivateView.as_view(), name="activate-member"),
+    
+    path("books/create/", BookCreateAPIView.as_view(), name="books-create"),
+    path("books/list/", BookListAPIView.as_view(), name="books-list"),
+    path("books/update/<int:pk>/", BookUpdateAPIView.as_view(), name="books-update"),
+    path("books/details/<int:pk>/", BookDetailAPIView.as_view(), name="book-details"),
+    
+    path("borrowed-books/create/", BorrowTransactionCreateView.as_view(), name="issue-book"),
+    path("borrowed-books/update/<int:pk>/", BorrowTransactionUpdateView.as_view(), name="update-issude-book"),
+    path("borrowed-books/list/", BorrowTransactionListView.as_view(), name="borrowed-books-record"),
+    
+    path("borrowed-books-fines/list/", FineListView.as_view(), name="borrowed-books-fines"),
+    path("fine-payment-request/", FinePaymentRequestView.as_view(), name="request-fine-payment")
 ]

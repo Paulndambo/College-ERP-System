@@ -10,7 +10,7 @@ class Book(AbsoluteBaseModel):
     CATEGORY_CHOICES = [
         ("Book", "Book"),
         ("Journal", "Journal"),
-        ("Digital", "Digital Content"),
+        ("Digital", "Digital"),
     ]
 
     title = models.CharField(max_length=200)
@@ -46,9 +46,9 @@ class Member(AbsoluteBaseModel):
 
 class BorrowTransaction(AbsoluteBaseModel):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    book_number = models.CharField(max_length=255, null=True)
+    copy_number = models.CharField(max_length=50, null=True , blank=True)
     member = models.ForeignKey(Member, on_delete=models.CASCADE)
-    borrow_date = models.DateField(default=now)
+    borrow_date = models.DateField(default=date.today)
     due_date = models.DateField(null=True)  # Default 2-week loan
     return_date = models.DateField(null=True, blank=True)
     status = models.CharField(

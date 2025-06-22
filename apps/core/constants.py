@@ -1,3 +1,4 @@
+from uuid import uuid4
 USER_ROLES = (
     ("Admin", "Admin"),
     ("Staff", "Staff"),
@@ -70,3 +71,7 @@ LEAVE_TYPES = [
     "Emergency Leave",
     "Other",
 ]
+
+
+def payment_ref_generator():
+    return uuid4().hex

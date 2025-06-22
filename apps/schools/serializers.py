@@ -41,14 +41,13 @@ class ProgrammeCreateSerializer(serializers.ModelSerializer):
 class ProgrammeListSerializer(serializers.ModelSerializer):
     school = SchoolListSerializer()
     department = DepartmentListSerializer()
+  
+    
     class Meta:
         model = Programme
         fields = ['id', 'name', 'code', 'school', 'department', 'level']
         
-    # def get_school(self, obj):
-    #     return obj.school.name
-    # def get_department(self, obj):
-    #     return obj.department.name
+   
 
 
 class CourseCreateSerializer(serializers.ModelSerializer):
@@ -56,7 +55,10 @@ class CourseCreateSerializer(serializers.ModelSerializer):
         model = Course
         fields = ['course_code', 'name', 'school', 'department', 'programme']
 
-
+class MinimalClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'course_code', 'name']
 class CourseListSerializer(serializers.ModelSerializer):
     school=SchoolListSerializer()
     department=DepartmentListSerializer()
@@ -64,7 +66,19 @@ class CourseListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ['id', 'course_code', 'name', 'school', 'department', 'programme']
-
+    
+class ProgrammeListDetailSerializer(serializers.ModelSerializer):
+    school = SchoolListSerializer()
+    department = DepartmentListSerializer()
+    units = CourseListSerializer(source='course_set', many=True, read_only=True)
+    
+    class Meta:
+        model = Programme
+        fields = ['id', 'name', 'code', 'school', 'department', 'level', 'units']
+        
+    # def get_courses(self, obj):
+    #     units = obj.course_set.filter(active=True)  
+    #     return CourseListSerializer(units, many=True)
 
 
 class SemesterCreateSerializer(serializers.ModelSerializer):
@@ -105,8 +119,8 @@ class CourseSessionCreateSerializer(serializers.ModelSerializer):
 
 
 class CourseSessionListSerializer(serializers.ModelSerializer):
-    cohort = serializers.StringRelatedField(source='cohort.name')
-    course = serializers.StringRelatedField(source='course.name')
+    cohort = ProgrammeCohortListSerializer()
+    course = CourseListSerializer()
     class Meta:
         model = CourseSession
         fields = ['id', 'cohort', 'course', 'start_time', 'period', 'status']
