@@ -1,88 +1,113 @@
-<html>
-    <head>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 0;
-                background-color: #f4f4f4;
-                color: #333;
-            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticket Assignment - Ticketfy</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    .email-wrapper {
+      width: 100%;
+      background-color: #f4f4f4;
+      padding: 20px 0;
+    }
+    .email-content {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .email-header {
+      text-align: center;
+      padding-bottom: 20px;
+    }
+    .email-header h1 {
+      color: #4CAF50;
+      font-size: 28px;
+      margin: 0;
+    }
+    .email-header p {
+      color: #666;
+      font-style: italic;
+      margin: 5px 0 0 0;
+    }
+    .email-body {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .email-body ul {
+      list-style-type: none;
+      padding: 0;
+      background-color: #f0f8f5;
+      border-radius: 5px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .email-body li {
+      margin-bottom: 10px;
+    }
+    .email-body strong {
+      display: inline-block;
+      width: 90px;
+      color: #4CAF50;
+    }
+    .email-footer {
+      font-size: 14px;
+      color: #777;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .email-footer a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="email-content">
+      <div class="email-header">
+        <h1>Ticketfy</h1>
+        <p>Your trusted ticketing partner</p>
+      </div>
+      <div class="email-body">
+        <p>Hello {{ agent_name }},</p>
 
-            .email-container {
-                width: 100%;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #fff;
-                border-radius: 8px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
+        <p>
+          You have been assigned a new support ticket. Below are the details:
+        </p>
 
-            .header {
-                text-align: center;
-                padding-bottom: 20px;
-            }
+        <ul>
+          <li><strong>Title:</strong> {{ ticket_title }}</li>
+          <li><strong>Priority:</strong> {{ ticket_priority }}</li>
+          <li><strong>Description:</strong> {{ ticket_description }}</li>
+        </ul>
 
-            .header h1 {
-                color: #4CAF50;
-                font-size: 28px;
-            }
+        <p>
+          Please address this ticket at your earliest convenience. You can log into your Ticketfy dashboard to update its status or take action.
+        </p>
 
-            .content {
-                font-size: 16px;
-                line-height: 1.6;
-                margin-bottom: 20px;
-            }
+        <p>
+          Thank you for your attention to this matter.
+        </p>
+      </div>
 
-            .otp-code {
-                text-align: center;
-                font-size: 24px;
-                font-weight: bold;
-                color: #4CAF50;
-                background-color: #f0f8f5;
-                padding: 10px;
-                margin: 20px 0;
-                border-radius: 5px;
-                display: inline-block;
-                letter-spacing: 2px;
-            }
-
-            .footer {
-                font-size: 14px;
-                color: #777;
-                text-align: center;
-                margin-top: 20px;
-            }
-
-            .footer a {
-                color: #4CAF50;
-                text-decoration: none;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="email-container">
-            <div class="header">
-                <h1>Welcome to Ulitimate College Erp!</h1>
-            </div>
-
-            <div class="content">
-                <p>Hello {{ name }},</p>
-
-                <p>Thank you for signing up. To activate your account, please enter the verification code below:</p>
-
-                <div class="otp-code">
-                    {{ otp }}
-                </div>
-
-                <p>This code is valid for a limited time. If you didn’t create this account, you can safely ignore this email.</p>
-            </div>
-
-            <div class="footer">
-                <p>Cheers, <br>The Development Team</p>
-                <p>If you have any questions, feel free to <a href="mailto:support@banjuka.com">contact us</a>.</p>
-            </div>
-        </div>
-    </body>
+      <div class="email-footer">
+        <p>Cheers, <br><strong>Admin</strong></p>
+        <p>&copy; {{ current_year }} Ticketfy. All rights reserved.</p>
+      </div>
+    </div>
+  </div>
+</body>
 </html>

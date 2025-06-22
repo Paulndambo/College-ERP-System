@@ -28,20 +28,35 @@ BUDGET_STATUSES = (
     ("Declined", "Declined"),
 )
 
+
 class Budget(AbsoluteBaseModel):
     title = models.CharField(max_length=255)
     school = models.ForeignKey("schools.School", on_delete=models.CASCADE, null=True)
-    department = models.ForeignKey("schools.Department", on_delete=models.SET_NULL, null=True)
+    department = models.ForeignKey(
+        "schools.Department", on_delete=models.SET_NULL, null=True
+    )
     amount_requested = models.DecimalField(max_digits=100, decimal_places=2, default=0)
     amount_approved = models.DecimalField(max_digits=100, decimal_places=2, default=0)
-    status = models.CharField(max_length=255, choices=BUDGET_STATUSES, default="Under Review")
-    submitted_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="budgetsubmitters")
-    approved_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="budgetapprovers")
+    status = models.CharField(
+        max_length=255, choices=BUDGET_STATUSES, default="Under Review"
+    )
+    submitted_by = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="budgetsubmitters",
+    )
+    approved_by = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="budgetapprovers",
+    )
     description = models.TextField(null=True)
 
     def __str__(self):
         return self.title
-    
+
 
 class BudgetItem(AbsoluteBaseModel):
     title = models.CharField(max_length=255)
@@ -51,7 +66,7 @@ class BudgetItem(AbsoluteBaseModel):
 
     def __str__(self):
         return self.title
-    
+
 
 class BudgetDocument(AbsoluteBaseModel):
     budget = models.ForeignKey(Budget, on_delete=models.CASCADE)
@@ -63,8 +78,12 @@ class BudgetDocument(AbsoluteBaseModel):
 
 
 class Payment(AbsoluteBaseModel):
-    payer = models.ForeignKey("users.User", on_delete=models.SET_NULL, related_name="payers", null=True)
-    receiver = models.ForeignKey("users.User", on_delete=models.SET_NULL, related_name="receivers", null=True)
+    payer = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, related_name="payers", null=True
+    )
+    receiver = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, related_name="receivers", null=True
+    )
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     payment_type = models.CharField(max_length=255, choices=PAYMENT_TYPES)
     direction = models.CharField(max_length=255, choices=PAYMENT_DIRECTIONS)
@@ -97,10 +116,14 @@ class FeePayment(AbsoluteBaseModel):
 
 class LibraryFinePayment(AbsoluteBaseModel):
     member = models.ForeignKey("library.Member", on_delete=models.CASCADE)
-    fine = models.OneToOneField("library.Fine", on_delete=models.CASCADE, null=True, related_name="finepayment")
+    fine = models.OneToOneField(
+        "library.Fine", on_delete=models.CASCADE, null=True, related_name="finepayment"
+    )
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     payment_date = models.DateField(null=True)
-    payment_method = models.CharField(max_length=255, choices=PAYMENT_METHODS, null=True)
+    payment_method = models.CharField(
+        max_length=255, choices=PAYMENT_METHODS, null=True
+    )
     payment_reference = models.CharField(max_length=255, null=True, blank=True)
     recorded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
     paid = models.BooleanField(default=False)
@@ -114,18 +137,26 @@ class LibraryFinePayment(AbsoluteBaseModel):
 
 class FeeStructure(AbsoluteBaseModel):
     programme = models.ForeignKey("schools.Programme", on_delete=models.CASCADE)
-    year_of_study = models.ForeignKey("core.StudyYear", on_delete=models.SET_NULL, null=True)
-    semester = models.ForeignKey("schools.Semester", on_delete=models.SET_NULL, null=True)
+    year_of_study = models.ForeignKey(
+        "core.StudyYear", on_delete=models.SET_NULL, null=True
+    )
+    semester = models.ForeignKey(
+        "schools.Semester", on_delete=models.SET_NULL, null=True
+    )
 
     def __str__(self):
-        return f"{str(self.programme)} - {self.year_of_study.name}, {self.semester.name}"
+        return (
+            f"{str(self.programme)} - {self.year_of_study.name}, {self.semester.name}"
+        )
 
     def total_amount(self):
         return sum(list(self.feeitems.all().values_list("amount", flat=True)))
 
 
 class FeeStructureItem(AbsoluteBaseModel):
-    fee_structure = models.ForeignKey(FeeStructure, on_delete=models.CASCADE, related_name="feeitems")
+    fee_structure = models.ForeignKey(
+        FeeStructure, on_delete=models.CASCADE, related_name="feeitems"
+    )
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 

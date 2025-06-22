@@ -156,7 +156,7 @@ class LeadListDetailSerializer(serializers.ModelSerializer):
     assigned_to_name = serializers.CharField(
         source="assigned_to.get_full_name", read_only=True
     )
-    campaign = CampaignListDetailSerializer(read_only=True) 
+    campaign = CampaignListDetailSerializer(read_only=True)
 
     class Meta:
         model = Lead
@@ -179,4 +179,3 @@ class LeadListDetailSerializer(serializers.ModelSerializer):
             "created_on",
             "updated_on",
         ]
-

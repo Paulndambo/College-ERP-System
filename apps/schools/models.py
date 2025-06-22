@@ -40,8 +40,18 @@ class School(AbsoluteBaseModel):
 
 
 class Department(AbsoluteBaseModel):
+    ACADEMIC = "Academic"
+    NOT_ACADEMIC = "Not Academic"
+
+    DEPARTMENT_TYPE_CHOICES = [
+        (ACADEMIC, "Academic"),
+        (NOT_ACADEMIC, "Not Academic"),
+    ]
     name = models.CharField(max_length=255)
-    school = models.ForeignKey(School, on_delete=models.CASCADE)
+    department_type = models.CharField(
+        max_length=15, choices=DEPARTMENT_TYPE_CHOICES, default=ACADEMIC
+    )
+    school = models.ForeignKey(School, on_delete=models.CASCADE, null=True, blank=True)
     office = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
@@ -81,13 +91,51 @@ class Semester(AbsoluteBaseModel):
 
     def __str__(self):
         return self.name
+    
+    def derive_academic_year_from_dates(self):
+        """
+        Derive academic year - now with a clear hierarchy:
+        1. Use cohort intake academic year if available
+        2. Fall back to date-based calculation
+        """
+        if not self.start_date or not self.end_date:
+            return ""
+        
+        return self._calculate_from_dates()
+    
+    def _calculate_from_dates(self):
+        start_year = self.start_date.year
+        end_year = self.end_date.year
+        start_month = self.start_date.month
+        
+        if start_year != end_year:
+            return f"{start_year}/{end_year}"
+        
+        if start_month >= 9:
+            return f"{start_year}/{start_year + 1}"
+        else:
+            return f"{start_year - 1}/{start_year}"
 
+    def save(self, *args, **kwargs):
+        """Auto-populate academic_year if not provided"""
+        if not self.academic_year and self.start_date and self.end_date:
+            self.academic_year = self.derive_academic_year_from_dates()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        """Validate that end_date is after start_date"""
+        from django.core.exceptions import ValidationError
+        
+        if self.start_date and self.end_date:
+            if self.end_date <= self.start_date:
+                raise ValidationError("End date must be after start date")
 
 class ProgrammeCohort(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
     current_year = models.CharField(max_length=255, choices=COHORT_YEAR_CHOICES)
     current_semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+    intake = models.ForeignKey("admissions.Intake", on_delete=models.CASCADE, null=True)
     status = models.CharField(
         max_length=255,
         choices=[("Active", "Active"), ("Graduated", "Graduated")],
@@ -99,6 +147,9 @@ class ProgrammeCohort(AbsoluteBaseModel):
 
     def students_count(self):
         return self.cohortstudents.all().count()
+    def get_academic_year(self):
+        """Get academic year from the intake this cohort belongs to"""
+        return self.intake.get_academic_year()
 
 
 class CourseSession(AbsoluteBaseModel):

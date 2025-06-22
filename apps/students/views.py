@@ -1,9 +1,11 @@
 from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
+
+
 from .filters import AssessmentFilter, StudentFilter
 from rest_framework.exceptions import ValidationError
 from django.views.generic import ListView
@@ -12,6 +14,7 @@ from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
 import pandas as pd
+from rest_framework.views import APIView
 import io
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -21,7 +24,7 @@ from apps.users.models import User, UserRole
 from apps.users.serializers import AdminUserSerializer, UserSerializer
 from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
 from services.permissions import HasUserRole
-from .models import Student, StudentProgramme
+from .models import SemesterReporting, Student, StudentProgramme
 from django.contrib.auth.models import AnonymousUser
 from .serializers import (
     MealCardCreateSerializer,
@@ -47,7 +50,7 @@ from apps.students.models import (
 )
 from apps.users.models import User
 from apps.core.models import UserRole
-from apps.schools.models import Programme, ProgrammeCohort
+from apps.schools.models import Programme, ProgrammeCohort, Semester
 
 
 class StudentRegistrationView(generics.CreateAPIView):
@@ -224,7 +227,7 @@ class AssessmentList(generics.ListAPIView):
         course = self.request.query_params.get("course", None)
         semester = self.request.query_params.get("semester", None)
         cohort = self.request.query_params.get("cohort", None)
-     
+
         try:
             students = self.get_queryset()
             students = self.filter_queryset(students)
@@ -643,3 +646,5 @@ class BulkStudentUploadView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+

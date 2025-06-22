@@ -34,8 +34,7 @@ class BudgetsListView(ListView):
 
         if search_query:
             queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(title__icontains=search_query)
+                Q(id__icontains=search_query) | Q(title__icontains=search_query)
             )
         # Get sort parameter
         return queryset.order_by("-created_on")

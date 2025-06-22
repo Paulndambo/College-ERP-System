@@ -147,8 +147,9 @@ class StudentApplicationListView(generics.ListAPIView):
     allowed_roles = ALL_ROLES
     serializer_class = StudentApplicationListDetailSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_class = StudentApplicationFilter 
+    filterset_class = StudentApplicationFilter
     pagination_class = PageNumberPagination
+
     def get_queryset(self):
         user = self.request.user
         if user.role.name == ROLE_STUDENT:
@@ -156,33 +157,34 @@ class StudentApplicationListView(generics.ListAPIView):
                 "-created_on"
             )
 
-        applications = (
-            StudentApplication.objects.all().order_by("-created_on")
-        )
+        applications = StudentApplication.objects.all().order_by("-created_on")
         return applications
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
-    
+
     def list(self, request, *args, **kwargs):
         try:
             queryset = self.get_queryset()
             filtered_queryset = self.filter_queryset(queryset)
-            page = self.request.query_params.get('page', None)
+            page = self.request.query_params.get("page", None)
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
-                paginated_applications = paginator.paginate_queryset(filtered_queryset, request)
+                paginated_applications = paginator.paginate_queryset(
+                    filtered_queryset, request
+                )
                 serializer = self.get_serializer(paginated_applications, many=True)
                 return paginator.get_paginated_response(serializer.data)
-            
 
             serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as exc:
-            raise CustomAPIException(message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class StudentApplicationDetailView(generics.RetrieveAPIView):
@@ -225,10 +227,9 @@ class ApplicationDocumentCreateView(generics.CreateAPIView):
             student_application = self.request.data.get("student_application")
             student_application = int(student_application)
         except (TypeError, ValueError):
-                return Response(
-                    {"error": "Invalid application ."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            return Response(
+                {"error": "Invalid application ."}, status=status.HTTP_400_BAD_REQUEST
+            )
         serializer.save()
 
 
@@ -244,7 +245,7 @@ class ApplicationDocumentUpdateView(generics.UpdateAPIView):
     #     if isinstance(user, AnonymousUser):
     #         return ApplicationDocument.objects.none()
     #     if user.role.name == ROLE_STUDENT:
-            
+
     #         return ApplicationDocument.objects.filter(
     #             student_application__email=user.email
     #         )
@@ -414,33 +415,37 @@ class ApplicationEducationHistoryDetailView(generics.RetrieveAPIView):
             )
         return ApplicationEducationHistory.objects.all()
 
+
 class StudentEnrollmentView(generics.CreateAPIView):
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
     serializer_class = StudentEnrollmentSerializer
-    
+
     def create(self, request, *args, **kwargs):
         data = request.data
         application_id = data.get("application")
         cohort_id = data.get("cohort")
         campus_id = data.get("campus")
-        
+
         try:
             application = StudentApplication.objects.get(id=application_id)
-            documents = ApplicationDocument.objects.filter(student_application=application)
-            education_history = ApplicationEducationHistory.objects.filter(student_application=application)
+            documents = ApplicationDocument.objects.filter(
+                student_application=application
+            )
+            education_history = ApplicationEducationHistory.objects.filter(
+                student_application=application
+            )
 
             try:
                 role = UserRole.objects.get(name="Student")
             except UserRole.DoesNotExist:
                 raise CustomAPIException(
                     message="UserRole 'Student' not found.",
-                    status_code=status.HTTP_400_BAD_REQUEST
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
 
             registration_number = application.application_number
 
-           
             try:
                 with transaction.atomic():
                     user = User.objects.create(
@@ -458,14 +463,12 @@ class StudentEnrollmentView(generics.CreateAPIView):
                         city=application.city,
                         country=application.country,
                         is_verified=True,
-                        role=role
+                        role=role,
                     )
-                    
-                   
+
                     user.set_password(registration_number)
                     user.save()
 
-                 
                     student = Student.objects.create(
                         user=user,
                         registration_number=registration_number,
@@ -479,7 +482,6 @@ class StudentEnrollmentView(generics.CreateAPIView):
                         campus_id=campus_id,
                     )
 
-                    
                     for document in documents:
                         StudentDocument.objects.create(
                             student=student,
@@ -488,7 +490,6 @@ class StudentEnrollmentView(generics.CreateAPIView):
                             document_file=document.document_file,
                         )
 
-                   
                     for history in education_history:
                         StudentEducationHistory.objects.create(
                             student=student,
@@ -499,37 +500,38 @@ class StudentEnrollmentView(generics.CreateAPIView):
                             grade_or_gpa=history.grade_or_gpa,
                         )
 
-                   
                     if application.lead:
                         application.lead.status = "Converted"
                         application.lead.save()
 
-                    
                     application.status = "Enrolled"
                     application.save()
 
                 student_data = StudentListSerializer(student).data
 
-                return Response({
-                    "message": "Student enrolled successfully",
-                    "student": student_data
-                }, status=status.HTTP_201_CREATED)
-            
+                return Response(
+                    {
+                        "message": "Student enrolled successfully",
+                        "student": student_data,
+                    },
+                    status=status.HTTP_201_CREATED,
+                )
+
             except Exception as e:
                 raise CustomAPIException(
                     message=f"Error creating user or enrolling student: {str(e)}",
-                    status_code=status.HTTP_400_BAD_REQUEST
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
-        
+
         except StudentApplication.DoesNotExist:
             raise CustomAPIException(
                 message="Student application not found.",
-                status_code=status.HTTP_404_NOT_FOUND
+                status_code=status.HTTP_404_NOT_FOUND,
             )
         except CustomAPIException as exc:
             raise
         except Exception as e:
             raise CustomAPIException(
                 message=f"Error enrolling student: {str(e)}",
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_400_BAD_REQUEST,
             )

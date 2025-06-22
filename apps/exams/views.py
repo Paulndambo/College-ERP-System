@@ -1,7 +1,11 @@
 from apps.exams.filters import ExamDataFilterSet, TranscriptsFilter
 from apps.schools.models import Course, ProgrammeCohort, Semester
 from apps.students.models import Student
-from apps.students.serializers import MinimalStudentSerializer, StudentDetailSerialzer, StudentListSerializer
+from apps.students.serializers import (
+    MinimalStudentSerializer,
+    StudentDetailSerialzer,
+    StudentListSerializer,
+)
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
@@ -285,55 +289,57 @@ class ExamDatapdateAPIView(generics.RetrieveUpdateAPIView):
 
 class TranscriptsDataView(generics.ListAPIView):
     queryset = ExamData.objects.all().select_related(
-        'student',
-        'student__user',
-        'student__programme',
-        'semester',
-        'cohort',
-        'course',
-        'recorded_by'
+        "student",
+        "student__user",
+        "student__programme",
+        "semester",
+        "cohort",
+        "course",
+        "recorded_by",
     )
     serializer_class = StudentExamDataSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TranscriptsFilter
-    
+
     def get_queryset(self):
         base_queryset = ExamData.objects.select_related(
-            'student',
-            'student__user',
-            'student__programme',
-            'semester',
-            'cohort',
-            'course',
-            'recorded_by'
+            "student",
+            "student__user",
+            "student__programme",
+            "semester",
+            "cohort",
+            "course",
+            "recorded_by",
         )
 
-        programme_id = self.request.query_params.get('programme')
-        semester_id = self.request.query_params.get('semester')
-        cohort_id = self.request.query_params.get('cohort')
-        reg_no = self.request.query_params.get('reg_no')
-        if not (programme_id and semester_id) and not (cohort_id and semester_id) and not (reg_no and semester_id):
-            raise CustomAPIException("You must provide either (programme and semester), or (cohort/class and semester), or (reg_no and semester).",
-                                     status_code=status.HTTP_400_BAD_REQUEST
-                                     )
+        programme_id = self.request.query_params.get("programme")
+        semester_id = self.request.query_params.get("semester")
+        cohort_id = self.request.query_params.get("cohort")
+        reg_no = self.request.query_params.get("reg_no")
+        if (
+            not (programme_id and semester_id)
+            and not (cohort_id and semester_id)
+            and not (reg_no and semester_id)
+        ):
+            raise CustomAPIException(
+                "You must provide either (programme and semester), or (cohort/class and semester), or (reg_no and semester).",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
         if programme_id and semester_id:
             base_queryset = base_queryset.filter(
-                student__programme_id=programme_id,
-                semester_id=semester_id
+                student__programme_id=programme_id, semester_id=semester_id
             )
         elif cohort_id and semester_id:
             base_queryset = base_queryset.filter(
-                cohort_id=cohort_id,
-                semester_id=semester_id
+                cohort_id=cohort_id, semester_id=semester_id
             )
         elif reg_no and semester_id:
             base_queryset = base_queryset.filter(
-                student__registration_number=reg_no,
-                semester_id=semester_id
+                student__registration_number=reg_no, semester_id=semester_id
             )
 
-        return base_queryset.order_by('-created_on')
-    
+        return base_queryset.order_by("-created_on")
+
     def list(self, request, *args, **kwargs):
         """
         Override the default list method to structure the response with student, semester, and marks data.
@@ -341,46 +347,38 @@ class TranscriptsDataView(generics.ListAPIView):
         """
         try:
             queryset = self.filter_queryset(self.get_queryset())
-            
-            
-            semester_id = self.request.query_params.get('semester')
-            
-           
+
+            semester_id = self.request.query_params.get("semester")
+
             student_data = {}
-            
+
             for exam in queryset:
                 student_id = exam.student.id
-                
-           
+
                 if student_id not in student_data:
                     student_serializer = StudentDetailSerialzer(exam.student)
                     semester_serializer = MinimalSemesterSerializer(exam.semester)
-                    
+
                     student_data[student_id] = {
                         "student": student_serializer.data,
                         "semester": semester_serializer.data,
-                        "marks": []
+                        "marks": [],
                     }
-                
-             
+
                 mark_serializer = MarkSerializer(exam)
                 student_data[student_id]["marks"].append(mark_serializer.data)
-            
-          
+
             response_data = list(student_data.values())
-            
-           
-            page = request.query_params.get('page', None)
+
+            page = request.query_params.get("page", None)
             if page:
                 paginator = self.pagination_class()
                 paginated_data = paginator.paginate_queryset(response_data, request)
                 return paginator.get_paginated_response(paginated_data)
-            
+
             return Response(response_data, status=status.HTTP_200_OK)
-            
+
         except Exception as exc:
             return Response(
-                {"error": str(exc)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-

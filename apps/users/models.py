@@ -15,7 +15,8 @@ GENDER_CHOICES = (
 
 
 def generate_otp():
-    return f"{random.randint(100000, 999999)}" 
+    return f"{random.randint(100000, 999999)}"
+
 
 class EmailVerificationOTP(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -24,7 +25,8 @@ class EmailVerificationOTP(models.Model):
     is_used = models.BooleanField(default=False)
 
     def is_expired(self):
-        return timezone.now() > self.created_at + timedelta(minutes=10) 
+        return timezone.now() > self.created_at + timedelta(minutes=10)
+
 
 class PasswordResetOTP(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -37,6 +39,7 @@ class PasswordResetOTP(models.Model):
 
     def __str__(self):
         return f"Reset OTP for {self.user.email}"
+
 
 class User(AbstractUser, AbsoluteBaseModel):
     role = models.ForeignKey(UserRole, on_delete=models.CASCADE, null=True)

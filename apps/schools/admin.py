@@ -13,7 +13,7 @@ from apps.schools.models import (
 # Register your models here.
 
 admin.site.register(School)
-admin.site.register(Department)
+# admin.site.register(Department)
 admin.site.register(Course)
 admin.site.register(Programme)
 
@@ -21,6 +21,20 @@ admin.site.register(Programme)
 @admin.register(Semester)
 class SemesterAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "academic_year", "created_on")
+
+
+@admin.register(Department)
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+        "department_type",
+        "school",
+        "created_on",
+    )
+
+
+filter_fields = ("school", "department")
 
 
 @admin.register(ProgrammeCohort)

@@ -46,7 +46,7 @@ class Member(AbsoluteBaseModel):
 
 class BorrowTransaction(AbsoluteBaseModel):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    copy_number = models.CharField(max_length=50, null=True , blank=True)
+    copy_number = models.CharField(max_length=50, null=True, blank=True)
     member = models.ForeignKey(Member, on_delete=models.CASCADE)
     borrow_date = models.DateField(default=date.today)
     due_date = models.DateField(null=True)  # Default 2-week loan
@@ -105,7 +105,9 @@ class Fine(AbsoluteBaseModel):
 
         if overdue_days > 0:
             if self.borrow_transaction.status == "Returned":
-                self.calculated_fine = Decimal(overdue_days) * Decimal(self.fine_per_day)
+                self.calculated_fine = Decimal(overdue_days) * Decimal(
+                    self.fine_per_day
+                )
             elif self.borrow_transaction.status == "Lost":
                 self.calculated_fine = (
                     Decimal(overdue_days) * Decimal(self.fine_per_day)

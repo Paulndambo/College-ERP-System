@@ -1,7 +1,6 @@
 from django.contrib import admin
 
 
-
 from .models import Member
 
 
@@ -9,6 +8,4 @@ from .models import Member
 @admin.register(Member)
 class MemberAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "role", "date_joined")
-    list_filter = ("active","role")
-    
-    
+    list_filter = ("active", "role")

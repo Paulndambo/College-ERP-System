@@ -1,4 +1,5 @@
 from uuid import uuid4
+
 USER_ROLES = (
     ("Admin", "Admin"),
     ("Staff", "Staff"),

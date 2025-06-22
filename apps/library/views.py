@@ -1,5 +1,10 @@
 from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
-from apps.library.filters import BookFilter, BorrowTransactionFilter, FineFilter, MemberFilter
+from apps.library.filters import (
+    BookFilter,
+    BorrowTransactionFilter,
+    FineFilter,
+    MemberFilter,
+)
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import status
@@ -264,9 +269,7 @@ class BorrowTransactionListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return (
-            BorrowTransaction.objects.all().order_by("-created_on")
-        )
+        return BorrowTransaction.objects.all().order_by("-created_on")
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -425,7 +428,6 @@ class FineListView(generics.ListAPIView):
             )
 
 
-
 class FineUpdateView(generics.UpdateAPIView):
     """
     Update a fine (mainly for marking as paid).
@@ -461,7 +463,6 @@ class FinePaymentRequestView(generics.CreateAPIView):
 
         payment_request = serializer.save()
 
-       
         output_serializer = LibraryFinePaymentSerializer(payment_request)
 
         return Response(

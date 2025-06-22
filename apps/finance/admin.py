@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from apps.finance.models import Payment, LibraryFinePayment, FeePayment, FeeStructureItem, FeeStructure
+from apps.finance.models import (
+    Payment,
+    LibraryFinePayment,
+    FeePayment,
+    FeeStructureItem,
+    FeeStructure,
+)
 
 
 # Register your models here.
@@ -17,10 +23,11 @@ class LibraryFinePaymentAdmin(admin.ModelAdmin):
         "paid",
     )
 
+
 @admin.register(FeeStructure)
 class FeeStructureAdmin(admin.ModelAdmin):
     list_display = ["id", "programme", "year_of_study", "semester"]
-    
+
 
 @admin.register(FeeStructureItem)
 class FeeStructureItemAdmin(admin.ModelAdmin):
