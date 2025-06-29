@@ -3,7 +3,10 @@ from .views import *
 
 urlpatterns = [
     path("list/", StaffListView.as_view(), name="staff"),
+    path("active-staff/", ActiveStaffListView.as_view(), name="active-staff"),
     path("positions/", PositionListView.as_view(), name="position-list"),
+    path("positions/create/", StaffPositionsCreateView.as_view(), name="position-create"),
+    path("positions/<int:pk>/update/", StaffPositionpdateView.as_view(), name="position-update"),
     path("create/", CreateStaffView.as_view(), name="create-staff"),
     path("update/<int:pk>/", StaffUpdateView.as_view(), name="update-staff"),
     path("details/<int:pk>/", StaffDetailAPIView.as_view(), name="staff-detail"),
@@ -45,11 +48,38 @@ urlpatterns = [
         StaffDocumentUpdateView.as_view(),
         name="documents-detail-update",
     ),
-    
-    
-    #leaves
+    # leaves
     path("leaves/", StaffLeaveListView.as_view(), name="staff-leaves"),
-    path("leave-applications/", StaffLeaveApplicationListView.as_view(), name="leave-applications"),
-    path("leave-applications/create/", StaffLeaveApplicationCreateView.as_view(), name="leave-application-create"),
-    path("leave-applications/<int:pk>/", StaffLeaveApplicationUpdateView.as_view(), name="leave-application-update")
+    path(
+        "leave-applications/",
+        StaffLeaveApplicationListView.as_view(),
+        name="leave-applications",
+    ),
+    path(
+        "leave-applications/create/",
+        StaffLeaveApplicationCreateView.as_view(),
+        name="leave-application-create",
+    ),
+    path(
+        "leave-applications/<int:pk>/",
+        StaffLeaveApplicationUpdateView.as_view(),
+        name="leave-application-update",
+    ),
+    path("leave-entitlements/", StaffLeaveEntitlementListView.as_view(), name="staff-entitlements-list"),
+    
+    path(
+        "leave-entitlements/create/",
+        StaffLeaveEntitlementCreateView.as_view(),
+        name="leave-entitlements-create",
+    ),
+    path(
+        "leave-entitlements/bulk-create/",
+        StaffLeaveEntitlementBulkCreateView.as_view(),
+        name="leave-entitlements-bulk-create",
+    ),
+    path(
+        "leave-entitlements/<int:pk>/update/",
+        StaffLeaveEntitlementUpdateView.as_view(),
+        name="leave-application-update",
+    ),
 ]

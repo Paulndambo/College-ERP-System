@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+
 from .models import (
     School,
     Department,
@@ -106,13 +108,13 @@ class SemesterListSerializer(serializers.ModelSerializer):
 class ProgrammeCohortCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgrammeCohort
-        fields = ["name", "programme", "current_year", "current_semester", "status"]
+        fields = ["name", "programme", "current_year", "current_semester", "intake", "status"]
 
 
 class ProgrammeCohortListSerializer(serializers.ModelSerializer):
     programme = ProgrammeListSerializer()
     current_semester = SemesterListSerializer()
-
+    intake = serializers.SerializerMethodField()
     class Meta:
         model = ProgrammeCohort
         fields = [
@@ -122,7 +124,12 @@ class ProgrammeCohortListSerializer(serializers.ModelSerializer):
             "current_year",
             "current_semester",
             "status",
+            "intake",
         ]
+        
+    def get_intake(self, obj):
+        from apps.admissions.serializers import IntakeListDetailSerializer
+        return IntakeListDetailSerializer(obj.intake).data
 
     def get_programme(self, obj):
         return obj.programme.name

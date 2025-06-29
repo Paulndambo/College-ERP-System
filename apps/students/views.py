@@ -646,5 +646,3 @@ class BulkStudentUploadView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
-
-

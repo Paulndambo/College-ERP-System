@@ -15,6 +15,7 @@ urlpatterns = [
     path("hostels/", include("apps.hostels.urls")),
     path("payroll/", include("apps.payroll.urls")),
     path("fees/", include("apps.student_finance.urls")),
+    path("finance/", include("apps.finance.urls")),
     # api documentation urls
     path(
         "swagger/",

@@ -1,4 +1,4 @@
-from .models import Payslip, Staff, StaffLeave, StaffLeaveApplication, StaffPayroll
+from .models import Payslip, Staff, StaffLeave, StaffLeaveApplication, StaffLeaveEntitlement, StaffPayroll
 import django_filters
 
 from apps.schools.models import Course, Programme, Semester, Department
@@ -43,6 +43,8 @@ class PayrollFilter(django_filters.FilterSet):
             Q(staff__user__phone_number__icontains=value)
             | Q(staff__staff_number__icontains=value)
         )
+
+
 class StaffLeaveApplicationFilter(django_filters.FilterSet):
     """
     Filter leave applications
@@ -62,14 +64,18 @@ class StaffLeaveApplicationFilter(django_filters.FilterSet):
             Q(staff__user__phone_number__icontains=value)
             | Q(staff__staff_number__icontains=value)
         )
+
+
 class StaffLeaveFilter(django_filters.FilterSet):
     """
-    Filter leave 
+    Filter leave
     """
 
     search = django_filters.CharFilter(method="filter_by_all", label="Search")
     status = django_filters.CharFilter(field_name="status", lookup_expr="icontains")
-    department = django_filters.NumberFilter(field_name="application__staff__department_id")
+    department = django_filters.NumberFilter(
+        field_name="application__staff__department_id"
+    )
 
     class Meta:
         model = StaffLeave
@@ -85,7 +91,6 @@ class StaffLeaveFilter(django_filters.FilterSet):
 
 class PayslipFilter(django_filters.FilterSet):
 
-   
     period_start = django_filters.DateFilter(
         method="filter_by_period", label="Filter Period Start"
     )
@@ -119,4 +124,28 @@ class PayslipFilter(django_filters.FilterSet):
         return queryset.filter(
             Q(payroll_period_start__lte=period_end),
             Q(payroll_period_end__gte=period_start),
+        )
+
+
+class StaffLeaveEntitlementFilter(django_filters.FilterSet):
+    search = django_filters.CharFilter(method="filter_by_all", label="Search")
+    year = django_filters.NumberFilter(field_name="year")
+    department = django_filters.NumberFilter(field_name="staff__department_id")
+    staff_status = django_filters.CharFilter(field_name="staff__status", lookup_expr="icontains")
+    
+    class Meta:
+        model = StaffLeaveEntitlement
+        fields = ["search", "year", "department", "staff_status"]
+    
+    def filter_by_all(self, queryset, name, value):
+        """
+        Filter leave entitlements by staff details
+        """
+        return queryset.filter(
+            Q(staff__staff_number__icontains=value) |
+            Q(staff__user__first_name__icontains=value) |
+            Q(staff__user__last_name__icontains=value) |
+            Q(staff__user__phone_number__icontains=value) |
+            Q(staff__user__email__icontains=value) |
+            Q(staff__department__name__icontains=value)
         )

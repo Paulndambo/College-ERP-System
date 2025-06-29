@@ -42,7 +42,7 @@ class PasswordResetOTP(models.Model):
 
 
 class User(AbstractUser, AbsoluteBaseModel):
-    role = models.ForeignKey(UserRole, on_delete=models.CASCADE, null=True)
+    role = models.ForeignKey(UserRole, on_delete=models.CASCADE, null=True, blank=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     phone_number = models.CharField(max_length=255)
     id_number = models.CharField(max_length=255, null=True, blank=True)

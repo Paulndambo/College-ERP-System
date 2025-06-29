@@ -2,8 +2,11 @@ from apps.core.filters import AcademicYearsFilter, CampusFilter
 from rest_framework import generics, status
 from rest_framework.response import Response
 from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from apps.core.utils import ModelCountUtils
 from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
+from django.contrib.admin.models import LogEntry
+from .serializers import LogEntrySerializer
 from .models import Campus, StudyYear, UserRole
 from .serializers import (
     CampusCreateSerializer,
@@ -12,9 +15,10 @@ from .serializers import (
     StudyYearListSerializer,
     UserRoleListSerializer,
 )
-
+from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.views import APIView
 
 
 class UserRoleListView(generics.ListAPIView):
@@ -198,3 +202,30 @@ class StudyYearUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class DashboardCountsRetrieveView(APIView):
+
+    def get(self, request, *args, **kwargs):
+        try:
+            data = ModelCountUtils.get_all_counts()
+            return Response(
+                {
+                    "success": True,
+                    "data": data,
+                    "message": "Dashboard counts retrieved successfully",
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            raise NotFound(f"Dashboard counts not available: {str(e)}")
+
+
+class RecentActionsView(APIView):
+
+    def get(self, request):
+        logs = LogEntry.objects.select_related("user", "content_type").order_by(
+            "-action_time"
+        )[:50]
+        serializer = LogEntrySerializer(logs, many=True)
+        return Response(serializer.data)

@@ -75,4 +75,9 @@ urlpatterns = [
         views.ApplicationEducationHistoryUpdateView.as_view(),
         name="education-history-update",
     ),
+    path(
+        "enrollments-metrics/",
+        views.EnrollmentsByIntakeView.as_view(),
+        name="enrollments-metrics",
+    ),
 ]

@@ -1,8 +1,9 @@
-from apps.core.models import UserRole
+from apps.core.models import Campus, UserRole
+from apps.schools.models import ProgrammeCohort
 from apps.students.models import Student, StudentDocument, StudentEducationHistory
 from apps.students.serializers import StudentCreateSerializer, StudentListSerializer
 from apps.users.models import User
-from .filters import StudentApplicationFilter
+from .filters import EnrollmentsByIntakeFilter, IntakeFilter, StudentApplicationFilter
 from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -11,6 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError
 from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
 from services.permissions import HasUserRole
+from django.db.models import Count, F
 
 from django.db import transaction
 from .models import (
@@ -52,13 +54,19 @@ class IntakeUpdateView(generics.UpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         intake = self.get_object()
+        print("Before update:", intake.closed)
+        
         serializer = self.get_serializer(intake, data=request.data, partial=True)
+        print(f"Updating intake {intake.id} with data: {request.data}")
 
         if serializer.is_valid():
             serializer.save()
+            print("After update:", intake.closed)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
+            print("Errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class IntakeListView(generics.ListAPIView):
@@ -68,6 +76,7 @@ class IntakeListView(generics.ListAPIView):
     serializer_class = IntakeListDetailSerializer
     pagination_class = None
     filter_backends = [DjangoFilterBackend]
+    filterset_class = IntakeFilter
 
     def get_queryset(self):
         return Intake.objects.all().order_by("-start_date")
@@ -443,6 +452,22 @@ class StudentEnrollmentView(generics.CreateAPIView):
                     message="UserRole 'Student' not found.",
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
+            try:
+                cohort = ProgrammeCohort.objects.get(id=cohort_id)
+            except ProgrammeCohort.DoesNotExist:
+                raise CustomAPIException(
+                    message="ProgrammeCohort not found.",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+            try:
+                campus = Campus.objects.get(id=campus_id)
+            except Campus.DoesNotExist:
+                raise CustomAPIException(
+                    message="Campus not found.",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+                
+            
 
             registration_number = application.application_number
 
@@ -478,8 +503,8 @@ class StudentEnrollmentView(generics.CreateAPIView):
                         guardian_relationship=application.guardian_relationship,
                         programme=application.first_choice_programme,
                         status="Active",
-                        cohort_id=cohort_id,
-                        campus_id=campus_id,
+                        cohort=cohort,
+                        campus=campus if campus else None,
                     )
 
                     for document in documents:
@@ -535,3 +560,30 @@ class StudentEnrollmentView(generics.CreateAPIView):
                 message=f"Error enrolling student: {str(e)}",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class EnrollmentsByIntakeView(generics.ListAPIView):
+    """
+    Returns number of enrolled applications grouped by intake,
+    with optional filters for intake ID, start_date, end_date.
+    """
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = EnrollmentsByIntakeFilter
+    pagination_class = None
+
+    def get_queryset(self):
+        return (
+            StudentApplication.objects.filter(status="Enrolled")
+            .annotate(
+                intake_name=F("intake__name"),
+                intake_start_date=F("intake__start_date"),
+            )
+            .values("intake_id", "intake_name", "intake_start_date")
+            .annotate(total=Count("id"))
+            .order_by("intake_start_date")
+        )
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        return Response(queryset)

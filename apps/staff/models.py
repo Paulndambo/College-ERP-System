@@ -112,7 +112,7 @@ class StaffLeaveApplication(AbsoluteBaseModel):
     end_date = models.DateField()
     leave_type = models.CharField(max_length=255, choices=LEAVE_TYPES)
     reason = models.CharField(max_length=255)
-    
+
     status = models.CharField(
         max_length=255,
         choices=(
@@ -129,6 +129,8 @@ class StaffLeaveApplication(AbsoluteBaseModel):
 
     def leave_days_applied_for(self):
         return (self.end_date - self.start_date).days + 1
+
+
 class StaffLeave(AbsoluteBaseModel):
     application = models.OneToOneField(StaffLeaveApplication, on_delete=models.CASCADE)
     status = models.CharField(
@@ -139,7 +141,8 @@ class StaffLeave(AbsoluteBaseModel):
     def __str__(self):
         return f"{self.application.staff.user.first_name} {self.application.staff.user.last_name}"
 
-class StaffLeaveEntitlement(models.Model):
+
+class StaffLeaveEntitlement(AbsoluteBaseModel):
     staff = models.OneToOneField(Staff, on_delete=models.CASCADE)
     year = models.PositiveIntegerField(default=timezone.now().year)
     total_days = models.PositiveIntegerField(default=21)

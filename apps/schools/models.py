@@ -91,7 +91,7 @@ class Semester(AbsoluteBaseModel):
 
     def __str__(self):
         return self.name
-    
+
     def derive_academic_year_from_dates(self):
         """
         Derive academic year - now with a clear hierarchy:
@@ -100,17 +100,17 @@ class Semester(AbsoluteBaseModel):
         """
         if not self.start_date or not self.end_date:
             return ""
-        
+
         return self._calculate_from_dates()
-    
+
     def _calculate_from_dates(self):
         start_year = self.start_date.year
         end_year = self.end_date.year
         start_month = self.start_date.month
-        
+
         if start_year != end_year:
             return f"{start_year}/{end_year}"
-        
+
         if start_month >= 9:
             return f"{start_year}/{start_year + 1}"
         else:
@@ -125,10 +125,11 @@ class Semester(AbsoluteBaseModel):
     def clean(self):
         """Validate that end_date is after start_date"""
         from django.core.exceptions import ValidationError
-        
+
         if self.start_date and self.end_date:
             if self.end_date <= self.start_date:
                 raise ValidationError("End date must be after start date")
+
 
 class ProgrammeCohort(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
@@ -147,6 +148,7 @@ class ProgrammeCohort(AbsoluteBaseModel):
 
     def students_count(self):
         return self.cohortstudents.all().count()
+
     def get_academic_year(self):
         """Get academic year from the intake this cohort belongs to"""
         return self.intake.get_academic_year()

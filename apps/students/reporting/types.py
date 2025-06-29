@@ -2,12 +2,16 @@ from typing import List, Optional, TypedDict, NotRequired, Union, Literal, Any, 
 
 
 """Basic validation result"""
+
+
 class ValidationResult(TypedDict):
     is_valid: bool
     error: Optional[str]
 
 
 """Invoice-related types"""
+
+
 class InvoiceResult(TypedDict):
     student_id: int
     student_name: str
@@ -24,6 +28,8 @@ class InvoiceSummary(TypedDict):
 
 
 """Response types for different scenarios"""
+
+
 class SuccessResponse(TypedDict):
     message: str
 
@@ -49,7 +55,9 @@ StatusCode = Literal[200, 201, 207, 400, 500]
 
 
 """Union types for different response data scenarios"""
-IndividualReportingResponseData = Union[SuccessResponse, ErrorResponse, PartialSuccessResponse, SerializerErrors]
+IndividualReportingResponseData = Union[
+    SuccessResponse, ErrorResponse, PartialSuccessResponse, SerializerErrors
+]
 CohortPromotionResponseData = Union[PromotionSuccessResponse, ErrorResponse]
 
 
@@ -58,18 +66,17 @@ IndividualReportingResponse = tuple[bool, IndividualReportingResponseData, Statu
 CohortPromotionResponse = tuple[bool, CohortPromotionResponseData, StatusCode]
 
 
-
 class ReportingRequestData(TypedDict, total=False):
     """
     Type for semester reporting request data based on SemesterReporting model.
     Using total=False means all fields are optional by default.
     """
-    student: int                    
-    semester: Optional[int]        
-    cohort: Optional[int]           
-    academic_year: Optional[str]    
-    reported: Optional[bool]        
 
+    student: int
+    semester: Optional[int]
+    cohort: Optional[int]
+    academic_year: Optional[str]
+    reported: Optional[bool]
 
 
 RequestData = Dict[str, Any]

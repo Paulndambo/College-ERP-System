@@ -1,5 +1,10 @@
 from django.db import transaction
-from apps.student_finance.models import StudentFeeInvoice, StudentFeePayment, StudentFeeStatement,StudentFeeLedger
+from apps.student_finance.models import (
+    StudentFeeInvoice,
+    StudentFeePayment,
+    StudentFeeStatement,
+    StudentFeeLedger,
+)
 from apps.schools.models import Semester
 from apps.students.models import Student
 from apps.finance.models import FeeStructure
@@ -7,13 +12,16 @@ import logging
 from datetime import date
 from decimal import Decimal
 from django.db.models import Sum, F
+
 logging.basicConfig(level=logging.DEBUG)
 
 from apps.core.constants import payment_ref_generator
 
 
 class StudentInvoicingMixin(object):
-    def __init__(self, student, semester, transaction_type, amount, payment_method=None):
+    def __init__(
+        self, student, semester, transaction_type, amount, payment_method=None
+    ):
         self.student = student
         self.semester = semester
         self.transaction_type = transaction_type
@@ -34,35 +42,28 @@ class StudentInvoicingMixin(object):
         else:
             return self.__process_fees_payment()
 
+    def __get_current_balance(self):
+        """Get the current balance for the student"""
+        last_statement = (
+            StudentFeeStatement.objects.filter(student=self.student)
+            .order_by("-created_on")
+            .first()
+        )
+        return last_statement.balance if last_statement else Decimal("0.00")
+
     def __process_fees_payment(self):
         try:
             StudentFeePayment.objects.create(
                 student=self.student,
                 amount=self.amount,
-                payment_date=date.today(),  
-                payment_method=self.payment_method, 
+                payment_date=date.today(),
+                payment_method=self.payment_method,
             )
 
-        
-            last_fee_stmt = (
-                StudentFeeStatement.objects.filter(student=self.student)
-                .order_by("-created_on")
-                .first()
-            )
+            current_balance = self.__get_current_balance()
 
-            previous_balance = last_fee_stmt.balance if last_fee_stmt else Decimal("0.00")
-            
-            StudentFeeLedger.objects.create(
-                student=self.student,
-                transaction_type="Student Payment",
-                debit=Decimal("0.00"),                
-                credit=self.amount,                   
-            )
-
-            
             unpaid_invoices = StudentFeeInvoice.objects.filter(
-                student=self.student,
-                status__in=["Pending", "Partially Paid"]
+                student=self.student, status__in=["Pending", "Partially Paid"]
             ).order_by("created_on")
 
             remaining_amount = self.amount
@@ -87,22 +88,20 @@ class StudentInvoicingMixin(object):
 
                 invoice.save()
 
-            
-            total_outstanding = StudentFeeInvoice.objects.filter(
-                student=self.student,
-                status__in=["Pending", "Partially Paid"]
-            ).aggregate(
-                total_due=Sum(F('amount') - F('amount_paid'))
-            )['total_due'] or Decimal("0.00")
-            
-            # If there's remaining payment amount after covering invoices or arrears it becomes the new balance in fee statement
-            new_balance = total_outstanding - remaining_amount
+            # total_outstanding = StudentFeeInvoice.objects.filter(
+            #     student=self.student,
+            #     status__in=["Pending", "Partially Paid"]
+            # ).aggregate(
+            #     total_due=Sum(F('amount') - F('amount_paid'))
+            # )['total_due'] or Decimal("0.00")
 
-            print(f"Previous balance: {previous_balance}")
+            # If there's remaining payment amount after covering invoices or arrears it becomes the new balance in fee statement
+            new_balance = current_balance - self.amount
+
+            print(f"Current balance: {current_balance}")
             print(f"Payment amount: {self.amount}")
             print(f"Amount applied to invoices: {applied_amount}")
             print(f"Remaining amount (overpayment): {remaining_amount}")
-            print(f"Total outstanding after payment: {total_outstanding}")
             print(f"New balance: {new_balance}")
 
             # Create fee statement
@@ -114,17 +113,15 @@ class StudentInvoicingMixin(object):
                 statement_type="Payment",
                 transaction_type="Student Payment",
                 semester=self.semester if self.semester else None,
+                payment_method=self.payment_method,
             )
 
-           
-           
             logging.info("Student payment processed and invoices updated.")
 
         except Exception as e:
             logging.error(f"Error processing payment: {e}")
-            raise  
-        return True   
-
+            raise
+        return True
 
     def __invoice_student(self):
         try:
@@ -158,13 +155,6 @@ class StudentInvoicingMixin(object):
                 semester_id=self.semester.id,
             )
 
-            
-            StudentFeeLedger.objects.create(
-                student=self.student,
-                transaction_type=self.transaction_type,
-                debit=self.amount,
-                credit=0
-            )
             logging.INFO("Student Invoicing ended successfully!!!!!!!!!!!!!!!")
 
         except Exception as e:

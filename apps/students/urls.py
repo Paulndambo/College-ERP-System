@@ -1,6 +1,9 @@
 from django.urls import path
 
-from apps.students.reporting.views import SemesterReportingAPIView, SemisterReportingList
+from apps.students.reporting.views import (
+    SemesterReportingAPIView,
+    SemisterReportingList,
+)
 
 from .views import (
     AssessmentList,
@@ -22,7 +25,6 @@ from .views import (
     StudentRegistrationView,
     StudentUpdateView,
     BulkStudentUploadView,
-  
 )
 
 
@@ -30,8 +32,16 @@ urlpatterns = [
     # Students
     path("create-student/", StudentRegistrationView.as_view(), name="create-student"),
     path("reporting-list/", SemisterReportingList.as_view(), name="reporting-list"),
-    path('semester-reporting/<int:cohort_id>/', SemesterReportingAPIView.as_view(), name='cohort-semester-reporting'),
-    path('semester-reporting/', SemesterReportingAPIView.as_view(), name='student-semester-reporting'),
+    path(
+        "semester-reporting/<int:cohort_id>/",
+        SemesterReportingAPIView.as_view(),
+        name="cohort-semester-reporting",
+    ),
+    path(
+        "semester-reporting/",
+        SemesterReportingAPIView.as_view(),
+        name="student-semester-reporting",
+    ),
     path(
         "update-student/<int:pk>/", StudentUpdateView.as_view(), name="update-student"
     ),

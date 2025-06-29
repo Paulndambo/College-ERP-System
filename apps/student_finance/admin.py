@@ -20,7 +20,7 @@ class StudentFeeInvoiceAdmin(admin.ModelAdmin):
         "amount_paid",
         "status",
         "created_on",
-        "bal_due"
+        "bal_due",
     )
 
 
@@ -34,7 +34,7 @@ class StudentFeePaymentAdmin(admin.ModelAdmin):
         "payment_method",
         "created_on",
     )
-  
+
 
 @admin.register(StudentFeeLedger)
 class StudentFeeLedgerAdmin(admin.ModelAdmin):
@@ -59,6 +59,7 @@ class StudentFeeStatementAdmin(admin.ModelAdmin):
         "academic_year",
         "debit",
         "credit",
+        "payment_method",
         "balance",
         "created_on",
     )

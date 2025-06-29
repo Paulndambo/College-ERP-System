@@ -39,19 +39,21 @@ class Intake(AbsoluteBaseModel):
 
     def __str__(self):
         return self.name
+
     def get_academic_year(self):
         start_year = self.start_date.year
         start_month = self.start_date.month
-        
-        if start_month >= 9:  # September-December intakes
+
+        if start_month >= 9: 
             return f"{start_year}/{start_year + 1}"
-        else:  # January-August intakes
+        else:  
             return f"{start_year - 1}/{start_year}"
-    
+
     @property
     def academic_year(self):
         """Property for easy access"""
         return self.get_academic_year()
+
 
 class StudentApplication(AbsoluteBaseModel):
     application_number = models.CharField(max_length=255, null=True, blank=True)

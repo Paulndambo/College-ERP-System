@@ -9,10 +9,10 @@ from .models import (
 
 class IntakeFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr="icontains")
-
+    closed = django_filters.BooleanFilter() 
     class Meta:
         model = Intake
-        fields = ["name"]
+        fields = ["name", "closed"]
 
 
 class StudentApplicationFilter(django_filters.FilterSet):
@@ -80,3 +80,17 @@ class ApplicationEducationHistoryFilter(django_filters.FilterSet):
     class Meta:
         model = ApplicationEducationHistory
         fields = ["student_application", "institution", "level", "graduated"]
+
+
+class EnrollmentsByIntakeFilter(django_filters.FilterSet):
+    intake = django_filters.NumberFilter(field_name="intake_id")
+    start_date = django_filters.DateFilter(
+        field_name="intake__start_date", lookup_expr="gte"
+    )
+    end_date = django_filters.DateFilter(
+        field_name="intake__start_date", lookup_expr="lte"
+    )
+
+    class Meta:
+        model = StudentApplication
+        fields = ["intake", "start_date", "end_date"]

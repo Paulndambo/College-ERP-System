@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from apps.students.models import SemesterReporting, Student, StudentDocument, StudentAttendance
+from apps.students.models import (
+    SemesterReporting,
+    Student,
+    StudentDocument,
+    StudentAttendance,
+)
 
 
 # Register your models here.
@@ -41,6 +46,10 @@ class SemesterReportingAdmin(admin.ModelAdmin):
         "reported",
         "created_on",
         "updated_on",
-        ]
-    list_filter = ["cohort", "semester", "reported"]  
-    search_fields = ["student__user__first_name", "student__user__last_name", "academic_year"]
+    ]
+    list_filter = ["cohort", "semester", "reported"]
+    search_fields = [
+        "student__user__first_name",
+        "student__user__last_name",
+        "academic_year",
+    ]

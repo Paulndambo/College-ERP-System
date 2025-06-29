@@ -6,6 +6,7 @@ from apps.student_finance.models import (
     StudentFeePayment,
     StudentFeeStatement,
 )
+from apps.students.serializers import MinimalStudentSerializer
 
 
 class StudentFeeLedgerSerializer(serializers.ModelSerializer):
@@ -15,10 +16,11 @@ class StudentFeeLedgerSerializer(serializers.ModelSerializer):
 
 
 class StudentFeeInvoiceListSerializer(serializers.ModelSerializer):
-    student_name  = serializers.SerializerMethodField()
+    student_name = serializers.SerializerMethodField()
     student_reg_no = serializers.SerializerMethodField()
     semester = SemesterListSerializer()
     bal_due = serializers.ReadOnlyField()
+
     class Meta:
         model = StudentFeeInvoice
         fields = [
@@ -35,11 +37,11 @@ class StudentFeeInvoiceListSerializer(serializers.ModelSerializer):
             "created_on",
             "updated_on",
             "status",
-            
-
         ]
+
     def get_student_name(self, obj):
         return obj.student.name()
+
     def get_student_reg_no(self, obj):
         return obj.student.registration_number
 
@@ -47,7 +49,7 @@ class StudentFeeInvoiceListSerializer(serializers.ModelSerializer):
 class StudentFeePaymentListSerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()
     student_reg_no = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = StudentFeePayment
         fields = [
@@ -58,16 +60,20 @@ class StudentFeePaymentListSerializer(serializers.ModelSerializer):
             "created_on",
             "updated_on",
             "student_name",
-            "student_reg_no"
+            "student_reg_no",
         ]
+
     def get_student_name(self, obj):
         return obj.student.name()
+
     def get_student_reg_no(self, obj):
         return obj.student.registration_number
 
+
 class StudentFeeStatementListSerializer(serializers.ModelSerializer):
-    student_name = serializers.SerializerMethodField()
-    student_reg_no = serializers.SerializerMethodField()
+    student = MinimalStudentSerializer()
+    semester = SemesterListSerializer()
+
     class Meta:
         model = StudentFeeStatement
         fields = [
@@ -77,15 +83,14 @@ class StudentFeeStatementListSerializer(serializers.ModelSerializer):
             "debit",
             "semester",
             "statement_type",
-            "student_name",
+            "student",
         ]
-    def get_student_name(self, obj):
-        return obj.student.name()
-    def get_student_reg_no(self, obj):
-        return obj.student.registration_number
-class  FeeLedgeListSerializer(serializers.ModelSerializer):
+
+
+class FeeLedgeListSerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()
     student_reg_no = serializers.SerializerMethodField()
+
     class Meta:
         model = StudentFeeLedger
         fields = [
@@ -97,15 +102,16 @@ class  FeeLedgeListSerializer(serializers.ModelSerializer):
             "student_reg_no",
             "transaction_type",
         ]
+
     def get_student_name(self, obj):
         return obj.student.name()
+
     def get_student_reg_no(self, obj):
         return obj.student.registration_number
+
 
 class StudentFeePaymentSerializer(serializers.Serializer):
     student = serializers.IntegerField()
     amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     payment_method = serializers.ChoiceField(choices=["Mpesa", "Cash", "Bank Transfer"])
-    semester = serializers.IntegerField(required=False) 
-    
-    
+    semester = serializers.IntegerField(required=False)

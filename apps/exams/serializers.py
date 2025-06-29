@@ -8,9 +8,8 @@ from apps.students.models import Student
 from apps.students.serializers import StudentListSerializer
 from apps.users.serializers import UserSerializer
 from rest_framework import serializers
-from .models import ExamData
-
 from rest_framework.exceptions import ValidationError
+from .models import ExamData
 
 
 class ExamDataCreateSerializer(serializers.ModelSerializer):

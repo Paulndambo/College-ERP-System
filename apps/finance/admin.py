@@ -32,3 +32,4 @@ class FeeStructureAdmin(admin.ModelAdmin):
 @admin.register(FeeStructureItem)
 class FeeStructureItemAdmin(admin.ModelAdmin):
     list_display = ["id", "fee_structure", "description", "amount"]
+    list_filter = ["fee_structure"]

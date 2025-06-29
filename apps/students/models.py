@@ -170,10 +170,11 @@ class SemesterReporting(AbsoluteBaseModel):
         null=True,
         related_name="semesterreportings",
     )
-    cohort = models.ForeignKey("schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True)
+    cohort = models.ForeignKey(
+        "schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True
+    )
     academic_year = models.CharField(max_length=255, null=True)
     reported = models.BooleanField(default=False)
+
     def __str__(self):
         return self.semester.name
-    
-    

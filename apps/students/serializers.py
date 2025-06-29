@@ -78,7 +78,7 @@ class StudentListSerializer(serializers.ModelSerializer):
         source="hostel_room.room_number", read_only=True
     )
     campus_name = serializers.CharField(source="campus.name", read_only=True)
-
+    current_semester = serializers.SerializerMethodField()
     class Meta:
         model = Student
         fields = [
@@ -94,7 +94,13 @@ class StudentListSerializer(serializers.ModelSerializer):
             "cohort_name",
             "hostel_room_number",
             "campus_name",
+            "current_semester"
         ]
+    def get_current_semester(self, obj):
+        if obj.cohort and obj.cohort.current_semester:
+            # from apps.schools.serializers import SemesterListSerializer  # Local import to avoid circular import
+            return SemesterListSerializer(obj.cohort.current_semester).data
+        return None
 
 
 class StudentDetailSerialzer(serializers.ModelSerializer):
@@ -194,5 +200,3 @@ class StudentCheckInListSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentCheckIn
         fields = "__all__"
-
-

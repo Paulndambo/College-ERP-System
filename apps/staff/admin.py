@@ -18,10 +18,12 @@ class StaffPositionAdmin(admin.ModelAdmin):
     list_display = ("id", "name")
     list_filter = ("name",)
 
+
 @admin.register(StaffLeaveEntitlement)
 class StaffLeaveEntitlementAdmin(admin.ModelAdmin):
     list_display = ("id", "staff", "total_days", "used_days", "year")
     list_filter = ("staff", "year")
+
 
 @admin.register(StaffDocuments)
 class StaffDocumentsAdmin(admin.ModelAdmin):

@@ -1,6 +1,7 @@
 from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
 from django.shortcuts import render, redirect
 from django.db.models import Q
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -21,12 +22,15 @@ from rest_framework.views import APIView
 from apps.staff.serializers import (
     CompleteOnboardingSerializer,
     CreateStaffLeaveApplicationSerializer,
+    CreateStaffPositionSerializer,
     CreateUpdateStaffLeaveSerializer,
     StaffCreateSerializer,
     StaffDocumentCreateSerializer,
     StaffDocumentListSerializer,
     StaffDocumentMultiCreateSerializer,
     StaffLeaveApplicationListSerializer,
+    StaffLeaveEntitlementCreateUpdateSerializer,
+    StaffLeaveEntitlementDetailSerializer,
     StaffLeaveSerializer,
     StaffListDetailSerializer,
     StaffOnboardingProgressListSerializer,
@@ -37,7 +41,14 @@ from apps.staff.serializers import (
     StaffStatusSerializer,
 )
 import json
-from .filters import PayrollFilter, PayslipFilter, StaffFilter, StaffLeaveApplicationFilter, StaffLeaveFilter
+from .filters import (
+    PayrollFilter,
+    PayslipFilter,
+    StaffFilter,
+    StaffLeaveApplicationFilter,
+    StaffLeaveEntitlementFilter,
+    StaffLeaveFilter,
+)
 from rest_framework.exceptions import ValidationError
 from django.views.generic import ListView
 from django.http import JsonResponse
@@ -86,7 +97,7 @@ class CreateStaffView(generics.CreateAPIView):
         state = data.get("state", None)
         country = data.get("country", None)
         date_of_birth = data.get("date_of_birth")
-        role = data.get("role")
+        role = data.get("role") or None
         department_id = data.get("department")
         position = data.get("position", None)
 
@@ -98,14 +109,16 @@ class CreateStaffView(generics.CreateAPIView):
                 message="Department not found",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
-        try:
-            user_role = UserRole.objects.get(id=role)
-            print(f"Role found: {user_role.name}")
-        except UserRole.DoesNotExist:
-            raise CustomAPIException(
-                message="Role not found",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
+        user_role = None
+        if role:
+            try:
+                user_role = UserRole.objects.get(id=role)
+                print(f"Role found: {user_role.name}")
+            except UserRole.DoesNotExist:
+                raise CustomAPIException(
+                    message="Role not found",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
 
         if User.objects.filter(email=email).exists():
             raise CustomAPIException(
@@ -279,7 +292,41 @@ class StaffListView(generics.ListAPIView):
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+class ActiveStaffListView(generics.ListAPIView):
+    queryset = Staff.objects.filter(status='Active')
+    serializer_class = StaffListDetailSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StaffFilter
+    pagination_class = None
 
+    def get_queryset(self):
+        return Staff.objects.filter(status='Active').order_by("-created_on")
+
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            staff = self.get_queryset()
+            staff = self.filter_queryset(staff)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_staff = paginator.paginate_queryset(staff, request)
+                serializer = self.get_serializer(paginated_staff, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(staff, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class StaffPaySlipListView(generics.ListAPIView):
     queryset = Payslip.objects.all()
@@ -513,9 +560,14 @@ class PositionListView(generics.ListAPIView):
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+class StaffPositionsCreateView(generics.CreateAPIView):
+    queryset = StaffPosition.objects.all()
+    serializer_class = CreateStaffPositionSerializer
 
-
-
+class StaffPositionpdateView(generics.RetrieveUpdateAPIView):
+    queryset = StaffPosition.objects.all()
+    serializer_class = CreateStaffPositionSerializer
+    lookup_field = "pk"
 class StaffLeaveApplicationListView(generics.ListAPIView):
     queryset = StaffLeaveApplication.objects.all()
     serializer_class = StaffLeaveApplicationListSerializer
@@ -524,7 +576,7 @@ class StaffLeaveApplicationListView(generics.ListAPIView):
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
     pagination_class = None
-    
+
     def get_queryset(self):
         return StaffLeaveApplication.objects.all().order_by("-created_on")
 
@@ -539,8 +591,12 @@ class StaffLeaveApplicationListView(generics.ListAPIView):
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
-                paginated_leave_applications = paginator.paginate_queryset(leave_applications, request)
-                serializer = self.get_serializer(paginated_leave_applications, many=True)
+                paginated_leave_applications = paginator.paginate_queryset(
+                    leave_applications, request
+                )
+                serializer = self.get_serializer(
+                    paginated_leave_applications, many=True
+                )
                 return paginator.get_paginated_response(serializer.data)
             serializer = self.get_serializer(leave_applications, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -550,21 +606,23 @@ class StaffLeaveApplicationListView(generics.ListAPIView):
             )
 
 
-
 class StaffLeaveApplicationCreateView(generics.CreateAPIView):
     queryset = StaffLeaveApplication.objects.all()
     serializer_class = CreateStaffLeaveApplicationSerializer
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
+
     def perform_create(self, serializer):
         user = self.request.user
 
         if user.role.name == ROLE_ADMIN:
             staff = serializer.validated_data.get("staff")
             if not staff:
-                raise ValidationError({"staff": "This field is required for admin users."})
+                raise ValidationError(
+                    {"staff": "This field is required for admin users."}
+                )
         else:
-            
+
             try:
                 staff = Staff.objects.get(user=user)
             except Staff.DoesNotExist:
@@ -576,26 +634,25 @@ class StaffLeaveApplicationCreateView(generics.CreateAPIView):
 class StaffLeaveApplicationUpdateView(generics.UpdateAPIView):
     queryset = StaffLeaveApplication.objects.all()
     serializer_class = CreateStaffLeaveApplicationSerializer
-    lookup_field = 'pk'
+    lookup_field = "pk"
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
 
-    
     def perform_update(self, serializer):
-            updated_instance = serializer.save()
+        updated_instance = serializer.save()
 
-            if updated_instance.status == 'Approved':
-                leave_days = updated_instance.leave_days_applied_for()
-                print("leave days in views", leave_days)
-                if updated_instance.leave_type != "Emergency":
-                    entitlement = StaffLeaveEntitlement.objects.get(staff=updated_instance.staff, year=updated_instance.start_date.year)
-                    entitlement.used_days += leave_days
-                    entitlement.save()
+        if updated_instance.status == "Approved":
+            leave_days = updated_instance.leave_days_applied_for()
+            print("leave days in views", leave_days)
+            if updated_instance.leave_type != "Emergency":
+                entitlement = StaffLeaveEntitlement.objects.get(
+                    staff=updated_instance.staff, year=updated_instance.start_date.year
+                )
+                entitlement.used_days += leave_days
+                entitlement.save()
 
-                if not StaffLeave.objects.filter(application=updated_instance).exists():
-                    StaffLeave.objects.create(application=updated_instance, status='Active')
-
-
+            if not StaffLeave.objects.filter(application=updated_instance).exists():
+                StaffLeave.objects.create(application=updated_instance, status="Active")
 
 
 class StaffLeaveListView(generics.ListAPIView):
@@ -606,10 +663,13 @@ class StaffLeaveListView(generics.ListAPIView):
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
     pagination_class = None
+
     def get_queryset(self):
         return StaffLeave.objects.all().order_by("-created_on")
+
     def get_paginated_response(self, data):
         return super().get_paginated_response(data)
+
     def list(self, request, *args, **kwargs):
         try:
             leaves = self.get_queryset()
@@ -624,6 +684,209 @@ class StaffLeaveListView(generics.ListAPIView):
             serializer = self.get_serializer(leaves, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
+
+
+
+class StaffLeaveEntitlementListView(generics.ListAPIView):
+    """List all staff leave entitlements with filtering and search"""
+    queryset = StaffLeaveEntitlement.objects.all()
+    serializer_class = StaffLeaveEntitlementDetailSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StaffLeaveEntitlementFilter
+    ordering_fields = ['year', 'total_days', 'used_days', 'remaining_days']
+    ordering = ['-year', 'staff__user__first_name']
+    
+   
+
+    def get_queryset(self):
+        queryset = StaffLeaveEntitlement.objects.select_related(
+            'staff__user',
+            'staff__department',
+            'staff__position'
+        ).filter(staff__status='Active').order_by("-created_on")
+
+    def get_paginated_response(self, data):
+        return super().get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            entitlements = self.get_queryset()
+            entitlements = self.filter_queryset(entitlements)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_entitlements= paginator.paginate_queryset(entitlements, request)
+                serializer = self.get_serializer(paginated_entitlements, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(entitlements, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+class StaffLeaveEntitlementDetailView(generics.RetrieveAPIView):
+    """Retrieve specific staff leave entitlement"""
+    
+    serializer_class = StaffLeaveEntitlementDetailSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = 'pk'
+    
+    def get_queryset(self):
+        return StaffLeaveEntitlement.objects.select_related(
+            'staff__user',
+            'staff__department',
+            'staff__position'
+        ).filter(staff__status='Active')
+
+
+class StaffLeaveEntitlementCreateView(generics.CreateAPIView):
+    serializer_class = StaffLeaveEntitlementCreateUpdateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    
+    def create(self, request, *args, **kwargs):
+        staff_id = request.data.get('staff')
+        year = request.data.get('year', timezone.now().year)
+        
+        if StaffLeaveEntitlement.objects.filter(staff_id=staff_id, year=year).exists():
+            return Response(
+                {
+                    'error': f'Leave entitlement for this staff member already exists for year {year}'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        entitlement = serializer.save()
+        
+        # Return detailed response
+        detail_serializer = StaffLeaveEntitlementDetailSerializer(entitlement)
+        return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class StaffLeaveEntitlementUpdateView(generics.UpdateAPIView):
+    
+    serializer_class = StaffLeaveEntitlementCreateUpdateSerializer
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = 'pk'
+    
+    def get_queryset(self):
+        return StaffLeaveEntitlement.objects.filter(staff__status='Active')
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        
+        # Check if trying to update staff or year combination that already exists
+        if 'staff' in request.data or 'year' in request.data:
+            staff_id = request.data.get('staff', instance.staff.id)
+            year = request.data.get('year', instance.year)
+            
+            existing = StaffLeaveEntitlement.objects.filter(
+                staff_id=staff_id, 
+                year=year
+            ).exclude(id=instance.id)
+            
+            if existing.exists():
+                return Response(
+                    {
+                        'error': f'Leave entitlement already exists for this staff member in year {year}'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        entitlement = serializer.save()
+        
+       
+        detail_serializer = StaffLeaveEntitlementDetailSerializer(entitlement)
+        return Response(detail_serializer.data)
+
+
+class StaffLeaveEntitlementDeleteView(generics.DestroyAPIView):
+    """Delete staff leave entitlement"""
+    
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    lookup_field = 'id'
+    
+    def get_queryset(self):
+        return StaffLeaveEntitlement.objects.filter(staff__status='Active')
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        # Check if entitlement has used days
+        if instance.used_days > 0:
+            return Response(
+                {
+                    'error': 'Cannot delete entitlement with used leave days'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        self.perform_destroy(instance)
+        return Response(
+            {'message': 'Leave entitlement deleted successfully'},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class StaffLeaveEntitlementBulkCreateView(generics.CreateAPIView):
+    """Bulk create leave entitlements for all active staff"""
+    
+    permission_classes = [HasUserRole]
+    allowed_roles = ALL_STAFF_ROLES
+    
+    def create(self, request, *args, **kwargs):
+        year = request.data.get('year', timezone.now().year)
+        total_days = request.data.get('total_days', 21)
+        
+       
+        active_staff = Staff.objects.filter(
+            status='Active'
+        ).exclude(
+            staffleaveentitlement__year=year
+        )
+        
+        if not active_staff.exists():
+            return Response(
+                {
+                    'message': f'All active staff already have leave entitlements for year {year}'
+                },
+                status=status.HTTP_200_OK
+            )
+        
+        # Create entitlements
+        entitlements = []
+        for staff in active_staff:
+            entitlement = StaffLeaveEntitlement.objects.create(
+                staff=staff,
+                year=year,
+                total_days=total_days,
+                used_days=0
+            )
+            entitlements.append(entitlement)
+        
+        
+        serializer = StaffLeaveEntitlementDetailSerializer(entitlements, many=True)
+        
+        return Response(
+            {
+                'message': f'Created {len(entitlements)} leave entitlements for year {year}',
+                'created_count': len(entitlements),
+                'entitlements': serializer.data
+            },
+            status=status.HTTP_201_CREATED)

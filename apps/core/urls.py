@@ -3,6 +3,8 @@ from .views import (
     CampusCreateView,
     CampusListView,
     CampusUpdateDeleteView,
+    DashboardCountsRetrieveView,
+    RecentActionsView,
     StudyYearCreateView,
     StudyYearListView,
     StudyYearUpdateDeleteView,
@@ -25,4 +27,11 @@ urlpatterns = [
         StudyYearUpdateDeleteView.as_view(),
         name="studyyear-update-delete",
     ),
+    path("studyyear/list/", StudyYearListView.as_view(), name="studyyear-list"),
+    path(
+        "dashboard-counts/",
+        DashboardCountsRetrieveView.as_view(),
+        name="dashboard-counts-metric",
+    ),
+    path("recent-actions/", RecentActionsView.as_view(), name="recent-actions"),
 ]

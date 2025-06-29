@@ -225,7 +225,10 @@ class StaffPositionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffPosition
         fields = ["id", "name", "created_on", "updated_on"]
-
+class CreateStaffPositionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffPosition
+        fields = ["name"]
 
 class StaffOnboardingProgressSimpleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -394,8 +397,14 @@ class CreateStaffLeaveApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffLeaveApplication
         fields = [
-            "id", "reason_declined", "start_date", "end_date",
-            "staff", "reason", "leave_type", "status",
+            "id",
+            "reason_declined",
+            "start_date",
+            "end_date",
+            "staff",
+            "reason",
+            "leave_type",
+            "status",
         ]
         extra_kwargs = {
             "reason_declined": {"required": False},
@@ -406,10 +415,9 @@ class CreateStaffLeaveApplicationSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         is_update = request and request.method in ["PUT", "PATCH"]
 
-        staff = attrs.get('staff')
-        start_date = attrs.get('start_date')
-        end_date = attrs.get('end_date')
-
+        staff = attrs.get("staff")
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
 
         if not is_update:
             if not start_date or not end_date:
@@ -423,24 +431,25 @@ class CreateStaffLeaveApplicationSerializer(serializers.ModelSerializer):
                 ).first()
 
                 if not entitlement:
-                    raise serializers.ValidationError("No leave entitlement record found.")
-
-                if attrs.get('leave_type') != "Emergency" and leave_days > entitlement.remaining_days:
                     raise serializers.ValidationError(
-                    f"Leave exceeds remaining days. You have {entitlement.remaining_days} days remaining."
-                )
+                        "No leave entitlement record found."
+                    )
+
+                if (
+                    attrs.get("leave_type") != "Emergency"
+                    and leave_days > entitlement.remaining_days
+                ):
+                    raise serializers.ValidationError(
+                        f"Leave exceeds remaining days. You have {entitlement.remaining_days} days remaining."
+                    )
 
         return attrs
-
-
-
-        
-
 
 
 class StaffLeaveApplicationListSerializer(serializers.ModelSerializer):
     staff = StaffListDetailSerializer()
     leave_days_applied_for = serializers.SerializerMethodField()
+
     class Meta:
         model = StaffLeaveApplication
         fields = [
@@ -452,11 +461,12 @@ class StaffLeaveApplicationListSerializer(serializers.ModelSerializer):
             "reason",
             "leave_type",
             "status",
-            "leave_days_applied_for"
+            "leave_days_applied_for",
         ]
         extra_kwargs = {
             "reason_declined": {"required": False},
         }
+
     def get_leave_days_applied_for(self, obj):
         return obj.leave_days_applied_for()
 
@@ -488,3 +498,63 @@ class CreateUpdateStaffLeaveSerializer(serializers.ModelSerializer):
             "application",
             "status",
         ]
+
+
+
+class StaffLeaveEntitlementCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for creating and updating staff leave entitlements"""
+    staff = serializers.PrimaryKeyRelatedField(queryset=Staff.objects.all())
+    class Meta:
+        model = StaffLeaveEntitlement
+        fields = ['staff', 'year', 'total_days', 'used_days']
+        extra_kwargs = {
+            'total_days': {'required': True},
+            'used_days': {'required': False},
+            'staff': {'required': False},
+        }
+        
+    def validate_staff(self, value):
+        """Ensure staff exists and is active"""
+        if not Staff.objects.filter(id=value.id, status='Active').exists():
+            raise serializers.ValidationError("Staff member must be active")
+        return value
+    
+    def validate_used_days(self, value):
+        """Ensure used days is not negative"""
+        if value < 0:
+            raise serializers.ValidationError("Used days cannot be negative")
+        return value
+    
+    def validate_total_days(self, value):
+        """Ensure total days is positive"""
+        if value <= 0:
+            raise serializers.ValidationError("Total days must be greater than 0")
+        return value
+    
+    def validate(self, attrs):
+        """Ensure used days doesn't exceed total days"""
+        used_days = attrs.get('used_days', 0)
+        total_days = attrs.get('total_days')
+        
+        if used_days > total_days:
+            raise serializers.ValidationError(
+                "Used days cannot exceed total days"
+            )
+        return attrs
+    
+class StaffLeaveEntitlementDetailSerializer(serializers.ModelSerializer):
+    """Serializer for listing staff leave entitlement details""" 
+    staff = StaffListDetailSerializer()
+    remaining_days = serializers.ReadOnlyField()
+    class Meta:
+        model = StaffLeaveEntitlement
+        fields = [
+            'id',
+            'staff',
+            'year',
+            'total_days',
+            'used_days',
+            'remaining_days',
+        ]
+    
+   

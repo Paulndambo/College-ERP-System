@@ -5,17 +5,23 @@ from rest_framework import status, generics
 from rest_framework.views import APIView
 from apps.schools.models import ProgrammeCohort, Semester
 from apps.students.reporting.filters import SemesterReportingFilter
-from apps.students.reporting.serializers import SemesterReportingListSerializer, SemesterReportingSerializer
+from apps.students.reporting.serializers import (
+    SemesterReportingListSerializer,
+    SemesterReportingSerializer,
+)
 from apps.students.models import SemesterReporting
 from apps.finance.models import FeeStructure
 
 from apps.student_finance.mixins import StudentInvoicingMixin
-from apps.students.reporting.usecases.promote_students import promote_students_to_next_semester
+from apps.students.reporting.usecases.promote_students import (
+    promote_students_to_next_semester,
+)
 from apps.students.reporting.usecases.reporting_service import SemesterReportingService
 from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
+
 """By Paul - Semester Reporting API View"""
 # class SemesterReportingAPIView(generics.ListCreateAPIView):
 #     queryset = SemesterReporting.objects.all()
@@ -66,39 +72,44 @@ class SemesterReportingAPIView(APIView):
     Handles both individual student semester reporting and cohort promotion
     with automatic fee structure invoicing
     """
-    
+
     def post(self, request, cohort_id=None):
         """Handle POST requests for both individual and cohort reporting"""
         if cohort_id:
-           
+
             cohort = get_object_or_404(ProgrammeCohort, pk=cohort_id)
-            
+
             next_semester_id = request.data.get("semester")
             if not next_semester_id:
                 return Response(
-                    {"error": "next semester is required"}, 
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "next semester is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
             next_semester = get_object_or_404(Semester, pk=next_semester_id)
-            success, response_data, status_code = SemesterReportingService.handle_cohort_promotion(
-                cohort, next_semester
+            print("next_semester", next_semester)
+            print("cohort", cohort)
+            success, response_data, status_code = (
+                SemesterReportingService.handle_cohort_promotion(cohort, next_semester)
             )
         else:
             semester_id = request.data.get("semester")
             if not semester_id:
                 return Response(
-                    {"error": "semester is required"}, 
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "semester is required"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
             semester = get_object_or_404(Semester, pk=semester_id)
-            success, response_data, status_code = SemesterReportingService.handle_individual_reporting(
-                semester, request.data
+            success, response_data, status_code = (
+                SemesterReportingService.handle_individual_reporting(
+                    semester, request.data
+                )
             )
-        
-        return Response(response_data, status=status_code) 
-    
+
+        return Response(response_data, status=status_code)
+
+
 class SemisterReportingList(generics.ListAPIView):
     queryset = SemesterReporting.objects.all().order_by("-created_on")
     serializer_class = SemesterReportingListSerializer
@@ -107,6 +118,7 @@ class SemisterReportingList(generics.ListAPIView):
     pagination_class = None
     filter_backends = [DjangoFilterBackend]
     filterset_class = SemesterReportingFilter
+
     def get_paginated_response(self, data):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
@@ -115,18 +127,20 @@ class SemisterReportingList(generics.ListAPIView):
         try:
             reporting_qs = self.get_queryset()
             reporting_qs = self.filter_queryset(reporting_qs)
-            
-            page = self.request.query_params.get('page', None)
+
+            page = self.request.query_params.get("page", None)
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
-                paginated_reporting_qs = paginator.paginate_queryset(reporting_qs, request)
+                paginated_reporting_qs = paginator.paginate_queryset(
+                    reporting_qs, request
+                )
                 serializer = self.get_serializer(paginated_reporting_qs, many=True)
                 return paginator.get_paginated_response(serializer.data)
-            
+
             serializer = self.get_serializer(reporting_qs, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

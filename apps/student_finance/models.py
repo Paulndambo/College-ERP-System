@@ -44,12 +44,14 @@ class StudentFeeInvoice(AbsoluteBaseModel):
             ("Partially Paid", "Partially Paid"),
         ),
     )
+
     @property
     def bal_due(self):
         return self.amount - self.amount_paid
+
     def __str__(self):
         return self.reference
-    
+
 
 class StudentFeePayment(AbsoluteBaseModel):
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
@@ -79,10 +81,16 @@ class StudentFeeLedger(AbsoluteBaseModel):
     def __str__(self):
         return self.student.registration_number
 
-    
-
 
 class StudentFeeStatement(AbsoluteBaseModel):
+    PAYMENT_METHODS = StudentFeePayment._meta.get_field("payment_method").choices
+
+    payment_method = models.CharField(
+        max_length=255,
+        choices=PAYMENT_METHODS,
+        null=True,
+        blank=True,
+    )
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
     statement_type = models.CharField(
         max_length=255, choices=STUDENT_FEE_STATEMENT_TYPES
@@ -102,7 +110,6 @@ class StudentFeeStatement(AbsoluteBaseModel):
     @property
     def academic_year(self):
         return self.semester.academic_year
-    
+
     def __str__(self):
         return self.student.registration_number
-    

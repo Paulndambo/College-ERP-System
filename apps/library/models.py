@@ -82,7 +82,7 @@ class BorrowTransaction(AbsoluteBaseModel):
         return days_count if days_count > 0 else 0
 
     def __str__(self):
-        return f"{self.book.title} borrowed by {self.member.name}"
+        return f"{self.book.title} borrowed by {self.member.user.first_name}"
 
 
 class Fine(AbsoluteBaseModel):

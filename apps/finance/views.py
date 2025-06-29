@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
 import calendar
-from decimal import Decimal
+from rest_framework.pagination import PageNumberPagination
 
+from decimal import Decimal
+from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import render, redirect
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -12,93 +15,157 @@ from django.db import transaction
 
 from django.views.generic import ListView
 from django.http import JsonResponse
+from rest_framework import generics,status
+from django_filters.rest_framework import DjangoFilterBackend
 
+from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
+from apps.finance.filters import FeeStructureFilter
+from apps.finance.serializers import (
+    FeeStructureCreateUpdateSerializer,
+    FeeStructureItemCreateUpdateSerializer,
+    FeeStructureItemListSerializer,
+    FeeStructureListSerializer,
+)
+from .models import FeeStructure, FeeStructureItem
 from apps.finance.models import LibraryFinePayment, Payment, FeePayment, Budget
 
 date_today = datetime.now().date()
 
 
-def finance_home(request):
-    return render(request, "finance/dashboard.html")
+class FeeStructureListView(generics.ListAPIView):
+    queryset = FeeStructure.objects.prefetch_related("feeitems").all().order_by("-created_on")
+    serializer_class = FeeStructureListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = FeeStructureFilter
+   
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            fee_structures = self.get_queryset()
+            fee_structures = self.filter_queryset(fee_structures)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_fee_structures = paginator.paginate_queryset(fee_structures, request)
+                serializer = self.get_serializer(paginated_fee_structures, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(fee_structures, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            raise CustomAPIException(
+                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
-class BudgetsListView(ListView):
-    model = Budget
-    template_name = "finance/budgets/budgets.html"
-    context_object_name = "budgets"
-    paginate_by = 10
+
+
+class FeeStructureRetrieveView(generics.RetrieveAPIView):
+    queryset = FeeStructure.objects.prefetch_related("feeitems").all()
+    serializer_class = FeeStructureListSerializer
+    lookup_field = "id"
+
+
+class FeeStructureCreateView(generics.CreateAPIView):
+    queryset = FeeStructure.objects.all()
+    serializer_class = FeeStructureCreateUpdateSerializer
+
+
+class FeeStructureUpdateView(generics.UpdateAPIView):
+    queryset = FeeStructure.objects.all()
+    serializer_class = FeeStructureCreateUpdateSerializer
+    lookup_field = "id"
+
+
+class FeeStructureDeleteView(generics.DestroyAPIView):
+    queryset = FeeStructure.objects.all()
+    serializer_class = FeeStructureCreateUpdateSerializer
+    lookup_field = "id"
+
+
+class FeeStructureItemListView(generics.ListAPIView):
+    serializer_class = FeeStructureItemListSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query) | Q(title__icontains=search_query)
-            )
-        # Get sort parameter
-        return queryset.order_by("-created_on")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        return context
+        fee_structure_id = self.request.query_params.get("fee_structure")
+        if fee_structure_id:
+            return FeeStructureItem.objects.filter(fee_structure_id=fee_structure_id)
+        return FeeStructureItem.objects.none()
 
 
-class LibraryFinePaymentListView(ListView):
-    model = LibraryFinePayment
-    template_name = "finance/library_fines.html"
-    context_object_name = "fines"
-    paginate_by = 8
+
+class FeeStructureItemByStructureView(generics.ListAPIView):
+    serializer_class = FeeStructureItemListSerializer
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        search_query = self.request.GET.get("search", "")
+        fee_structure_id = self.kwargs.get("fee_structure_id")
+        if not fee_structure_id:
+            raise ValidationError("FeeStructure ID is required")
 
-        if search_query:
-            queryset = queryset.filter(
-                Q(id__icontains=search_query)
-                | Q(member__user__first_name__icontains=search_query)
-            )
-        # Get sort parameter
-        return queryset.order_by("-created_on")
+        queryset = FeeStructureItem.objects.filter(fee_structure_id=fee_structure_id)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["search_query"] = self.request.GET.get("search", "")
-        return context
+        semester = self.request.query_params.get("semester")
+        year_of_study = self.request.query_params.get("year_of_study")
+
+        if semester:
+            queryset = queryset.filter(fee_structure__semester_id=semester)
+
+        if year_of_study:
+            queryset = queryset.filter(fee_structure__year_of_study_id=year_of_study)
+
+        return queryset
+
+    def list(self, request, *args, **kwargs):
+        fee_structure_id = kwargs.get("fee_structure_id")
+        if not fee_structure_id:
+            raise ValidationError("FeeStructure  is required")
+        try:
+            fee_structure = FeeStructure.objects.get(id=fee_structure_id)
+        except FeeStructure.DoesNotExist:
+            raise ValidationError("FeeStructure not found")
+
+        queryset = self.filter_queryset(self.get_queryset())
+        total_amount = queryset.aggregate(total=Sum("amount"))["total"] or 0
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serialized_page = self.get_serializer(page, many=True)
+            paginated_response = self.get_paginated_response(serialized_page.data)
+            paginated_response.data["fee_structure"] = FeeStructureListSerializer(fee_structure).data
+            paginated_response.data["total_amount"] = total_amount
+            return paginated_response
+
+        serialized = self.get_serializer(queryset, many=True)
+        return Response({
+            "fee_structure": FeeStructureSerializer(fee_structure).data,
+            "total_amount": total_amount,
+            "results": serialized.data
+        })
 
 
-@login_required
-@transaction.atomic
-def capture_library_fine_payment(request):
-    if request.method == "POST":
-        fine_id = request.POST.get("fine_id")
-        payment_method = request.POST.get("payment_method")
-        payment_reference = request.POST.get("payment_reference")
+class FeeStructureItemRetrieveView(generics.RetrieveAPIView):
+    queryset = FeeStructureItem.objects.all()
+    serializer_class = FeeStructureItemListSerializer
+    lookup_field = "id"
 
-        fine_payment = LibraryFinePayment.objects.get(id=fine_id)
 
-        fine_payment.fine.paid = True
-        fine_payment.fine.save()
+class FeeStructureItemCreateView(generics.CreateAPIView):
+    queryset = FeeStructureItem.objects.all()
+    serializer_class = FeeStructureItemCreateUpdateSerializer
 
-        Payment.objects.create(
-            payer=fine_payment.member.user,
-            payment_method=payment_method,
-            payment_reference=payment_reference,
-            amount=fine_payment.amount,
-            description=f"Library fine payment for {fine_payment.fine.borrow_transaction.member.user.first_name} {fine_payment.fine.borrow_transaction.member.user.last_name}",
-            direction="Income",
-            payment_type="Library Fine Payment",
-            recorded_by=request.user,
-        )
 
-        fine_payment.payment_method = payment_method
-        fine_payment.payment_reference = payment_reference
-        fine_payment.paid = True
-        fine_payment.payment_date = date_today
-        fine_payment.recorded_by = request.user
-        fine_payment.save()
+class FeeStructureItemUpdateView(generics.UpdateAPIView):
+    queryset = FeeStructureItem.objects.all()
+    serializer_class = FeeStructureItemCreateUpdateSerializer
+    lookup_field = "id"
 
-        return redirect("library-fines")
-    return render(request, "finance/record_library_fine.html")
+
+class FeeStructureItemDeleteView(generics.DestroyAPIView):
+    queryset = FeeStructureItem.objects.all()
+    serializer_class = FeeStructureItemCreateUpdateSerializer
+    lookup_field = "id"
