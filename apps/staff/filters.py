@@ -1,4 +1,12 @@
-from .models import Payslip, Staff, StaffLeave, StaffLeaveApplication, StaffLeaveEntitlement, StaffPayroll
+from .models import (
+    OvertimeRecords,
+    Payslip,
+    Staff,
+    StaffLeave,
+    StaffLeaveApplication,
+    StaffLeaveEntitlement,
+    StaffPayroll,
+)
 import django_filters
 
 from apps.schools.models import Course, Programme, Semester, Department
@@ -131,21 +139,44 @@ class StaffLeaveEntitlementFilter(django_filters.FilterSet):
     search = django_filters.CharFilter(method="filter_by_all", label="Search")
     year = django_filters.NumberFilter(field_name="year")
     department = django_filters.NumberFilter(field_name="staff__department_id")
-    staff_status = django_filters.CharFilter(field_name="staff__status", lookup_expr="icontains")
-    
+    staff_status = django_filters.CharFilter(
+        field_name="staff__status", lookup_expr="icontains"
+    )
+
     class Meta:
         model = StaffLeaveEntitlement
         fields = ["search", "year", "department", "staff_status"]
-    
+
     def filter_by_all(self, queryset, name, value):
         """
         Filter leave entitlements by staff details
         """
         return queryset.filter(
-            Q(staff__staff_number__icontains=value) |
-            Q(staff__user__first_name__icontains=value) |
-            Q(staff__user__last_name__icontains=value) |
-            Q(staff__user__phone_number__icontains=value) |
-            Q(staff__user__email__icontains=value) |
-            Q(staff__department__name__icontains=value)
+            Q(staff__staff_number__icontains=value)
+            | Q(staff__user__first_name__icontains=value)
+            | Q(staff__user__last_name__icontains=value)
+            | Q(staff__user__phone_number__icontains=value)
+            | Q(staff__user__email__icontains=value)
+            | Q(staff__department__name__icontains=value)
+        )
+
+
+class OvertimePaymentsFilter(django_filters.FilterSet):
+    """
+    Filter staff payroll
+    """
+
+    search = django_filters.CharFilter(method="filter_by_all", label="Search")
+    status = django_filters.CharFilter(field_name="status", lookup_expr="icontains")
+    department = django_filters.NumberFilter(field_name="staff__department_id")
+
+    class Meta:
+        model = OvertimeRecords
+        fields = ["status", "department", "search"]
+
+    def filter_by_all(self, queryset, name, value):
+        value = value.strip()
+        return queryset.filter(
+            Q(staff__user__phone_number__icontains=value)
+            | Q(staff__staff_number__icontains=value)
         )

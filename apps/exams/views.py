@@ -57,13 +57,7 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
         course_id = request.data.get("course")
         semester_id = request.data.get("semester")
         cohort_id = request.data.get("cohort")
-
-        # if not course_id:
-        #     return Response({"error": "Course is required"}, status=status.HTTP_400_BAD_REQUEST)
-        # if not semester_id:
-        #     return Response({"error": "Semester is required"}, status=status.HTTP_400_BAD_REQUEST)
-        # if not cohort_id:
-        #     return Response({"error": "Cohort is required"}, status=status.HTTP_400_BAD_REQUEST)
+        print("cohort_id from request:", cohort_id)
 
         file_extension = file_obj.name.split(".")[-1].lower()
 
@@ -102,12 +96,12 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
                     )
 
             result = self._process_data(
-                data, course_id=course_id, semester_id=semester_id, cohort=cohort_id
+                data, course_id=course_id, semester_id=semester_id, cohort_id=cohort_id
             )
 
             if result["created"] == 0:
                 raise CustomAPIException(
-                    "Marks upload failed. Either all the marks already exist or no valid data was provided.",
+                    "Marks upload failed. Either all the marks already exist or invalid data was provided i.e invalid  registration number in the uploaded file.",
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -154,14 +148,26 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
     def _process_data(self, data, course_id, semester_id, cohort_id):
 
         try:
-            course = Course.objects.get(id=course_id)
-            semester = Semester.objects.get(id=semester_id)
-            cohort = ProgrammeCohort.objects.get(id=cohort_id)
-        except (Course.DoesNotExist, Semester.DoesNotExist) as e:
+            course = Course.objects.get(id=int(course_id))
+
+        except (Course.DoesNotExist,) as e:
             raise CustomAPIException(
                 f"Invalid reference: {str(e)}", status_code=status.HTTP_400_BAD_REQUEST
             )
-
+        try:
+            semester = Semester.objects.get(id=int(semester_id))
+        except (ValueError, Semester.DoesNotExist):
+            raise CustomAPIException(
+                f"Invalid cohort ID: {cohort_id}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            cohort = ProgrammeCohort.objects.get(id=int(cohort_id))
+        except (ValueError, ProgrammeCohort.DoesNotExist):
+            raise CustomAPIException(
+                f"Invalid cohort ID: {cohort_id}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
         created_count = 0
         errors = []
 

@@ -21,7 +21,6 @@ urlpatterns = [
         ProcessLibraryPaymentView.as_view(),
         name="library-process-payment",
     ),
-    
     # FeeStructure
     path("fee-structures/", FeeStructureListView.as_view(), name="fee-structure-list"),
     path(

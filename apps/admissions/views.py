@@ -1,3 +1,4 @@
+from apps.admissions.admissions_utils import generate_registration_number
 from apps.core.models import Campus, UserRole
 from apps.schools.models import ProgrammeCohort
 from apps.students.models import Student, StudentDocument, StudentEducationHistory
@@ -13,7 +14,7 @@ from rest_framework.exceptions import ValidationError
 from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
 from services.permissions import HasUserRole
 from django.db.models import Count, F
-
+from datetime import datetime
 from django.db import transaction
 from .models import (
     Intake,
@@ -55,7 +56,7 @@ class IntakeUpdateView(generics.UpdateAPIView):
     def patch(self, request, *args, **kwargs):
         intake = self.get_object()
         print("Before update:", intake.closed)
-        
+
         serializer = self.get_serializer(intake, data=request.data, partial=True)
         print(f"Updating intake {intake.id} with data: {request.data}")
 
@@ -66,7 +67,6 @@ class IntakeUpdateView(generics.UpdateAPIView):
         else:
             print("Errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class IntakeListView(generics.ListAPIView):
@@ -466,10 +466,13 @@ class StudentEnrollmentView(generics.CreateAPIView):
                     message="Campus not found.",
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
-                
-            
 
-            registration_number = application.application_number
+            # registration_number = application.application_number
+            programme = application.first_choice_programme
+            level = getattr(programme, 'level', 'Bachelor') 
+            year = cohort.intake.start_date.year if cohort.intake and cohort.intake.start_date else datetime.now().year
+            registration_number = generate_registration_number(programme, level, year)
+
 
             try:
                 with transaction.atomic():

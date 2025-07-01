@@ -37,7 +37,7 @@ class FeeStructureListSerializer(serializers.ModelSerializer):
     programme = ProgrammeListSerializer()
     semester = SemesterListSerializer()
     year_of_study = StudyYearListSerializer()
-    
+
     total = serializers.SerializerMethodField()
 
     class Meta:

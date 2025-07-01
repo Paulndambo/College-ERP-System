@@ -225,10 +225,13 @@ class StaffPositionListSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffPosition
         fields = ["id", "name", "created_on", "updated_on"]
+
+
 class CreateStaffPositionSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffPosition
         fields = ["name"]
+
 
 class StaffOnboardingProgressSimpleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -500,61 +503,97 @@ class CreateUpdateStaffLeaveSerializer(serializers.ModelSerializer):
         ]
 
 
-
 class StaffLeaveEntitlementCreateUpdateSerializer(serializers.ModelSerializer):
     """Serializer for creating and updating staff leave entitlements"""
+
     staff = serializers.PrimaryKeyRelatedField(queryset=Staff.objects.all())
+
     class Meta:
         model = StaffLeaveEntitlement
-        fields = ['staff', 'year', 'total_days', 'used_days']
+        fields = ["staff", "year", "total_days", "used_days"]
         extra_kwargs = {
-            'total_days': {'required': True},
-            'used_days': {'required': False},
-            'staff': {'required': False},
+            "total_days": {"required": True},
+            "used_days": {"required": False},
+            "staff": {"required": False},
         }
-        
+
     def validate_staff(self, value):
         """Ensure staff exists and is active"""
-        if not Staff.objects.filter(id=value.id, status='Active').exists():
+        if not Staff.objects.filter(id=value.id, status="Active").exists():
             raise serializers.ValidationError("Staff member must be active")
         return value
-    
+
     def validate_used_days(self, value):
         """Ensure used days is not negative"""
         if value < 0:
             raise serializers.ValidationError("Used days cannot be negative")
         return value
-    
+
     def validate_total_days(self, value):
         """Ensure total days is positive"""
         if value <= 0:
             raise serializers.ValidationError("Total days must be greater than 0")
         return value
-    
+
     def validate(self, attrs):
         """Ensure used days doesn't exceed total days"""
-        used_days = attrs.get('used_days', 0)
-        total_days = attrs.get('total_days')
-        
+        used_days = attrs.get("used_days", 0)
+        total_days = attrs.get("total_days")
+
         if used_days > total_days:
-            raise serializers.ValidationError(
-                "Used days cannot exceed total days"
-            )
+            raise serializers.ValidationError("Used days cannot exceed total days")
         return attrs
-    
+
+
 class StaffLeaveEntitlementDetailSerializer(serializers.ModelSerializer):
-    """Serializer for listing staff leave entitlement details""" 
+    """Serializer for listing staff leave entitlement details"""
+
     staff = StaffListDetailSerializer()
     remaining_days = serializers.ReadOnlyField()
+
     class Meta:
         model = StaffLeaveEntitlement
         fields = [
-            'id',
-            'staff',
-            'year',
-            'total_days',
-            'used_days',
-            'remaining_days',
+            "id",
+            "staff",
+            "year",
+            "total_days",
+            "used_days",
+            "remaining_days",
         ]
-    
-   
+
+
+class OvertimeRecordsListSerializer(serializers.ModelSerializer):
+    staff = StaffListDetailSerializer()
+
+    class Meta:
+        model = OvertimeRecords
+        fields = [
+            "id",
+            "date",
+            "hours",
+            "rate_per_hour",
+            "approved",
+            "staff",
+        ]
+
+
+class CreateOvertimeRecordSerializer(serializers.ModelSerializer):
+    staff = serializers.PrimaryKeyRelatedField(queryset=Staff.objects.all())
+
+    class Meta:
+        model = OvertimeRecords
+        fields = [
+            "date",
+            "hours",
+            "rate_per_hour",
+            "approved",
+            "staff",
+        ]
+        extra_kwargs = {
+            "approved": {"required": False},
+        }
+class ApproveOvertimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OvertimeRecords
+        fields = ['approved']

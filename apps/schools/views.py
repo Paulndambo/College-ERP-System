@@ -102,13 +102,7 @@ class SchoolUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         try:
             with transaction.atomic():
-                school = self.get_object()
-
-                Budget.objects.filter(school=school).update(school=None)
-
-                school.delete()
-
-                return Response(status=status.HTTP_204_NO_CONTENT)
+                return self.partial_update(request, *args, **kwargs)
         except Exception as exc:
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -116,7 +110,11 @@ class SchoolUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         try:
-            return super().delete(request, *args, **kwargs)
+            with transaction.atomic():
+                school = self.get_object()
+                Budget.objects.filter(school=school).update(school=None)
+                school.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as exc:
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR

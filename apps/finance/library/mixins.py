@@ -27,9 +27,6 @@ class ProcessLibraryPaymentMixin:
         if self.fine.paid:
             raise ValueError("Fine has already been paid.")
 
-        if LibraryFinePayment.objects.filter(fine=self.fine).exists():
-            raise ValueError("Payment for this fine already exists.")
-
         if self.amount < self.fine.calculated_fine:
             raise ValueError("Amount must be equal to or greater than the fine amount.")
 

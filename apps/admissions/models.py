@@ -44,9 +44,9 @@ class Intake(AbsoluteBaseModel):
         start_year = self.start_date.year
         start_month = self.start_date.month
 
-        if start_month >= 9: 
+        if start_month >= 9:
             return f"{start_year}/{start_year + 1}"
-        else:  
+        else:
             return f"{start_year - 1}/{start_year}"
 
     @property

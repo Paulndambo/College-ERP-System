@@ -5,8 +5,14 @@ urlpatterns = [
     path("list/", StaffListView.as_view(), name="staff"),
     path("active-staff/", ActiveStaffListView.as_view(), name="active-staff"),
     path("positions/", PositionListView.as_view(), name="position-list"),
-    path("positions/create/", StaffPositionsCreateView.as_view(), name="position-create"),
-    path("positions/<int:pk>/update/", StaffPositionpdateView.as_view(), name="position-update"),
+    path(
+        "positions/create/", StaffPositionsCreateView.as_view(), name="position-create"
+    ),
+    path(
+        "positions/<int:pk>/update/",
+        StaffPositionpdateView.as_view(),
+        name="position-update",
+    ),
     path("create/", CreateStaffView.as_view(), name="create-staff"),
     path("update/<int:pk>/", StaffUpdateView.as_view(), name="update-staff"),
     path("details/<int:pk>/", StaffDetailAPIView.as_view(), name="staff-detail"),
@@ -65,8 +71,11 @@ urlpatterns = [
         StaffLeaveApplicationUpdateView.as_view(),
         name="leave-application-update",
     ),
-    path("leave-entitlements/", StaffLeaveEntitlementListView.as_view(), name="staff-entitlements-list"),
-    
+    path(
+        "leave-entitlements/",
+        StaffLeaveEntitlementListView.as_view(),
+        name="staff-entitlements-list",
+    ),
     path(
         "leave-entitlements/create/",
         StaffLeaveEntitlementCreateView.as_view(),
@@ -82,4 +91,20 @@ urlpatterns = [
         StaffLeaveEntitlementUpdateView.as_view(),
         name="leave-application-update",
     ),
+    path(
+        "overtime-payments/",
+        OvertimePaymentsAPIView.as_view(),
+        name="overtime-payments-list",
+    ),
+    path(
+        "overtime-payments/<int:pk>/update/",
+        OvertimePaymentsUpdateView.as_view(),
+        name="overtime-payments",
+    ),
+    path(
+        "overtime-payments/create/",
+        OvertimePaymentCreateView.as_view(),
+        name="overtime-payments-create",
+    ),
+     path('overtime-payments/<int:pk>/approve/', ApproveOvertimeRecordView.as_view(), name='approve-overtime'),
 ]

@@ -9,7 +9,8 @@ from .models import (
 
 class IntakeFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr="icontains")
-    closed = django_filters.BooleanFilter() 
+    closed = django_filters.BooleanFilter()
+
     class Meta:
         model = Intake
         fields = ["name", "closed"]

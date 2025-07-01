@@ -13,6 +13,7 @@ from rest_framework.exceptions import ValidationError
 
 class IntakeCreateSerializer(serializers.ModelSerializer):
     closed = serializers.BooleanField(default=False)
+
     class Meta:
         model = Intake
         fields = ["name", "start_date", "end_date", "closed"]

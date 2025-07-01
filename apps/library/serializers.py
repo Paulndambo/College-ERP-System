@@ -373,6 +373,7 @@ class BorrowTransactionCreateSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             "borrow_date": {"required": False},
+            "copy_number": {"required": False},
             "issued_by": {"required": False},
             "status": {"required": False},
         }

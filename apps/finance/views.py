@@ -15,7 +15,7 @@ from django.db import transaction
 
 from django.views.generic import ListView
 from django.http import JsonResponse
-from rest_framework import generics,status
+from rest_framework import generics, status
 from django_filters.rest_framework import DjangoFilterBackend
 
 from apps.core.base_api_error_exceptions.base_exceptions import CustomAPIException
@@ -33,11 +33,13 @@ date_today = datetime.now().date()
 
 
 class FeeStructureListView(generics.ListAPIView):
-    queryset = FeeStructure.objects.prefetch_related("feeitems").all().order_by("-created_on")
+    queryset = (
+        FeeStructure.objects.prefetch_related("feeitems").all().order_by("-created_on")
+    )
     serializer_class = FeeStructureListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = FeeStructureFilter
-   
+
     def get_paginated_response(self, data):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
@@ -50,7 +52,9 @@ class FeeStructureListView(generics.ListAPIView):
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
-                paginated_fee_structures = paginator.paginate_queryset(fee_structures, request)
+                paginated_fee_structures = paginator.paginate_queryset(
+                    fee_structures, request
+                )
                 serializer = self.get_serializer(paginated_fee_structures, many=True)
                 return paginator.get_paginated_response(serializer.data)
 
@@ -61,8 +65,6 @@ class FeeStructureListView(generics.ListAPIView):
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-
 
 
 class FeeStructureRetrieveView(generics.RetrieveAPIView):
@@ -96,7 +98,6 @@ class FeeStructureItemListView(generics.ListAPIView):
         if fee_structure_id:
             return FeeStructureItem.objects.filter(fee_structure_id=fee_structure_id)
         return FeeStructureItem.objects.none()
-
 
 
 class FeeStructureItemByStructureView(generics.ListAPIView):
@@ -136,16 +137,20 @@ class FeeStructureItemByStructureView(generics.ListAPIView):
         if page is not None:
             serialized_page = self.get_serializer(page, many=True)
             paginated_response = self.get_paginated_response(serialized_page.data)
-            paginated_response.data["fee_structure"] = FeeStructureListSerializer(fee_structure).data
+            paginated_response.data["fee_structure"] = FeeStructureListSerializer(
+                fee_structure
+            ).data
             paginated_response.data["total_amount"] = total_amount
             return paginated_response
 
         serialized = self.get_serializer(queryset, many=True)
-        return Response({
-            "fee_structure": FeeStructureSerializer(fee_structure).data,
-            "total_amount": total_amount,
-            "results": serialized.data
-        })
+        return Response(
+            {
+                "fee_structure": FeeStructureSerializer(fee_structure).data,
+                "total_amount": total_amount,
+                "results": serialized.data,
+            }
+        )
 
 
 class FeeStructureItemRetrieveView(generics.RetrieveAPIView):

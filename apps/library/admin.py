@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 
-from .models import Fine, Member
+from .models import BorrowTransaction, Fine, Member
 
 
 # Register your models here.
@@ -24,3 +24,21 @@ class FineAdmin(admin.ModelAdmin):
         "updated_on",
     )
     list_filter = ("paid",)
+
+@admin.register(BorrowTransaction)
+class BorrowTransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "book",
+        "member",
+        "borrow_date",
+        "due_date",
+        "return_date",
+        "issued_by",
+        "status",
+        "copy_number",
+        "days_overdue",
+        "is_overdue",
+        "created_on",
+        "updated_on",
+    )

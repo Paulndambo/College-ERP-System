@@ -9,7 +9,10 @@ from apps.students.reporting.usecases.promote_students import (
     promote_students_to_next_semester,
 )
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
+
+
 class SemesterReportingService:
     """Service class to handle semester reporting business logic"""
 
@@ -30,11 +33,10 @@ class SemesterReportingService:
         #     semester__name=semester.name,
         # ).first()
         fee_structure = FeeStructure.objects.filter(
-            programme=student.programme,
-            semester=semester
+            programme=student.programme, semester=semester
         ).first()
         logging.info("Fee structure found.", fee_structure)
-        print("fee structre",fee_structure )
+        print("fee structre", fee_structure)
         if not fee_structure:
             print(
                 f"No fee structure found for programme {student.programme} and semester {semester.name}"
@@ -112,8 +114,7 @@ class SemesterReportingService:
             FeeStructure instance or None
         """
         return FeeStructure.objects.filter(
-            programme=student.programme,
-            semester=semester
+            programme=student.programme, semester=semester
         ).first()
 
     @staticmethod
@@ -164,20 +165,59 @@ class SemesterReportingService:
 
         return summary
 
+    # @staticmethod
+    # @transaction.atomic
+    # def handle_individual_reporting(semester, request_data):
+    #     """
+    #     Handle individual student semester reporting with invoicing
+
+    #     Args:
+    #         semester: Semester object from database
+    #         request_data: Dictionary containing request data
+
+    #     Returns:
+    #         Tuple of (success, response_data, status_code)
+    #     """
+    #     # Validate semester first
+    #     semester_validation = SemesterReportingService.validate_semester_for_reporting(
+    #         semester
+    #     )
+    #     if not semester_validation["is_valid"]:
+    #         return False, {"error": semester_validation["error"]}, 400
+
+    #     serializer = CreateSemesterReportingSerializer(data=request_data)
+
+    #     if not serializer.is_valid():
+    #         return False, serializer.errors, 400
+
+    #     reporting = serializer.save()
+
+    #     invoice_success = SemesterReportingService.create_student_invoice(
+    #         reporting.student, semester
+    #     )
+
+    #     if invoice_success:
+    #         return (
+    #             True,
+    #             {
+    #                 "message": "Student reporting created and invoice generated successfully"
+    #             },
+    #             201,
+    #         )
+    #     else:
+    #         return (
+    #             False,
+    #             {"error": "Student reporting created but invoice generation failed"},
+    #             207,
+    #         )
+
     @staticmethod
     @transaction.atomic
     def handle_individual_reporting(semester, request_data):
         """
         Handle individual student semester reporting with invoicing
-
-        Args:
-            semester: Semester object from database
-            request_data: Dictionary containing request data
-
-        Returns:
-            Tuple of (success, response_data, status_code)
         """
-        # Validate semester first
+
         semester_validation = SemesterReportingService.validate_semester_for_reporting(
             semester
         )
@@ -189,10 +229,24 @@ class SemesterReportingService:
         if not serializer.is_valid():
             return False, serializer.errors, 400
 
+        # Extract student from validated data before saving
+        student = serializer.validated_data.get("student")
+
+        fee_structure = SemesterReportingService.get_fee_structure(student, semester)
+        if not fee_structure:
+            return (
+                False,
+                {
+                    "error": f"No fee structure found for programme {student.programme} for given {semester.name}"
+                },
+                400,
+            )
+
+        # Now that validation is passed, save reporting and create invoice
         reporting = serializer.save()
 
         invoice_success = SemesterReportingService.create_student_invoice(
-            reporting.student, semester
+            student, semester
         )
 
         if invoice_success:

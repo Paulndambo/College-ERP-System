@@ -27,7 +27,7 @@ class SchoolListSerializer(serializers.ModelSerializer):
 class DepartmentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ["name", "school", "office"]
+        fields = ["name", "school", "office", "department_type"]
 
 
 class DepartmentListSerializer(serializers.ModelSerializer):
@@ -108,13 +108,21 @@ class SemesterListSerializer(serializers.ModelSerializer):
 class ProgrammeCohortCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgrammeCohort
-        fields = ["name", "programme", "current_year", "current_semester", "intake", "status"]
+        fields = [
+            "name",
+            "programme",
+            "current_year",
+            "current_semester",
+            "intake",
+            "status",
+        ]
 
 
 class ProgrammeCohortListSerializer(serializers.ModelSerializer):
     programme = ProgrammeListSerializer()
     current_semester = SemesterListSerializer()
     intake = serializers.SerializerMethodField()
+
     class Meta:
         model = ProgrammeCohort
         fields = [
@@ -126,9 +134,10 @@ class ProgrammeCohortListSerializer(serializers.ModelSerializer):
             "status",
             "intake",
         ]
-        
+
     def get_intake(self, obj):
         from apps.admissions.serializers import IntakeListDetailSerializer
+
         return IntakeListDetailSerializer(obj.intake).data
 
     def get_programme(self, obj):

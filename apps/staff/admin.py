@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from apps.staff.models import (
+    OvertimeRecords,
     Staff,
     StaffDocuments,
     StaffLeave,
@@ -120,3 +121,16 @@ class StaffLeaveApplicationAdmin(admin.ModelAdmin):
 @admin.register(StaffLeave)
 class StaffLeaveAdmin(admin.ModelAdmin):
     list_display = ("id", "application", "status", "created_on")
+
+
+@admin.register(OvertimeRecords)
+class OvertimeRecordsAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "staff",
+        "date",
+        "hours",
+        "rate_per_hour",
+        "approved",
+        "created_on",
+    )
