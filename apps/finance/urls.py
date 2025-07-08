@@ -73,4 +73,10 @@ urlpatterns = [
         FeeStructureItemDeleteView.as_view(),
         name="fee-item-delete",
     ),
+    
+    
+    
+    
+
+
 ]
