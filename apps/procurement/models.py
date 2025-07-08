@@ -106,3 +106,48 @@ class TenderAward(AbsoluteBaseModel):
 
     def __str__(self):
         return f"{self.vendor.name} awarded '{self.tender.title}' for {self.award_amount}"
+
+
+class PurchaseOrder(AbsoluteBaseModel):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=[
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("received", "Received")
+    ], default="pending")
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"PO-{self.id} - {self.vendor.name}"
+
+
+class PurchaseItem(AbsoluteBaseModel):
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE, related_name="items")
+    description = models.CharField(max_length=255)
+    quantity = models.IntegerField()
+    name = models.CharField(max_length=100, help_text="Short name of the item e.g., 'Office Desk'")
+    unit = models.CharField(max_length=50, help_text="Unit of measure, e.g., pcs, reams, litres")
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+    category = models.ForeignKey('inventory.Category', on_delete=models.SET_NULL, null=True, blank=True)
+    @property
+    def total_price(self):
+        return self.quantity * self.unit_price
+    def __str__(self):
+        return f"{self.description} - {self.quantity} @ {self.unit_price} each"
+
+class GoodsReceived(AbsoluteBaseModel):
+    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
+    remarks = models.TextField(blank=True, null=True)
+    
+    def __str__(self):
+        return f"Goods Received for {self.purchase_order.vendor.name} - PO-{self.purchase_order.id}"
+
+
+class VendorPayment(AbsoluteBaseModel):
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    reference = models.CharField(max_length=50)
+    paid_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    
+    def __str__(self):
+        return f"Payment to {self.vendor.name} - {self.amount} ({self.reference})"

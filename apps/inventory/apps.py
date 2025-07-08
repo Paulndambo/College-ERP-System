@@ -1,9 +1,9 @@
 from django.apps import AppConfig
 
 
-class ProcurementConfig(AppConfig):
+class InventoryConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.procurement"
-
+    name = "apps.inventory"
+    
     def ready(self):
-        import apps.accounting.signals
+        import apps.inventory.signals
