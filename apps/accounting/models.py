@@ -1,12 +1,14 @@
 from django.db import models
 
-class AccountType(models.Model):
+from apps.core.models import AbsoluteBaseModel
+
+class AccountType(AbsoluteBaseModel):
     name = models.CharField(max_length=50, unique=True)
     normal_balance = models.CharField(max_length=6, choices=[('debit', 'Debit'), ('credit', 'Credit')])
 
     def __str__(self):
         return self.name
-class Account(models.Model):
+class Account(AbsoluteBaseModel):
     account_code = models.CharField(max_length=10, unique=True)  # e.g. '1001'
     name = models.CharField(max_length=100)              # e.g. 'Cash at Bank'
     account_type = models.ForeignKey(AccountType, on_delete=models.CASCADE)
@@ -16,7 +18,7 @@ class Account(models.Model):
         return f"{self.account_code} - {self.name}"
     
     
-class JournalEntry(models.Model):
+class JournalEntry(AbsoluteBaseModel):
     date = models.DateField()
     description = models.TextField()
     reference = models.CharField(max_length=100, null=True, blank=True)
@@ -27,7 +29,7 @@ class JournalEntry(models.Model):
         return f"{self.date} - {self.description}"
 
 
-class Transaction(models.Model):
+class Transaction(AbsoluteBaseModel):
     journal = models.ForeignKey(JournalEntry, related_name="transactions", on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
