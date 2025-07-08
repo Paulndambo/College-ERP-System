@@ -10,7 +10,6 @@ User = get_user_model()
 class Tender(AbsoluteBaseModel):
     status_choices = [
     ("open", "Open"),
-    ("closed", "Closed"),
     ("awarded", "Awarded"),
 ]
 
@@ -20,7 +19,12 @@ class Tender(AbsoluteBaseModel):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     
     status = models.CharField(max_length=20, choices=status_choices, default="open")
-
+    projected_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0.00, help_text="The projected cost for the tender"
+    )
+    actual_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0.00, help_text="The actual awarded amount for the tender"
+    )
     def __str__(self):
         return self.title
 
@@ -63,10 +67,19 @@ class TenderApplication(AbsoluteBaseModel):
 
         # Only create a TenderAward if one doesn't already exist for the tender
         if not TenderAward.objects.filter(tender=self.tender).exists():
+            # Determine the award amount (this can be the tender's projected amount or some other logic)
+            award_amount = self.tender.projected_amount  # Example: set award amount equal to projected_amount
+
             TenderAward.objects.create(
                 tender=self.tender,
-                vendor=vendor
+                vendor=vendor,
+                award_amount=award_amount
             )
+
+            # Update the tender's actual amount (this will be set once awarded)
+            self.tender.actual_amount = award_amount
+            self.tender.status = "awarded"
+            self.tender.save()
 
         return vendor
 
@@ -87,6 +100,9 @@ class TenderAward(AbsoluteBaseModel):
     tender = models.OneToOneField('Tender', on_delete=models.CASCADE, related_name='award')
     vendor = models.ForeignKey('Vendor', on_delete=models.CASCADE, related_name='awarded_tenders')
     
+    award_amount = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0.00, help_text="The final agreed amount for the award"
+    )
 
     def __str__(self):
-        return f"{self.vendor.name} awarded '{self.tender.title}'"
+        return f"{self.vendor.name} awarded '{self.tender.title}' for {self.award_amount}"

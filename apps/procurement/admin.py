@@ -4,9 +4,9 @@ from apps.procurement.models import Tender, TenderApplication, TenderAward, Vend
 
 @admin.register(Tender)
 class TenderAdmin(admin.ModelAdmin):
-    list_display = ("title", "deadline", "created_by")
+    list_display = ("title", "deadline", "created_by", "status", "projected_amount", "actual_amount")
     search_fields = ("title", "description")
-    list_filter = ("created_by", "deadline")
+    list_filter = ("created_by", "deadline", "status")
 
 
 @admin.register(TenderApplication)
@@ -22,7 +22,7 @@ class VendorAdmin(admin.ModelAdmin):
     
 @admin.register(TenderAward)
 class TenderAwardAdmin(admin.ModelAdmin):
-    list_display = ("tender", "vendor")
+    list_display = ("tender", "vendor", "award_amount")
     search_fields = ("tender__title", "vendor__name")
     list_filter = ("tender__created_by", "vendor__name")
     

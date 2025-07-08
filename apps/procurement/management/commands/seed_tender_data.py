@@ -40,13 +40,17 @@ class Command(BaseCommand):
         ]
 
         for title in tender_titles:
+            # Randomly generate projected amount for the tender (between 10000 and 100000)
+            projected_amount = random.randint(10000, 100000)
+
             tender = Tender.objects.create(
                 title=title,
                 description=fake.paragraph(nb_sentences=3),
                 deadline=timezone.now().date() + timedelta(days=random.randint(7, 30)),
-                created_by=user
+                created_by=user,
+                projected_amount=projected_amount  # Add the projected amount
             )
-            self.stdout.write(self.style.SUCCESS(f"Created Tender: {title}"))
+            self.stdout.write(self.style.SUCCESS(f"Created Tender: {title} with projected amount: {projected_amount}"))
 
             for _ in range(random.randint(3, 5)):
                 company_name = fake.company()
@@ -80,15 +84,19 @@ class Command(BaseCommand):
                 if status == "approved" and not TenderAward.objects.filter(tender=tender).exists():
                     vendor = app.convert_to_vendor()
 
+                    # Randomly generate award amount (between 9000 and 100000, usually close to projected)
+                    award_amount = random.randint(int(projected_amount * 0.9), int(projected_amount * 1.1))
+
                     # Create award only for the first approved application
                     if not TenderAward.objects.filter(tender=tender).exists():
                         TenderAward.objects.create(
                             tender=tender,
-                            vendor=vendor
+                            vendor=vendor,
+                            award_amount=award_amount  # Add the award amount
                         )
 
                         self.stdout.write(self.style.SUCCESS(
-                            f"Tender '{tender.title}' awarded to: {vendor.name}"
+                            f"Tender '{tender.title}' awarded to: {vendor.name} for {award_amount}"
                         ))
 
         self.stdout.write(self.style.SUCCESS("\n✔ Seeding completed successfully."))
