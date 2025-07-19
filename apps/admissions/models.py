@@ -4,7 +4,6 @@ from django.utils.text import slugify
 from uuid import uuid4
 
 
-
 from apps.core.models import AbsoluteBaseModel
 
 date_today = datetime.now().date()
@@ -16,7 +15,7 @@ APPLICATION_STATUSES = (
     ("Accepted", "Accepted"),
     ("Draft", "Draft"),
     ("Enrolled", "Enrolled"),
-    ("Incomplete", "Incomplete")
+    ("Incomplete", "Incomplete"),
 )
 EDUCATION_LEVEL_CHOICES = (
     ("Primary School", "Primary School"),
@@ -40,6 +39,20 @@ class Intake(AbsoluteBaseModel):
 
     def __str__(self):
         return self.name
+
+    def get_academic_year(self):
+        start_year = self.start_date.year
+        start_month = self.start_date.month
+
+        if start_month >= 9:
+            return f"{start_year}/{start_year + 1}"
+        else:
+            return f"{start_year - 1}/{start_year}"
+
+    @property
+    def academic_year(self):
+        """Property for easy access"""
+        return self.get_academic_year()
 
 
 class StudentApplication(AbsoluteBaseModel):
@@ -82,7 +95,7 @@ class StudentApplication(AbsoluteBaseModel):
     address = models.CharField(max_length=255, null=True, blank=True)
     postal_code = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=255, null=True, blank=True)
-    country = models.CharField(max_length=255, null=True , blank=True   )
+    country = models.CharField(max_length=255, null=True, blank=True)
     passport_photo = models.ImageField(
         upload_to="passport_photos/", null=True, blank=True
     )
@@ -99,6 +112,7 @@ class StudentApplication(AbsoluteBaseModel):
 
     def save(self, *args, **kwargs):
         from apps.admissions.admissions_utils import generate_application_number
+
         if not self.application_number:
             self.application_number = generate_application_number()
         if not self.slug:

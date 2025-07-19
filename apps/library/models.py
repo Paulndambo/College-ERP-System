@@ -46,7 +46,7 @@ class Member(AbsoluteBaseModel):
 
 class BorrowTransaction(AbsoluteBaseModel):
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
-    copy_number = models.CharField(max_length=50, null=True , blank=True)
+    copy_number = models.CharField(max_length=50, null=True, blank=True)
     member = models.ForeignKey(Member, on_delete=models.CASCADE)
     borrow_date = models.DateField(default=date.today)
     due_date = models.DateField(null=True)  # Default 2-week loan
@@ -64,9 +64,28 @@ class BorrowTransaction(AbsoluteBaseModel):
     issued_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.copy_number and self.status == "Pending Return":
+            self.copy_number = self.assign_copy_number()
         if not self.due_date:
             self.due_date = now().date() + timedelta(days=14)
         super().save(*args, **kwargs)
+    
+    
+    def assign_copy_number(self):
+        """Assign next available copy number"""
+        
+        borrowed_copies = BorrowTransaction.objects.filter(
+            book=self.book,
+            status="Pending Return"
+        ).values_list('copy_number', flat=True)
+        
+        
+        for i in range(1, self.book.total_copies + 1):
+            copy_number = f"{self.book.isbn or f'B{self.book.id}'}-{i:03d}"
+            if copy_number not in borrowed_copies:
+                return copy_number
+        
+        return None
 
     def is_overdue(self):
         if self.return_date:
@@ -82,7 +101,7 @@ class BorrowTransaction(AbsoluteBaseModel):
         return days_count if days_count > 0 else 0
 
     def __str__(self):
-        return f"{self.book.title} borrowed by {self.member.name}"
+        return f"{self.book.title} borrowed by {self.member.user.first_name}"
 
 
 class Fine(AbsoluteBaseModel):
@@ -105,7 +124,9 @@ class Fine(AbsoluteBaseModel):
 
         if overdue_days > 0:
             if self.borrow_transaction.status == "Returned":
-                self.calculated_fine = Decimal(overdue_days) * Decimal(self.fine_per_day)
+                self.calculated_fine = Decimal(overdue_days) * Decimal(
+                    self.fine_per_day
+                )
             elif self.borrow_transaction.status == "Lost":
                 self.calculated_fine = (
                     Decimal(overdue_days) * Decimal(self.fine_per_day)

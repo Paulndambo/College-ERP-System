@@ -8,13 +8,14 @@ from apps.students.models import Student
 from apps.students.serializers import StudentListSerializer
 from apps.users.serializers import UserSerializer
 from rest_framework import serializers
-from .models import ExamData
-
 from rest_framework.exceptions import ValidationError
+from .models import ExamData
 
 
 class ExamDataCreateSerializer(serializers.ModelSerializer):
-    cohort = serializers.PrimaryKeyRelatedField(queryset=ProgrammeCohort.objects.all(), required=False)
+    cohort = serializers.PrimaryKeyRelatedField(
+        queryset=ProgrammeCohort.objects.all(), required=False
+    )
     course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
     student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
     semester = serializers.PrimaryKeyRelatedField(queryset=Semester.objects.all())
@@ -45,29 +46,23 @@ class ExamDataCreateSerializer(serializers.ModelSerializer):
                 "required": False,
                 "write_only": True,
             },
-            
-
         }
 
     def validate(self, data):
-        student = data.get('student')
-        semester = data.get('semester')
-        course = data.get('course')
+        student = data.get("student")
+        semester = data.get("semester")
+        course = data.get("course")
 
         if ExamData.objects.filter(
-            student=student,
-            semester=semester,
-            course=course
+            student=student, semester=semester, course=course
         ).exists():
             raise ValidationError(
                 "Marks for this student in the specified Unit and semester already exist."
             )
 
-      
-        cat_marks = (data.get('cat_one', 0) + data.get('cat_two', 0)) / 2
-        data['total_marks'] = cat_marks + data.get('exam_marks', 0)
+        cat_marks = (data.get("cat_one", 0) + data.get("cat_two", 0)) / 2
+        data["total_marks"] = cat_marks + data.get("exam_marks", 0)
         return data
-
 
 
 class ExamDataListSerializer(serializers.ModelSerializer):
@@ -90,9 +85,8 @@ class ExamDataListSerializer(serializers.ModelSerializer):
             "recorded_by",
             "exam_marks",
             "total_marks",
-            "grade"
+            "grade",
         ]
-
 
 
 class StudentExamDataSerializer(serializers.ModelSerializer):
@@ -101,19 +95,28 @@ class StudentExamDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExamData
         fields = ["student"]
+
+
 class MinimalSemesterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Semester
         fields = ["id", "name", "academic_year", "status"]
-        
+
+
 class MinimalCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ["id", "name", "course_code", ]
+        fields = [
+            "id",
+            "name",
+            "course_code",
+        ]
+
 
 class MarkSerializer(serializers.ModelSerializer):
     course = MinimalCourseSerializer()
     grade = serializers.SerializerMethodField()
+
     class Meta:
         model = ExamData
         fields = [
@@ -123,7 +126,8 @@ class MarkSerializer(serializers.ModelSerializer):
             "cat_two",
             "exam_marks",
             "total_marks",
-            "grade"
+            "grade",
         ]
+
     def get_grade(self, obj):
         return obj.grade()

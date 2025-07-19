@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Payslip for {{ payslip.staff.user.first_name }} {{ payslip.staff.user.last_name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            color: #333;
+        }
+        h1, h2 {
+            color: #004085;
+        }
+        .header, .footer {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #999;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #e2e6ea;
+        }
+        .totals td {
+            font-weight: bold;
+        }
+        .footer {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 50px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Company Name</h1>
+        <h2>Payslip</h2>
+        <p><strong>Period:</strong> {{ payslip.payroll_period_start }} to {{ payslip.payroll_period_end }}</p>
+    </div>
+
+    <p><strong>Employee:</strong> {{ payslip.staff.user.first_name }} {{ payslip.staff.user.last_name }}</p>
+    <p><strong>Position:</strong> {{ payslip.staff.position.name if payslip.staff.position else "N/A" }}</p>
+    <p><strong>Department:</strong> {{ payslip.staff.department.name }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Amount (KES)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Basic Salary</td>
+                <td>{{ payslip.basic_salary|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Total Allowances</td>
+                <td>{{ payslip.total_allowances|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Total Overtime</td>
+                <td>{{ payslip.total_overtime|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Total Deductions</td>
+                <td>-{{ payslip.total_deductions|floatformat:2 }}</td>
+            </tr>
+            <tr class="totals">
+                <td>Net Pay</td>
+                <td>{{ payslip.net_pay|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Thank you for your hard work!</p>
+        <p>Generated on {{ payslip.generated_at|date:"F j, Y, g:i a" }}</p>
+    </div>
+</body>
+</html>

@@ -1,24 +1,82 @@
 from django.urls import path
-from apps.finance.views import finance_home, BudgetsListView, LibraryFinePaymentListView, capture_library_fine_payment
-
-from apps.finance.fees_structures.views import (
-    FeesStructuresProgrammesListView,
+from apps.finance.library.views import ProcessLibraryPaymentView
+from .views import (
+    FeeStructureItemByStructureView,
     FeeStructureListView,
-    new_fees_structure,
-    edit_fees_structure,
-    delete_fees_structure,
-    fees_structire_details
+    FeeStructureRetrieveView,
+    FeeStructureCreateView,
+    FeeStructureUpdateView,
+    FeeStructureDeleteView,
+    FeeStructureItemListView,
+    FeeStructureItemRetrieveView,
+    FeeStructureItemCreateView,
+    FeeStructureItemUpdateView,
+    FeeStructureItemDeleteView,
 )
 
 urlpatterns = [
-    path("", finance_home, name="finance-home"),
-    path("budgets/", BudgetsListView.as_view(), name="budgets"),
-    path("library-fines/", LibraryFinePaymentListView.as_view(), name="library-fines"),
-    path("capture-library-fine-payment/", capture_library_fine_payment, name="capture-library-fine-payment"),
-    path("programmes-fees/", FeesStructuresProgrammesListView.as_view(),name="programmes-fees"),
-    path("fees-structures/<int:programme_id>/", FeeStructureListView.as_view(), name="fees-structures"),
-    path("fees-structure-details/<int:id>/", fees_structire_details, name="fees-structure-details"),
-    path("new-fees-structure/", new_fees_structure, name="new-fees-structure"),
-    path("edit-fees-structure/", edit_fees_structure, name="edit-fees-structure"),
-    path("delete-fees-structure/", delete_fees_structure, name="delete-fees-structure"),
+    # Pay library fines
+    path(
+        "library/process-payment/",
+        ProcessLibraryPaymentView.as_view(),
+        name="library-process-payment",
+    ),
+    # FeeStructure
+    path("fee-structures/", FeeStructureListView.as_view(), name="fee-structure-list"),
+    path(
+        "fee-structures/create/",
+        FeeStructureCreateView.as_view(),
+        name="fee-structure-create",
+    ),
+    path(
+        "fee-structures/<int:id>/",
+        FeeStructureRetrieveView.as_view(),
+        name="fee-structure-detail",
+    ),
+    path(
+        "fee-structures/<int:id>/update/",
+        FeeStructureUpdateView.as_view(),
+        name="fee-structure-update",
+    ),
+    path(
+        "fee-structures/<int:id>/delete/",
+        FeeStructureDeleteView.as_view(),
+        name="fee-structure-delete",
+    ),
+    # FeeStructureItem
+    path(
+        "fee-structure-items/", FeeStructureItemListView.as_view(), name="fee-item-list"
+    ),
+    path(
+        "fee-structure-items/create/",
+        FeeStructureItemCreateView.as_view(),
+        name="fee-item-create",
+    ),
+    path(
+        "fee-structure-items/<int:id>/",
+        FeeStructureItemRetrieveView.as_view(),
+        name="fee-item-detail",
+    ),
+    # urls.py
+    path(
+        "fee-structures/<int:fee_structure_id>/items/",
+        FeeStructureItemByStructureView.as_view(),
+        name="fee-structure-items-by-structure",
+    ),
+    path(
+        "fee-structure-items/<int:id>/update/",
+        FeeStructureItemUpdateView.as_view(),
+        name="fee-item-update",
+    ),
+    path(
+        "fee-structure-items/<int:id>/delete/",
+        FeeStructureItemDeleteView.as_view(),
+        name="fee-item-delete",
+    ),
+    
+    
+    
+    
+
+
 ]

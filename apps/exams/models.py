@@ -27,7 +27,7 @@ class ExamData(AbsoluteBaseModel):
     exam_marks = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_marks = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     recorded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
- 
+
     def __str__(self):
         return f"{self.student.user.name} - {self.semester.name}"
 

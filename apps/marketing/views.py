@@ -82,7 +82,6 @@ class LeadListView(generics.ListAPIView):
             .order_by("-created_on")
         )
 
-
         user_id = self.request.query_params.get("assigned_to", None)
         if user_id and user_id.isdigit():
             queryset = queryset.filter(assigned_to_id=int(user_id))
@@ -166,7 +165,6 @@ class InteractionListView(generics.ListAPIView):
             .order_by("-date")
         )
 
-     
         lead_id = self.request.query_params.get("lead", None)
         if lead_id and lead_id.isdigit():
             queryset = queryset.filter(lead_id=int(lead_id))
@@ -352,17 +350,14 @@ class TaskListView(generics.ListAPIView):
         if my_tasks_only == "true":
             queryset = queryset.filter(user=user)
 
-        
         lead_id = self.request.query_params.get("lead", None)
         if lead_id and lead_id.isdigit():
             queryset = queryset.filter(lead_id=int(lead_id))
 
-      
         completed = self.request.query_params.get("completed", None)
         if completed in ["true", "false"]:
             queryset = queryset.filter(completed=(completed == "true"))
 
-        
         due_filter = self.request.query_params.get("due", None)
         today = timezone.now().date()
 

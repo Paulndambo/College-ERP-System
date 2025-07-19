@@ -43,30 +43,29 @@ class HostelListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Hostel.objects.all().order_by("-created_on")
-    
+
     def list(self, request, *args, **kwargs):
         try:
             queryset = self.get_queryset()
             queryset = self.filter_queryset(queryset)
-            
+
             page = self.request.query_params.get("page", None)
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
                 paginated_queryset = paginator.paginate_queryset(queryset, request)
-                
+
                 hostels_serializer = self.get_serializer(paginated_queryset, many=True)
                 hostels_data = hostels_serializer.data
                 return paginator.get_paginated_response(hostels_data)
-                
-            
+
             hostels_serializer = self.get_serializer(queryset, many=True)
             hostels_data = hostels_serializer.data
-            return Response(hostels_data,
+            return Response(
+                hostels_data,
                 status=status.HTTP_200_OK,
             )
 
-           
         except Exception as exc:
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -100,7 +99,6 @@ class HostelDeleteView(generics.DestroyAPIView):
     queryset = Hostel.objects.all()
 
 
-
 class HostelRoomListView(generics.ListAPIView):
     """List all hostel rooms"""
 
@@ -129,8 +127,6 @@ class HostelRoomUpdateView(generics.UpdateAPIView):
     serializer_class = CreateAndUpdateHostelRoomSerializer
 
 
-
-
 class AvailableRoomsListView(generics.ListAPIView):
     """List all available rooms (not fully booked)"""
 
@@ -156,48 +152,47 @@ class HostelRoomDeleteAPIView(generics.RetrieveDestroyAPIView):
         serializer.is_valid(raise_exception=True)
         room.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
+
 # ========== BOOKING VIEWS ==========
 
 
 class RoomBookingsView(generics.ListAPIView):
 
-    
     serializer_class = BookingListSerializer
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = BookingFilter
-    pagination_class = None  
-    
+    pagination_class = None
+
     def get_queryset(self):
         return Booking.objects.select_related(
-            'student', 'hostel_room', 'student__user'
+            "student", "hostel_room", "student__user"
         ).order_by("-created_on")
-    
+
     def list(self, request, *args, **kwargs):
         try:
             queryset = self.get_queryset()
             queryset = self.filter_queryset(queryset)
-            
+
             page = self.request.query_params.get("page", None)
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
                 paginated_queryset = paginator.paginate_queryset(queryset, request)
-                
+
                 bookings_serializer = self.get_serializer(paginated_queryset, many=True)
                 bookings_data = bookings_serializer.data
                 return paginator.get_paginated_response(bookings_data)
-                
-            
+
             bookings_serializer = self.get_serializer(queryset, many=True)
             bookings = bookings_serializer.data
-            return Response(bookings,
+            return Response(
+                bookings,
                 status=status.HTTP_200_OK,
             )
 
-           
         except Exception as exc:
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -232,60 +227,72 @@ class BookingDeleteView(generics.DestroyAPIView):
 
     queryset = Booking.objects.all()
     look_up_field = "pk"
+
+
 class AddStudentToRoomView(generics.CreateAPIView):
     """Add student to a hostel room"""
+
     serializer_class = AddStudentToRoomSerializer
-    
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         student = serializer.save()
-        
-        return Response({
-            'message': 'Student successfully added to room',
-            'student_id': student.id,
-            'student_name': f"{student.user.first_name} {student.user.last_name}",
-            'room_number': student.hostel_room.room_number,
-            'room_occupancy': f"{student.hostel_room.students_assigned}/{student.hostel_room.room_capacity}"
-        })
+
+        return Response(
+            {
+                "message": "Student successfully added to room",
+                "student_id": student.id,
+                "student_name": f"{student.user.first_name} {student.user.last_name}",
+                "room_number": student.hostel_room.room_number,
+                "room_occupancy": f"{student.hostel_room.students_assigned}/{student.hostel_room.room_capacity}",
+            }
+        )
+
 
 class RemoveStudentFromRoomView(generics.CreateAPIView):
     """Remove student from hostel room"""
+
     serializer_class = RemoveStudentFromRoomSerializer
+
     def post(self, request, *args, **kwargs):
         serializer = RemoveStudentFromRoomSerializer(data=request.data)
         if serializer.is_valid():
-            student = serializer.remove_student() 
+            student = serializer.remove_student()
             return Response(
-                {"message": "Student removed successfully"}, 
-                status=status.HTTP_200_OK
+                {"message": "Student removed successfully"}, status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UpdateStudentRoomView(generics.CreateAPIView):
     """Move student to a different room"""
+
     serializer_class = UpdateStudentRoomSerializer
-    
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         student = serializer.save()
-        
-        return Response({
-            'message': 'Student successfully moved to new room',
-            'student_id': student.id,
-            'student_name': f"{student.user.first_name} {student.user.last_name}",
-            'new_room_number': student.hostel_room.room_number,
-            'new_room_occupancy': f"{student.hostel_room.students_assigned}/{student.hostel_room.room_capacity}"
-        })
+
+        return Response(
+            {
+                "message": "Student successfully moved to new room",
+                "student_id": student.id,
+                "student_name": f"{student.user.first_name} {student.user.last_name}",
+                "new_room_number": student.hostel_room.room_number,
+                "new_room_occupancy": f"{student.hostel_room.students_assigned}/{student.hostel_room.room_capacity}",
+            }
+        )
+
 
 class ConfirmBookingView(generics.UpdateAPIView):
     queryset = Booking.objects.all()
     serializer_class = UpdateBookingSerializer
-    lookup_field = 'pk'  
+    lookup_field = "pk"
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.get('partial', False)
+        partial = kwargs.get("partial", False)
         instance = self.get_object()
         print("instance", instance)
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -311,10 +318,12 @@ class HostelRoomsByHostelView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = HostelRoomFilter
     pagination_class = None
+
     def get_queryset(self):
         hostel_id = self.kwargs["hostel_id"]
-        
+
         return HostelRoom.objects.filter(hostel_id=hostel_id).order_by("-created_on")
+
     def get_paginated_response(self, data):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
@@ -331,14 +340,16 @@ class HostelRoomsByHostelView(generics.ListAPIView):
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
                 paginated_queryset = paginator.paginate_queryset(queryset, request)
-                
+
                 rooms_serializer = self.get_serializer(paginated_queryset, many=True)
                 rooms_data = rooms_serializer.data
-                return paginator.get_paginated_response({
-                    "hostel": hostel_data,
-                    "rooms": rooms_data,
-                })
-            
+                return paginator.get_paginated_response(
+                    {
+                        "hostel": hostel_data,
+                        "rooms": rooms_data,
+                    }
+                )
+
             rooms_serializer = self.get_serializer(queryset, many=True)
             rooms_data = rooms_serializer.data
 
@@ -358,51 +369,56 @@ class HostelRoomsByHostelView(generics.ListAPIView):
 
 class RoomOccupantsView(generics.ListAPIView):
     """Get all occupants (students) for a specific room"""
-    
-    serializer_class = StudentListSerializer  
+
+    serializer_class = StudentListSerializer
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
-    filterset_class = StudentFilter  
-    pagination_class = None  
-    
+    filterset_class = StudentFilter
+    pagination_class = None
+
     def get_queryset(self):
         room_id = self.kwargs["room_id"]
-        return Student.objects.filter(
-            hostel_room=room_id
-        ).select_related('user', 'hostel_room', 'programme', 'cohort', 'campus').order_by("-created_on")
-    
+        return (
+            Student.objects.filter(hostel_room=room_id)
+            .select_related("user", "hostel_room", "programme", "cohort", "campus")
+            .order_by("-created_on")
+        )
+
     def list(self, request, *args, **kwargs):
         try:
             room_id = self.kwargs["room_id"]
             room = HostelRoom.objects.get(id=room_id)
             room_data = HostelRoomListSerializer(room).data
-            
-           
+
             base_queryset = self.get_queryset()
-            
-            
+
             actual_occupants_count = base_queryset.count()
             available_spots = room.room_capacity - actual_occupants_count
-            
-            
+
             filtered_queryset = self.filter_queryset(base_queryset)
-            
+
             page = self.request.query_params.get("page", None)
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
-                paginated_queryset = paginator.paginate_queryset(filtered_queryset, request)
-                
-                occupants_serializer = self.get_serializer(paginated_queryset, many=True)
+                paginated_queryset = paginator.paginate_queryset(
+                    filtered_queryset, request
+                )
+
+                occupants_serializer = self.get_serializer(
+                    paginated_queryset, many=True
+                )
                 occupants_data = occupants_serializer.data
-                return paginator.get_paginated_response({
-                    "room": room_data,
-                    "occupants": occupants_data,
-                    "available_spots": available_spots,
-                    "total_occupants": actual_occupants_count,  
-                })
-            
+                return paginator.get_paginated_response(
+                    {
+                        "room": room_data,
+                        "occupants": occupants_data,
+                        "available_spots": available_spots,
+                        "total_occupants": actual_occupants_count,
+                    }
+                )
+
             occupants_serializer = self.get_serializer(filtered_queryset, many=True)
             occupants = occupants_serializer.data
 
@@ -411,7 +427,7 @@ class RoomOccupantsView(generics.ListAPIView):
                     "room": room_data,
                     "occupants": occupants,
                     "available_spots": available_spots,
-                    "total_occupants": actual_occupants_count, 
+                    "total_occupants": actual_occupants_count,
                 },
                 status=status.HTTP_200_OK,
             )

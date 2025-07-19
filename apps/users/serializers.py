@@ -10,61 +10,66 @@ from rest_framework.exceptions import ValidationError
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
 class UserRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
-        fields = [
-            'id',
-            'name'
-        ]
+        fields = ["id", "name"]
+
+
 class UserSerializer(serializers.ModelSerializer):
     role = UserRoleSerializer()
+
     class Meta:
         model = User
         fields = [
-            'id', 
-            'username', 
-            'first_name', 
-            'last_name', 
-            'email',
-            'role', 
-            'gender', 
-            'phone_number', 
-            'id_number', 
-            'passport_number',
-            'address', 
-            'postal_code', 
-            'city', 
-            'state',
-            'country',
-            'date_of_birth', 
-            'is_verified'
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "gender",
+            "phone_number",
+            "id_number",
+            "passport_number",
+            "address",
+            "postal_code",
+            "city",
+            "state",
+            "country",
+            "date_of_birth",
+            "is_verified",
         ]
-        read_only_fields = ['id', 'role', 'is_verified']
+        read_only_fields = ["id", "role", "is_verified"]
+
+
 class AdminUserSerializer(serializers.ModelSerializer):
     role = UserRoleSerializer()
+
     class Meta:
         model = User
         fields = [
-            'id', 
-            'username', 
-            'first_name', 
-            'last_name', 
-            'email',
-            'role', 
-            'gender', 
-            'phone_number', 
-            'id_number', 
-            'passport_number',
-            'address', 
-            'postal_code', 
-            'city', 
-            'state',
-            'country',
-            'date_of_birth', 
-            'is_verified'
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "role",
+            "gender",
+            "phone_number",
+            "id_number",
+            "passport_number",
+            "address",
+            "postal_code",
+            "city",
+            "state",
+            "country",
+            "date_of_birth",
+            "is_verified",
         ]
-        read_only_fields = ['id']
+        read_only_fields = ["id"]
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -73,57 +78,56 @@ class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'email',
-            'phone_number',
-            'gender',
-            'id_number',
-            'passport_number',
-            'address',
-            'postal_code',
-            'state',
-            'country',
-            'date_of_birth',
-            'city',
-            'role',
-            'password'
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "phone_number",
+            "gender",
+            "id_number",
+            "passport_number",
+            "address",
+            "postal_code",
+            "state",
+            "country",
+            "date_of_birth",
+            "city",
+            "role",
+            "password",
         ]
+
     def validate_email(self, value):
         from apps.core.base_api_error_exceptions import CustomAPIException
+
         if User.objects.filter(email=value).exists():
             raise CustomAPIException(
-                message="This email is already registered.",
-                status_code=400
+                message="This email is already registered.", status_code=400
             )
         return value
+
     def create(self, validated_data):
-        user = User.objects.create_user( 
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', ''),
-            phone_number=validated_data.get('phone_number', ''),
-            id_number=validated_data.get('id_number', ''),
-            passport_number=validated_data.get('passport_number', ''),
-            gender=validated_data.get('gender', ''),
-            address=validated_data.get('address', ''),
-            postal_code=validated_data.get('postal_code', ''),
-            city=validated_data.get('city', ''),
-            state=validated_data.get('state', ''),
-            country=validated_data.get('country', ''),
-            date_of_birth=validated_data.get('date_of_birth', ''),
-            password=validated_data['password']  
+        user = User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data.get("email", ""),
+            first_name=validated_data.get("first_name", ""),
+            last_name=validated_data.get("last_name", ""),
+            phone_number=validated_data.get("phone_number", ""),
+            id_number=validated_data.get("id_number", ""),
+            passport_number=validated_data.get("passport_number", ""),
+            gender=validated_data.get("gender", ""),
+            address=validated_data.get("address", ""),
+            postal_code=validated_data.get("postal_code", ""),
+            city=validated_data.get("city", ""),
+            state=validated_data.get("state", ""),
+            country=validated_data.get("country", ""),
+            date_of_birth=validated_data.get("date_of_birth", ""),
+            password=validated_data["password"],
         )
         otp_record = EmailVerificationOTP.objects.create(user=user)
-        context = {
-            'name': f"{user.first_name} {user.last_name}",
-            'otp': otp_record.otp
-        }
+        context = {"name": f"{user.first_name} {user.last_name}", "otp": otp_record.otp}
 
-        message = render_to_string('users/verification_email.html', context)
+        message = render_to_string("users/verification_email.html", context)
         send_mail(
             subject="Welcome to our College Erp",
             message="",
@@ -135,8 +139,10 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         return user
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     profile_picture = serializers.ImageField(required=False, allow_null=True)
+
     class Meta:
         model = User
         fields = [
@@ -155,10 +161,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "country",
             "date_of_birth",
             "gender",
-            
         ]
         read_only_fields = ["role"]
-    
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -172,10 +176,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "first_name": user.first_name,
             "last_name": user.last_name,
             "phone_number": user.phone_number,
-            "role": {
-                "id": user.role.id,
-                "name": user.role.name
-            } if user.role else None
+            "role": {"id": user.role.id, "name": user.role.name} if user.role else None,
         }
 
         return token
@@ -183,19 +184,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         user_data = {
-            'id': self.user.id,
-            'username': self.user.username,
-            'email': self.user.email,
-            'first_name': self.user.first_name,
-            'last_name': self.user.last_name,
-            'phone_number': self.user.phone_number,
-            'role': {
-                "id": self.user.role.id,
-                "name": self.user.role.name
-            },
+            "id": self.user.id,
+            "username": self.user.username,
+            "email": self.user.email,
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+            "phone_number": self.user.phone_number,
+            "role": {"id": self.user.role.id, "name": self.user.role.name},
         }
-        data['user'] = user_data
-        
+        data["user"] = user_data
+
         return data
 
 
@@ -203,22 +201,18 @@ class ForgotPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
     def validate_email(self, value):
-      
+
         try:
             user = User.objects.get(email=value)
         except ObjectDoesNotExist:
-            raise ValidationError("User with provided email not found")  
+            raise ValidationError("User with provided email not found")
 
-      
         reset_otp = PasswordResetOTP.objects.create(user=user)
 
         full_name = f"{user.first_name} {user.last_name}"
-        context = {
-            'name': full_name,
-            'otp': reset_otp.otp
-        }
+        context = {"name": full_name, "otp": reset_otp.otp}
 
-        message = render_to_string('users/password_reset_email.html', context)
+        message = render_to_string("users/password_reset_email.html", context)
         send_mail(
             subject="Your Password Reset Code",
             message="",
@@ -229,7 +223,7 @@ class ForgotPasswordSerializer(serializers.Serializer):
         )
 
         return value
-    
+
 
 class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -276,7 +270,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField()
 
     def validate_current_password(self, value):
-        user = self.context['request'].user
+        user = self.context["request"].user
         if not user.check_password(value):
             raise ValidationError("Current password is incorrect")
         return value
@@ -285,7 +279,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         return value
 
     def save(self, **kwargs):
-        user = self.context['request'].user
-        user.set_password(self.validated_data['new_password'])
+        user = self.context["request"].user
+        user.set_password(self.validated_data["new_password"])
         user.save()
         return user

@@ -12,7 +12,7 @@ schema_url = "" if is_production else None
 schema_view = get_schema_view(
     openapi.Info(
         title="College ERP Backend",
-        default_version='v2',
+        default_version="v2",
         description="COllege Erp  system apis",
         terms_of_service="",
         contact=openapi.Contact(email=""),

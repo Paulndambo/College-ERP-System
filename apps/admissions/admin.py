@@ -19,7 +19,7 @@ class StudentApplicationAdmin(admin.ModelAdmin):
         "phone_number",
         "gender",
         "status",
-        "intake"
+        "intake",
     ]
 
 
@@ -50,5 +50,5 @@ class ApplicationEducationHistoryAdmin(admin.ModelAdmin):
         "major",
         "year",
         "grade_or_gpa",
-        "graduated"
+        "graduated",
     ]

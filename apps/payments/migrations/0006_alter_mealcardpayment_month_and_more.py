@@ -6,28 +6,62 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payments', '0005_alter_mealcardpayment_month_alter_rentpayment_month'),
+        ("payments", "0005_alter_mealcardpayment_month_alter_rentpayment_month"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mealcardpayment',
-            name='month',
-            field=models.CharField(choices=[('January', 'January'), ('February', 'February'), ('March', 'March'), ('April', 'April'), ('May', 'May'), ('June', 'June'), ('July', 'July'), ('August', 'August'), ('September', 'September'), ('October', 'October'), ('November', 'November'), ('December', 'December')], default='March', max_length=255),
+            model_name="mealcardpayment",
+            name="month",
+            field=models.CharField(
+                choices=[
+                    ("January", "January"),
+                    ("February", "February"),
+                    ("March", "March"),
+                    ("April", "April"),
+                    ("May", "May"),
+                    ("June", "June"),
+                    ("July", "July"),
+                    ("August", "August"),
+                    ("September", "September"),
+                    ("October", "October"),
+                    ("November", "November"),
+                    ("December", "December"),
+                ],
+                default="March",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='mealcardpayment',
-            name='year',
+            model_name="mealcardpayment",
+            name="year",
             field=models.IntegerField(default=2025),
         ),
         migrations.AlterField(
-            model_name='rentpayment',
-            name='month',
-            field=models.CharField(choices=[('January', 'January'), ('February', 'February'), ('March', 'March'), ('April', 'April'), ('May', 'May'), ('June', 'June'), ('July', 'July'), ('August', 'August'), ('September', 'September'), ('October', 'October'), ('November', 'November'), ('December', 'December')], default='March', max_length=255),
+            model_name="rentpayment",
+            name="month",
+            field=models.CharField(
+                choices=[
+                    ("January", "January"),
+                    ("February", "February"),
+                    ("March", "March"),
+                    ("April", "April"),
+                    ("May", "May"),
+                    ("June", "June"),
+                    ("July", "July"),
+                    ("August", "August"),
+                    ("September", "September"),
+                    ("October", "October"),
+                    ("November", "November"),
+                    ("December", "December"),
+                ],
+                default="March",
+                max_length=255,
+            ),
         ),
         migrations.AlterField(
-            model_name='rentpayment',
-            name='year',
+            model_name="rentpayment",
+            name="year",
             field=models.IntegerField(default=2025),
         ),
     ]

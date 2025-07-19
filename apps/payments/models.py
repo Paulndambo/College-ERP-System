@@ -39,7 +39,9 @@ class RentPayment(AbsoluteBaseModel):
 
 class MealCardPayment(AbsoluteBaseModel):
     card_number = models.CharField(max_length=255, null=True)
-    mealcard = models.OneToOneField("students.MealCard", on_delete=models.CASCADE, null=True)
+    mealcard = models.OneToOneField(
+        "students.MealCard", on_delete=models.CASCADE, null=True
+    )
     transaction_code = models.CharField(max_length=255, null=True)
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)

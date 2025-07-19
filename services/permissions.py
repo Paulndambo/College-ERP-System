@@ -1,5 +1,6 @@
 from rest_framework.permissions import IsAuthenticated
 
+
 class HasUserRole(IsAuthenticated):
     """
     Allows access only to authenticated users who have a role assigned.
@@ -11,9 +12,9 @@ class HasUserRole(IsAuthenticated):
         user = request.user
 
         """If the view defines allowed roles, check against them"""
-        allowed_roles = getattr(view, 'allowed_roles', None)
+        allowed_roles = getattr(view, "allowed_roles", None)
 
-        if not is_authenticated or not hasattr(user, 'role') or user.role is None:
+        if not is_authenticated or not hasattr(user, "role") or user.role is None:
             return False
 
         if allowed_roles is not None:
@@ -22,6 +23,7 @@ class HasUserRole(IsAuthenticated):
         """If no allowed_roles specified, any assigned role is acceptable"""
         return True
 
+
 """sample useage in api view"""
-    # permission_classes = [HasUserRole]
-    # allowed_roles = ['Admin'] 
+# permission_classes = [HasUserRole]
+# allowed_roles = ['Admin']

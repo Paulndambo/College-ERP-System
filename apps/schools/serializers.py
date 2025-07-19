@@ -1,126 +1,159 @@
 from rest_framework import serializers
-from .models import School, Department, Programme, Course, Semester, ProgrammeCohort, CourseSession
 
+
+from .models import (
+    School,
+    Department,
+    Programme,
+    Course,
+    Semester,
+    ProgrammeCohort,
+    CourseSession,
+)
 
 
 class SchoolCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = School
-        fields = ['name', 'email', 'phone', 'location']
+        fields = ["name", "email", "phone", "location"]
 
 
 class SchoolListSerializer(serializers.ModelSerializer):
     class Meta:
         model = School
-        fields = ['id', 'name', 'email', 'phone', 'location']
+        fields = ["id", "name", "email", "phone", "location"]
 
 
 class DepartmentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
-        fields = ['name', 'school', 'office']
+        fields = ["name", "school", "office", "department_type"]
 
 
 class DepartmentListSerializer(serializers.ModelSerializer):
     school = SchoolListSerializer()
+
     class Meta:
         model = Department
-        fields = ['id', 'name', 'school', 'office']
-        
+        fields = ["id", "name", "school", "office", "department_type"]
+
     def get_school(self, obj):
         return obj.school.name
 
 
 class ProgrammeCreateSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Programme
-        fields = ['name', 'code', 'school', 'department', 'level']
+        fields = ["name", "code", "school", "department", "level"]
 
 
 class ProgrammeListSerializer(serializers.ModelSerializer):
     school = SchoolListSerializer()
     department = DepartmentListSerializer()
-  
-    
+
     class Meta:
         model = Programme
-        fields = ['id', 'name', 'code', 'school', 'department', 'level']
-        
-   
+        fields = ["id", "name", "code", "school", "department", "level"]
 
 
 class CourseCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['course_code', 'name', 'school', 'department', 'programme']
+        fields = ["course_code", "name", "school", "department", "programme"]
+
 
 class MinimalClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'course_code', 'name']
+        fields = ["id", "course_code", "name"]
+
+
 class CourseListSerializer(serializers.ModelSerializer):
-    school=SchoolListSerializer()
-    department=DepartmentListSerializer()
-    programme=ProgrammeListSerializer()
+    school = SchoolListSerializer()
+    department = DepartmentListSerializer()
+    programme = ProgrammeListSerializer()
+
     class Meta:
         model = Course
-        fields = ['id', 'course_code', 'name', 'school', 'department', 'programme']
-    
+        fields = ["id", "course_code", "name", "school", "department", "programme"]
+
+
 class ProgrammeListDetailSerializer(serializers.ModelSerializer):
     school = SchoolListSerializer()
     department = DepartmentListSerializer()
-    units = CourseListSerializer(source='course_set', many=True, read_only=True)
-    
+    units = CourseListSerializer(source="course_set", many=True, read_only=True)
+
     class Meta:
         model = Programme
-        fields = ['id', 'name', 'code', 'school', 'department', 'level', 'units']
-        
+        fields = ["id", "name", "code", "school", "department", "level", "units"]
+
     # def get_courses(self, obj):
-    #     units = obj.course_set.filter(active=True)  
+    #     units = obj.course_set.filter(active=True)
     #     return CourseListSerializer(units, many=True)
 
 
 class SemesterCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Semester
-        fields = ['name', 'academic_year', 'start_date', 'end_date', 'status']
+        fields = ["name", "start_date", "end_date", "status"]
 
 
 class SemesterListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Semester
-        fields = ['id', 'name', 'academic_year', 'start_date', 'end_date', 'status']
-
+        fields = ["id", "name", "academic_year", "start_date", "end_date", "status"]
 
 
 class ProgrammeCohortCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProgrammeCohort
-        fields = ['name', 'programme', 'current_year', 'current_semester', 'status']
+        fields = [
+            "name",
+            "programme",
+            "current_year",
+            "current_semester",
+            "intake",
+            "status",
+        ]
 
 
 class ProgrammeCohortListSerializer(serializers.ModelSerializer):
     programme = ProgrammeListSerializer()
     current_semester = SemesterListSerializer()
+    intake = serializers.SerializerMethodField()
+
     class Meta:
         model = ProgrammeCohort
-        fields = ['id', 'name', 'programme', 'current_year', 'current_semester', 'status']
-    
+        fields = [
+            "id",
+            "name",
+            "programme",
+            "current_year",
+            "current_semester",
+            "status",
+            "intake",
+        ]
+
+    def get_intake(self, obj):
+        from apps.admissions.serializers import IntakeListDetailSerializer
+
+        return IntakeListDetailSerializer(obj.intake).data
+
     def get_programme(self, obj):
         return obj.programme.name
-
 
 
 class CourseSessionCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseSession
-        fields = ['cohort', 'course', 'start_time', 'period', 'status']
+        fields = ["cohort", "course", "start_time", "period", "status"]
 
 
 class CourseSessionListSerializer(serializers.ModelSerializer):
     cohort = ProgrammeCohortListSerializer()
     course = CourseListSerializer()
+
     class Meta:
         model = CourseSession
-        fields = ['id', 'cohort', 'course', 'start_time', 'period', 'status']
+        fields = ["id", "cohort", "course", "start_time", "period", "status"]

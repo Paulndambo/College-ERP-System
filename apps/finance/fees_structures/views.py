@@ -80,11 +80,11 @@ def fees_structire_details(request, id):
     structure = FeeStructure.objects.get(id=id)
     items = FeeStructureItem.objects.filter(fee_structure=structure)
 
-    context = {
-        "structure": structure,
-        "items": items
-    }
-    return render(request, "finance/fees_structures/fee_structure_details.html", context)
+    context = {"structure": structure, "items": items}
+    return render(
+        request, "finance/fees_structures/fee_structure_details.html", context
+    )
+
 
 def new_fees_structure(request):
     if request.method == "POST":
@@ -93,9 +93,7 @@ def new_fees_structure(request):
         year_id = request.POST.get("year_id")
 
         FeeStructure.objects.create(
-            programme_id=programme_id, 
-            semester_id=semester_id, 
-            year_of_study_id=year_id
+            programme_id=programme_id, semester_id=semester_id, year_of_study_id=year_id
         )
         return redirect("fees-structures", programme_id=programme_id)
     return render(request, "finance/fees_structures/new_fee_structure.html")

@@ -9,43 +9,44 @@ from .models import (
 
 class IntakeFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr="icontains")
-   
+    closed = django_filters.BooleanFilter()
 
     class Meta:
         model = Intake
-        fields = ["name"]
+        fields = ["name", "closed"]
 
 
 class StudentApplicationFilter(django_filters.FilterSet):
-    application_no = django_filters.CharFilter(field_name='application_number', lookup_expr="icontains")
-    phone_no = django_filters.CharFilter(field_name='phone_number', lookup_expr="icontains")
-    status = django_filters.CharFilter(field_name='status')
-    intake = django_filters.NumberFilter(field_name='intake_id')
-    campus = django_filters.NumberFilter(field_name='campus_id')
-    
+    application_no = django_filters.CharFilter(
+        field_name="application_number", lookup_expr="icontains"
+    )
+    phone_no = django_filters.CharFilter(
+        field_name="phone_number", lookup_expr="icontains"
+    )
+    status = django_filters.CharFilter(field_name="status")
+    intake = django_filters.NumberFilter(field_name="intake_id")
+    campus = django_filters.NumberFilter(field_name="campus_id")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         print(f"Filter initialized with data: {args[0] if args else 'No args'}")
-        
+
     def filter_queryset(self, queryset):
         print(f"Before filtering: {queryset.count()} records")
         filtered = super().filter_queryset(queryset)
         print(f"After filtering: {filtered.count()} records")
         return filtered
 
-   
     class Meta:
         model = StudentApplication
-        fields = [  
+        fields = [
             "application_no",
             "phone_no",
             "status",
             "intake",
             "campus",
-            
         ]
-    
+
 
 class ApplicationDocumentFilter(django_filters.FilterSet):
     student_application = django_filters.NumberFilter()
@@ -80,3 +81,17 @@ class ApplicationEducationHistoryFilter(django_filters.FilterSet):
     class Meta:
         model = ApplicationEducationHistory
         fields = ["student_application", "institution", "level", "graduated"]
+
+
+class EnrollmentsByIntakeFilter(django_filters.FilterSet):
+    intake = django_filters.NumberFilter(field_name="intake_id")
+    start_date = django_filters.DateFilter(
+        field_name="intake__start_date", lookup_expr="gte"
+    )
+    end_date = django_filters.DateFilter(
+        field_name="intake__start_date", lookup_expr="lte"
+    )
+
+    class Meta:
+        model = StudentApplication
+        fields = ["intake", "start_date", "end_date"]
