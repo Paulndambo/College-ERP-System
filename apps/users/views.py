@@ -28,6 +28,7 @@ from rest_framework.response import Response
 class UserLoginAPIView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
+    
 
 
 class UserRoleCreateAPIView(generics.CreateAPIView):

@@ -28,10 +28,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-e*fx58)%+k66z6)l95mmpbqjjp&6qhx11e!(-rbauys5hnq*gl"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://college-erp-ebon.vercel.app",
+]
 AUTH_USER_MODEL = "users.User"
 
 
@@ -69,10 +73,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -124,16 +128,6 @@ DATABASES = {
 }
 """
 
-
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-
-    cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "")
-    CORS_ALLOWED_ORIGINS = [
-        origin.strip() for origin in cors_origins_env.split(",") if origin.strip()
-    ]
-
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
@@ -143,13 +137,15 @@ CORS_ALLOW_METHODS = [
     "OPTIONS",
 ]
 
-CORS_ALLOW_HEADERS = [
-    "x-csrftoken",
-    "accessToken",
-    "refreshToken",
-    "Content-Type",
-    "authorization",
-]
+# CORS_ALLOW_HEADERS = [
+#     "x-csrftoken",
+#     "accessToken",
+#     "refreshToken",
+#     "Content-Type",
+#     "authorization",
+# ]
+CORS_ALLOW_HEADERS = ["*"]
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
