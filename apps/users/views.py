@@ -9,8 +9,8 @@ from .serializers import (
     ChangePasswordSerializer,
     CreateUserSerializer,
     CustomTokenObtainPairSerializer,
-    ForgotPasswordSerializer,
-    ResetPasswordSerializer,
+    # ForgotPasswordSerializer,
+    # ResetPasswordSerializer,
     UserProfileSerializer,
     UserRoleSerializer,
     UserSerializer,
@@ -28,7 +28,6 @@ from rest_framework.response import Response
 class UserLoginAPIView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
-    
 
 
 class UserRoleCreateAPIView(generics.CreateAPIView):
@@ -99,30 +98,30 @@ class UserLogoutAPIView(APIView):
             return Response({"error": f"Unexpected error: {str(e)}"}, status=400)
 
 
-class ForgotPasswordAPIView(generics.CreateAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = ForgotPasswordSerializer
+# class ForgotPasswordAPIView(generics.CreateAPIView):
+#     permission_classes = [AllowAny]
+#     serializer_class = ForgotPasswordSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data)
 
-        serializer.is_valid(raise_exception=True)
-        return Response(
-            {"message": "OTP sent to your email.Check your email."},
-            status=status.HTTP_200_OK,
-        )
+#         serializer.is_valid(raise_exception=True)
+#         return Response(
+#             {"message": "OTP sent to your email.Check your email."},
+#             status=status.HTTP_200_OK,
+#         )
 
 
-class ResetPasswordAPIView(APIView):
-    permission_classes = [AllowAny]
+# class ResetPasswordAPIView(APIView):
+#     permission_classes = [AllowAny]
 
-    def post(self, request):
-        serializer = ResetPasswordSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            {"message": "Password has been reset successfully."}, status=200
-        )
+#     def post(self, request):
+#         serializer = ResetPasswordSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(
+#             {"message": "Password has been reset successfully."}, status=200
+#         )
 
 
 class ChangePasswordAPIView(APIView):

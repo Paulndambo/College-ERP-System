@@ -19,6 +19,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 
 class UserRoleListView(generics.ListAPIView):
@@ -77,6 +78,7 @@ class CampusCreateView(generics.CreateAPIView):
 
 class CampusListView(generics.ListAPIView):
     queryset = Campus.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = CampusListSerializer
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend]
@@ -154,6 +156,7 @@ class StudyYearListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = AcademicYearsFilter
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -186,6 +189,7 @@ class StudyYearUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = StudyYearCreateSerializer
     lookup_field = "pk"
     http_method_names = ["patch", "delete"]
+    permission_classes = [IsAuthenticated]
 
     def patch(self, request, *args, **kwargs):
         try:
@@ -205,6 +209,7 @@ class StudyYearUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class DashboardCountsRetrieveView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         try:

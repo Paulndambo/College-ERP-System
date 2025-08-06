@@ -27,7 +27,7 @@ urlpatterns = [
         StudyYearUpdateDeleteView.as_view(),
         name="studyyear-update-delete",
     ),
-    path("studyyear/list/", StudyYearListView.as_view(), name="studyyear-list"),
+    # path("studyyear/list/", StudyYearListView.as_view(), name="studyyear-list"),
     path(
         "dashboard-counts/",
         DashboardCountsRetrieveView.as_view(),

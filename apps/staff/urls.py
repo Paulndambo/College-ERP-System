@@ -106,5 +106,9 @@ urlpatterns = [
         OvertimePaymentCreateView.as_view(),
         name="overtime-payments-create",
     ),
-     path('overtime-payments/<int:pk>/approve/', ApproveOvertimeRecordView.as_view(), name='approve-overtime'),
+    path(
+        "overtime-payments/<int:pk>/approve/",
+        ApproveOvertimeRecordView.as_view(),
+        name="approve-overtime",
+    ),
 ]

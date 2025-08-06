@@ -46,7 +46,7 @@ urlpatterns = [
     path("books/list/", BookListAPIView.as_view(), name="books-list"),
     path("books/update/<int:pk>/", BookUpdateAPIView.as_view(), name="books-update"),
     path("books/details/<int:pk>/", BookDetailAPIView.as_view(), name="book-details"),
-     path('books/upload/', BooksUploadView.as_view(), name='books-upload'),
+    path("books/upload/", BooksUploadView.as_view(), name="books-upload"),
     path(
         "borrowed-books/create/",
         BorrowTransactionCreateView.as_view(),

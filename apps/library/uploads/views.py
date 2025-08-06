@@ -54,42 +54,45 @@ from apps.library.uploads.mixins import BooksUploadMixin
 #             raise e
 #     return render(request, "library/books/upload_books.html")
 
+
 class BooksUploadView(APIView):
     parser_classes = [MultiPartParser, FormParser]
-    
+
     def post(self, request):
         try:
             # Get the uploaded file
-            books_csv = request.FILES.get('books_csv')
-            
+            books_csv = request.FILES.get("books_csv")
+
             if not books_csv:
                 return Response(
-                    {'error': 'No file provided. Please upload a CSV file with key "books_csv".'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {
+                        "error": 'No file provided. Please upload a CSV file with key "books_csv".'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
             # Validate file type
-            if not books_csv.name.endswith('.csv'):
+            if not books_csv.name.endswith(".csv"):
                 return Response(
-                    {'error': 'Invalid file type. Please upload a CSV file.'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {"error": "Invalid file type. Please upload a CSV file."},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
             # Process the upload
             uploader = BooksUploadMixin(books_csv)
             result = uploader.run()
-            
-            if result['success']:
+
+            if result["success"]:
                 response_status = status.HTTP_201_CREATED
-                if result['errors']:
+                if result["errors"]:
                     response_status = status.HTTP_207_MULTI_STATUS
             else:
                 response_status = status.HTTP_400_BAD_REQUEST
-            
+
             return Response(result, status=response_status)
-            
+
         except Exception as e:
             return Response(
-                {'error': f'An unexpected error occurred: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

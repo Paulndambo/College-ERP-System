@@ -1,4 +1,6 @@
 from django.db import transaction
+from apps.accounting.models import Account
+from apps.accounting.services.journals import create_journal_entry
 from apps.student_finance.models import (
     StudentFeeInvoice,
     StudentFeePayment,
@@ -20,13 +22,20 @@ from apps.core.constants import payment_ref_generator
 
 class StudentInvoicingMixin(object):
     def __init__(
-        self, student, semester, transaction_type, amount, payment_method=None
+        self,
+        student,
+        semester,
+        transaction_type,
+        amount,
+        payment_method=None,
+        user=None,
     ):
         self.student = student
         self.semester = semester
         self.transaction_type = transaction_type
         self.amount = amount
         self.payment_method = payment_method
+        self.user = user
 
     @transaction.atomic()
     def run(self):
@@ -58,6 +67,7 @@ class StudentInvoicingMixin(object):
                 amount=self.amount,
                 payment_date=date.today(),
                 payment_method=self.payment_method,
+                created_by=self.user,
             )
 
             current_balance = self.__get_current_balance()
@@ -133,6 +143,7 @@ class StudentInvoicingMixin(object):
                 semester_id=self.semester.id,
                 student_id=self.student.id,
                 description=self.transaction_type,
+                created_by=self.user,
             )
 
             last_fee_stmt = (

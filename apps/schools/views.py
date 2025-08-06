@@ -9,6 +9,7 @@ from .filters import (
     SchoolFilter,
     SemesterFilter,
 )
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from apps.schools.filters import CohortsFilter
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -67,6 +68,7 @@ class SchoolListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = SchoolFilter
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -145,6 +147,7 @@ class DepartmentListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = DepartmentFilter
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -218,6 +221,7 @@ class ProgrammeListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ProgrammeFilter
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -302,6 +306,7 @@ class CourseListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = CourseFilter
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -373,6 +378,7 @@ class SemesterListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = SemesterFilter
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -444,6 +450,7 @@ class ProgrammeCohortListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = CohortsFilter
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -514,6 +521,7 @@ class CourseSessionListView(generics.ListAPIView):
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = CourseSessionFilter
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         try:

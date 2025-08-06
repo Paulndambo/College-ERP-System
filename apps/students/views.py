@@ -164,7 +164,7 @@ class StudentAccountUpdateView(generics.UpdateAPIView):
 class StudentListView(generics.ListAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = StudentFilter
@@ -205,7 +205,7 @@ class StudentListView(generics.ListAPIView):
 class AssessmentList(generics.ListAPIView):
     queryset = Student.objects.all()
     serializer_class = StudentDetailSerialzer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = AssessmentFilter
@@ -258,7 +258,7 @@ class StudentDetailView(generics.RetrieveAPIView):
 
 class StudentEducationHistoryListView(generics.ListAPIView):
     serializer_class = StudentEducationHistoryListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
 
     def get_queryset(self):
@@ -270,7 +270,7 @@ class StudentEducationHistoryListView(generics.ListAPIView):
 
 class StudentEducationHistoryCreateView(generics.CreateAPIView):
     serializer_class = StudentEducationHistoryCreateSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
 
     def perform_create(self, serializer):
@@ -289,7 +289,7 @@ class StudentEducationHistoryCreateView(generics.CreateAPIView):
 
 class StudentEducationHistoryUpdateView(generics.UpdateAPIView):
     serializer_class = StudentEducationHistoryCreateSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
     lookup_field = "pk"
 
@@ -305,7 +305,7 @@ class StudentEducationHistoryUpdateView(generics.UpdateAPIView):
 
 class StudentDocumentHistoryListView(generics.ListAPIView):
     serializer_class = StudentDocumentListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
 
     def get_queryset(self):

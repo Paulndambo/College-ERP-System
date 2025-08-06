@@ -69,22 +69,19 @@ class BorrowTransaction(AbsoluteBaseModel):
         if not self.due_date:
             self.due_date = now().date() + timedelta(days=14)
         super().save(*args, **kwargs)
-    
-    
+
     def assign_copy_number(self):
         """Assign next available copy number"""
-        
+
         borrowed_copies = BorrowTransaction.objects.filter(
-            book=self.book,
-            status="Pending Return"
-        ).values_list('copy_number', flat=True)
-        
-        
+            book=self.book, status="Pending Return"
+        ).values_list("copy_number", flat=True)
+
         for i in range(1, self.book.total_copies + 1):
             copy_number = f"{self.book.isbn or f'B{self.book.id}'}-{i:03d}"
             if copy_number not in borrowed_copies:
                 return copy_number
-        
+
         return None
 
     def is_overdue(self):
