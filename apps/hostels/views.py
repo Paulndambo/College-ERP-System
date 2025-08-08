@@ -36,7 +36,7 @@ class HostelListView(generics.ListAPIView):
 
     queryset = Hostel.objects.all()
     serializer_class = HostelListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = HostelFilter
@@ -82,6 +82,7 @@ class HostelCreateView(generics.CreateAPIView):
 class HostelDetailView(generics.RetrieveAPIView):
     """Retrieve a specific hostel"""
 
+    permission_classes = [IsAuthenticated]
     queryset = Hostel.objects.all()
     serializer_class = HostelListSerializer
 
@@ -102,6 +103,7 @@ class HostelDeleteView(generics.DestroyAPIView):
 class HostelRoomListView(generics.ListAPIView):
     """List all hostel rooms"""
 
+    permission_classes = [IsAuthenticated]
     queryset = HostelRoom.objects.all()
     serializer_class = HostelRoomListSerializer
 
@@ -116,6 +118,7 @@ class HostelRoomCreateView(generics.CreateAPIView):
 class HostelRoomDetailView(generics.RetrieveAPIView):
     """Retrieve a specific hostel room"""
 
+    permission_classes = [IsAuthenticated]
     queryset = HostelRoom.objects.all()
     serializer_class = HostelRoomListSerializer
 
@@ -130,6 +133,7 @@ class HostelRoomUpdateView(generics.UpdateAPIView):
 class AvailableRoomsListView(generics.ListAPIView):
     """List all available rooms (not fully booked)"""
 
+    permission_classes = [IsAuthenticated]
     serializer_class = HostelRoomListSerializer
 
     def get_queryset(self):
@@ -160,7 +164,7 @@ class HostelRoomDeleteAPIView(generics.RetrieveDestroyAPIView):
 class RoomBookingsView(generics.ListAPIView):
 
     serializer_class = BookingListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = BookingFilter
@@ -209,6 +213,7 @@ class BookingCreateView(generics.CreateAPIView):
 class BookingDetailView(generics.RetrieveAPIView):
     """Retrieve a specific booking"""
 
+    permission_classes = [IsAuthenticated]
     queryset = Booking.objects.all()
     serializer_class = BookingListSerializer
     look_up_field = "pk"
@@ -371,7 +376,7 @@ class RoomOccupantsView(generics.ListAPIView):
     """Get all occupants (students) for a specific room"""
 
     serializer_class = StudentListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = StudentFilter

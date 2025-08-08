@@ -15,6 +15,7 @@ from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
 from services.permissions import HasUserRole
 from django.db.models import Count, F
 from datetime import datetime
+from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from .models import (
     Intake,
@@ -38,7 +39,7 @@ from .serializers import (
 
 class IntakeCreateView(generics.CreateAPIView):
     queryset = Intake.objects.all()
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     serializer_class = IntakeCreateSerializer
 
@@ -71,7 +72,7 @@ class IntakeUpdateView(generics.UpdateAPIView):
 
 class IntakeListView(generics.ListAPIView):
     queryset = Intake.objects.all()
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
     serializer_class = IntakeListDetailSerializer
     pagination_class = None
@@ -104,7 +105,7 @@ class IntakeListView(generics.ListAPIView):
 
 class IntakeDetailView(generics.RetrieveAPIView):
     queryset = Intake.objects.all()
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
     serializer_class = IntakeListDetailSerializer
     lookup_field = "pk"
@@ -115,7 +116,7 @@ class IntakeDetailView(generics.RetrieveAPIView):
 
 class StudentApplicationCreateView(generics.CreateAPIView):
     queryset = StudentApplication.objects.all()
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
     serializer_class = StudentApplicationCreateSerializer
 
@@ -125,7 +126,7 @@ class StudentApplicationCreateView(generics.CreateAPIView):
 
 class StudentApplicationUpdateView(generics.UpdateAPIView):
     queryset = StudentApplication.objects.all()
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
     serializer_class = StudentApplicationCreateSerializer
     lookup_field = "pk"
@@ -152,7 +153,7 @@ class StudentApplicationUpdateView(generics.UpdateAPIView):
 
 class StudentApplicationListView(generics.ListAPIView):
     queryset = StudentApplication.objects.all()
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
     serializer_class = StudentApplicationListDetailSerializer
     filter_backends = [DjangoFilterBackend]
@@ -199,7 +200,7 @@ class StudentApplicationListView(generics.ListAPIView):
 class StudentApplicationDetailView(generics.RetrieveAPIView):
     queryset = StudentApplication.objects.all()
     serializer_class = StudentApplicationListDetailSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_ROLES
     lookup_field = "pk"
 
@@ -469,10 +470,13 @@ class StudentEnrollmentView(generics.CreateAPIView):
 
             # registration_number = application.application_number
             programme = application.first_choice_programme
-            level = getattr(programme, 'level', 'Bachelor') 
-            year = cohort.intake.start_date.year if cohort.intake and cohort.intake.start_date else datetime.now().year
+            level = getattr(programme, "level", "Bachelor")
+            year = (
+                cohort.intake.start_date.year
+                if cohort.intake and cohort.intake.start_date
+                else datetime.now().year
+            )
             registration_number = generate_registration_number(programme, level, year)
-
 
             try:
                 with transaction.atomic():
@@ -571,6 +575,7 @@ class EnrollmentsByIntakeView(generics.ListAPIView):
     with optional filters for intake ID, start_date, end_date.
     """
 
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_class = EnrollmentsByIntakeFilter
     pagination_class = None

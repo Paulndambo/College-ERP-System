@@ -197,72 +197,72 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
-class ForgotPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+# class ForgotPasswordSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
 
-    def validate_email(self, value):
+#     def validate_email(self, value):
 
-        try:
-            user = User.objects.get(email=value)
-        except ObjectDoesNotExist:
-            raise ValidationError("User with provided email not found")
+#         try:
+#             user = User.objects.get(email=value)
+#         except ObjectDoesNotExist:
+#             raise ValidationError("User with provided email not found")
 
-        reset_otp = PasswordResetOTP.objects.create(user=user)
+#         reset_otp = PasswordResetOTP.objects.create(user=user)
 
-        full_name = f"{user.first_name} {user.last_name}"
-        context = {"name": full_name, "otp": reset_otp.otp}
+#         full_name = f"{user.first_name} {user.last_name}"
+#         context = {"name": full_name, "otp": reset_otp.otp}
 
-        message = render_to_string("users/password_reset_email.html", context)
-        send_mail(
-            subject="Your Password Reset Code",
-            message="",
-            html_message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
+#         message = render_to_string("users/password_reset_email.html", context)
+#         send_mail(
+#             subject="Your Password Reset Code",
+#             message="",
+#             html_message=message,
+#             from_email=settings.DEFAULT_FROM_EMAIL,
+#             recipient_list=[user.email],
+#             fail_silently=False,
+#         )
 
-        return value
+#         return value
 
 
-class ResetPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    otp = serializers.CharField()
-    new_password = serializers.CharField(write_only=True)
-    confirm_password = serializers.CharField(write_only=True)
+# class ResetPasswordSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
+#     otp = serializers.CharField()
+#     new_password = serializers.CharField(write_only=True)
+#     confirm_password = serializers.CharField(write_only=True)
 
-    def validate(self, attrs):
-        email = attrs.get("email")
-        otp = attrs.get("otp")
-        new_password = attrs.get("new_password")
-        confirm_password = attrs.get("confirm_password")
+#     def validate(self, attrs):
+#         email = attrs.get("email")
+#         otp = attrs.get("otp")
+#         new_password = attrs.get("new_password")
+#         confirm_password = attrs.get("confirm_password")
 
-        if new_password != confirm_password:
-            raise ValidationError("Passwords do not match.")
+#         if new_password != confirm_password:
+#             raise ValidationError("Passwords do not match.")
 
-        try:
-            user = User.objects.get(email=email)
-            otp_record = PasswordResetOTP.objects.get(user=user, otp=otp, is_used=False)
-        except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
-            raise ValidationError("Invalid OTP or email.")
+#         try:
+#             user = User.objects.get(email=email)
+#             otp_record = PasswordResetOTP.objects.get(user=user, otp=otp, is_used=False)
+#         except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
+#             raise ValidationError("Invalid OTP or email.")
 
-        if otp_record.is_expired():
-            raise ValidationError("OTP has expired.")
+#         if otp_record.is_expired():
+#             raise ValidationError("OTP has expired.")
 
-        attrs["user"] = user
-        attrs["otp_record"] = otp_record
-        return attrs
+#         attrs["user"] = user
+#         attrs["otp_record"] = otp_record
+#         return attrs
 
-    def save(self, **kwargs):
-        user = self.validated_data["user"]
-        new_password = self.validated_data["new_password"]
-        otp_record = self.validated_data["otp_record"]
+#     def save(self, **kwargs):
+#         user = self.validated_data["user"]
+#         new_password = self.validated_data["new_password"]
+#         otp_record = self.validated_data["otp_record"]
 
-        user.set_password(new_password)
-        user.save()
+#         user.set_password(new_password)
+#         user.save()
 
-        otp_record.is_used = True
-        otp_record.save()
+#         otp_record.is_used = True
+#         otp_record.save()
 
 
 class ChangePasswordSerializer(serializers.Serializer):

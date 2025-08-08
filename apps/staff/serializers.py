@@ -593,7 +593,9 @@ class CreateOvertimeRecordSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             "approved": {"required": False},
         }
+
+
 class ApproveOvertimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = OvertimeRecords
-        fields = ['approved']
+        fields = ["approved"]

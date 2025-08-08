@@ -11,24 +11,35 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 fake = Faker()
 
+
 class Command(BaseCommand):
     help = "Seed inventory items, stock receipts, and issues using existing vendors"
 
     def handle(self, *args, **kwargs):
         # Get admin user
         admin, _ = User.objects.get_or_create(
-            username='admin',
-            defaults={'email': 'admin@example.com', 'is_staff': True, 'is_superuser': True}
+            username="admin",
+            defaults={
+                "email": "admin@example.com",
+                "is_staff": True,
+                "is_superuser": True,
+            },
         )
 
         departments = list(Department.objects.filter(department_type="Not Academic"))
         if not departments:
-            self.stdout.write(self.style.ERROR("Please seed departments first using `seed_departments`."))
+            self.stdout.write(
+                self.style.ERROR(
+                    "Please seed departments first using `seed_departments`."
+                )
+            )
             return
 
         vendors = list(Vendor.objects.all())
         if not vendors:
-            self.stdout.write(self.style.ERROR("No vendors found. Run the tender seeder first."))
+            self.stdout.write(
+                self.style.ERROR("No vendors found. Run the tender seeder first.")
+            )
             return
 
         # Categories
@@ -40,14 +51,21 @@ class Command(BaseCommand):
 
         categories = []
         for name, desc in categories_data:
-            cat, _ = Category.objects.get_or_create(name=name, defaults={"description": desc})
+            cat, _ = Category.objects.get_or_create(
+                name=name, defaults={"description": desc}
+            )
             categories.append(cat)
             self.stdout.write(self.style.SUCCESS(f"✔ Category: {cat.name}"))
 
         # Inventory items
         items_data = [
             ("Office Desk", "Wooden desk", "Furniture", "pcs"),
-            ("Introduction to Economics", "Textbook for business dept", "Books", "books"),
+            (
+                "Introduction to Economics",
+                "Textbook for business dept",
+                "Books",
+                "books",
+            ),
             ("Ballpoint Pens", "Blue pens for exams", "Stationery", "dozens"),
         ]
 
@@ -59,15 +77,19 @@ class Command(BaseCommand):
                 description=desc,
                 category=category,
                 unit=unit,
-                quantity_in_stock=0
+                quantity_in_stock=0,
             )
             inventory_items.append(item)
-            self.stdout.write(self.style.SUCCESS(f"Created Inventory Item: {item.name}"))
+            self.stdout.write(
+                self.style.SUCCESS(f"Created Inventory Item: {item.name}")
+            )
 
         # Purchase orders + StockReceipt
         for item in inventory_items:
             vendor = random.choice(vendors)
-            po = PurchaseOrder.objects.create(vendor=vendor, created_by=admin, status="approved")
+            po = PurchaseOrder.objects.create(
+                vendor=vendor, created_by=admin, status="approved"
+            )
             quantity = random.randint(10, 50)
 
             PurchaseItem.objects.create(
@@ -77,7 +99,7 @@ class Command(BaseCommand):
                 quantity=quantity,
                 unit=item.unit,
                 unit_price=random.randint(100, 5000),
-                category=item.category  # link back to same category
+                category=item.category,  # link back to same category
             )
 
             StockReceipt.objects.create(
@@ -85,10 +107,14 @@ class Command(BaseCommand):
                 purchase_order=po,
                 vendor=vendor,
                 quantity_received=quantity,
-                remarks="Initial batch"
+                remarks="Initial batch",
             )
 
-            self.stdout.write(self.style.SUCCESS(f"Received {quantity} {item.unit} of {item.name} from {vendor.name}"))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Received {quantity} {item.unit} of {item.name} from {vendor.name}"
+                )
+            )
 
         # Stock Issues
         for item in inventory_items:
@@ -100,8 +126,12 @@ class Command(BaseCommand):
                     quantity=qty,
                     issued_to=dept,
                     issued_by=admin,
-                    remarks=f"Issued to {dept.name}"
+                    remarks=f"Issued to {dept.name}",
                 )
-                self.stdout.write(self.style.SUCCESS(f"Issued {qty} {item.unit} of {item.name} to {dept.name}"))
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Issued {qty} {item.unit} of {item.name} to {dept.name}"
+                    )
+                )
 
         self.stdout.write(self.style.SUCCESS("Inventory seeding complete."))

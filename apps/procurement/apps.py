@@ -7,3 +7,4 @@ class ProcurementConfig(AppConfig):
 
     def ready(self):
         import apps.accounting.signals
+        import apps.procurement.signals

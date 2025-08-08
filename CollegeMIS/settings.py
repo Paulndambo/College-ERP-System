@@ -20,6 +20,7 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+from corsheaders.defaults import default_headers
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -31,11 +32,7 @@ SECRET_KEY = "django-insecure-e*fx58)%+k66z6)l95mmpbqjjp&6qhx11e!(-rbauys5hnq*gl
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "https://college-erp-ebon.vercel.app",
-]
+
 AUTH_USER_MODEL = "users.User"
 
 
@@ -73,10 +70,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -128,23 +125,6 @@ DATABASES = {
 }
 """
 
-CORS_ALLOW_METHODS = [
-    "GET",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-]
-
-# CORS_ALLOW_HEADERS = [
-#     "x-csrftoken",
-#     "accessToken",
-#     "refreshToken",
-#     "Content-Type",
-#     "authorization",
-# ]
-CORS_ALLOW_HEADERS = ["*"]
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -162,7 +142,6 @@ REST_FRAMEWORK = {
 }
 
 
-# CORS_ALLOW_CREDENTIALS = True
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -253,16 +232,42 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-BASE_URL = "http://localhost:8000"
+# BASE_URL = "https://api.collegeerp.co.ke"
+
+
+# CORS setup
+CORS_ALLOW_CREDENTIALS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "https://college-erp-ebon.vercel.app",
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+# ]
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-LOGIN_URL = "/users/login/"
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "authorization",
+    "content-type",
+    "x-csrftoken",
+    "accesstoken",
+    "refreshtoken",
+]
 
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND")
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT"))
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS") == "True"
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "PATCH",
+    "OPTIONS",
+]
+
+
+# EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND")
+# EMAIL_HOST = os.environ.get("EMAIL_HOST")
+# EMAIL_PORT = int(os.environ.get("EMAIL_PORT"))
+# EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS") == "True"
+# EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+# DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")

@@ -44,6 +44,9 @@ class StudentFeeInvoice(AbsoluteBaseModel):
             ("Partially Paid", "Partially Paid"),
         ),
     )
+    created_by = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     @property
     def bal_due(self):
@@ -64,6 +67,9 @@ class StudentFeePayment(AbsoluteBaseModel):
             ("Bank Transfer", "Bank Transfer"),
             ("Cash", "Cash"),
         ),
+    )
+    created_by = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, null=True, blank=True
     )
 
     def __str__(self):

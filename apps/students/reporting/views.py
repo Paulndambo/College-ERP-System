@@ -11,7 +11,7 @@ from apps.students.reporting.serializers import (
 )
 from apps.students.models import SemesterReporting
 from apps.finance.models import FeeStructure
-
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from apps.student_finance.mixins import StudentInvoicingMixin
 from apps.students.reporting.usecases.promote_students import (
     promote_students_to_next_semester,
@@ -113,7 +113,7 @@ class SemesterReportingAPIView(APIView):
 class SemisterReportingList(generics.ListAPIView):
     queryset = SemesterReporting.objects.all().order_by("-created_on")
     serializer_class = SemesterReportingListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     pagination_class = None
     filter_backends = [DjangoFilterBackend]

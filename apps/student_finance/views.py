@@ -31,12 +31,15 @@ from apps.students.models import Student
 from decimal import Decimal
 from django.db.models import Sum, Count, Q
 
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+
 
 class StudentFeeInvoiceListView(generics.ListAPIView):
     queryset = StudentFeeInvoice.objects.all().order_by("-created_on")
     serializer_class = StudentFeeInvoiceListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = StudentFeeInvoiceFilter
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -66,6 +69,7 @@ class StudentFeeInvoiceListView(generics.ListAPIView):
 class StudentFeeStatementListView(generics.ListAPIView):
     serializer_class = StudentFeeStatementListSerializer
     pagination_class = None
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         semester_id = self.request.query_params.get("semester")
@@ -127,6 +131,7 @@ class StudentFeePaymentListView(generics.ListAPIView):
     serializer_class = StudentFeePaymentListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = StudentFeePaymentFilter
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -180,6 +185,7 @@ class StudentFeePaymentView(APIView):
             amount=data["amount"],
             payment_method=data["payment_method"],
             semester=semester,
+            user=self.request.user,
         ).run()
 
         if success:
@@ -199,6 +205,8 @@ class TotalCollectedFeesView(APIView):
     Get total fees collected, optionally filtered by semester.
     Uses StudentFeeStatement as the primary source for financial data.
     """
+
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         semester_id = request.query_params.get("semester")

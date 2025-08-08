@@ -29,11 +29,13 @@ from rest_framework.parsers import MultiPartParser, FormParser
 import pandas as pd
 import io
 import csv
+from rest_framework.permissions import IsAuthenticated
 
 
 class ExamDataCreateAPIView(generics.CreateAPIView):
     # queryset = ExamData.objects.all()
     serializer_class = ExamDataCreateSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(recorded_by=self.request.user)
@@ -44,6 +46,7 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
     API endpoint for uploading multiple student exam marks via CSV or Excel file.
     """
 
+    permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = ExamDataCreateSerializer
 
@@ -229,8 +232,8 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
 
 class ExamDataListAPIView(generics.ListAPIView):
     queryset = ExamData.objects.all()
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_ROLES
+    permission_classes = [IsAuthenticated]
+    # allowed_roles = ALL_ROLES
     serializer_class = ExamDataListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = ExamDataFilterSet
@@ -241,12 +244,12 @@ class ExamDataListAPIView(generics.ListAPIView):
         base_queryset = ExamData.objects.select_related(
             "student", "semester", "cohort", "course", "recorded_by"
         )
-        if user.role.name == ROLE_STUDENT:
-            if user.role.name == ROLE_STUDENT:
-                return base_queryset.filter(student=user)
+        # if user.role.name == ROLE_STUDENT:
+        #     if user.role.name == ROLE_STUDENT:
+        #         return base_queryset.filter(student=user)
 
-            exam_data = base_queryset.order_by("-created_on")
-            return exam_data
+        #     exam_data = base_queryset.order_by("-created_on")
+        #     return exam_data
 
         exam_data = base_queryset.order_by("-created_on")
         return exam_data
@@ -282,6 +285,7 @@ class ExamDatapdateAPIView(generics.RetrieveUpdateAPIView):
     queryset = ExamData.objects.all()
     serializer_class = ExamDataCreateSerializer
     http_method_names = ["patch", "put"]
+    permission_classes = [IsAuthenticated]
 
     def patch(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -306,6 +310,7 @@ class TranscriptsDataView(generics.ListAPIView):
     serializer_class = StudentExamDataSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = TranscriptsFilter
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         base_queryset = ExamData.objects.select_related(

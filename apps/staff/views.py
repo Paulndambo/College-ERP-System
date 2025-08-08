@@ -53,7 +53,7 @@ from .filters import (
     StaffLeaveApplicationFilter,
     StaffLeaveEntitlementFilter,
     StaffLeaveFilter,
-    OvertimePaymentsFilter
+    OvertimePaymentsFilter,
 )
 from rest_framework.exceptions import ValidationError
 from django.views.generic import ListView
@@ -235,7 +235,7 @@ class StaffDetailAPIView(generics.RetrieveAPIView):
     queryset = Staff.objects.all()
     serializer_class = StaffListDetailSerializer
     lookup_field = "pk"
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
 
 
@@ -266,7 +266,7 @@ class StaffStatusToggleView(APIView):
 class StaffListView(generics.ListAPIView):
     queryset = Staff.objects.all()
     serializer_class = StaffListDetailSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = StaffFilter
@@ -340,8 +340,8 @@ class ActiveStaffListView(generics.ListAPIView):
 class StaffPaySlipListView(generics.ListAPIView):
     queryset = Payslip.objects.all()
     serializer_class = StaffPaySlipSerializer
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
+    permission_classes = [IsAuthenticated]
+    # allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = PayslipFilter
     pagination_class = PageNumberPagination
@@ -422,6 +422,7 @@ class StaffPayrollDetailView(generics.RetrieveAPIView):
     queryset = StaffPayroll.objects.all()
     serializer_class = StaffPayrollCreateSerializer
     lookup_field = "pk"
+    permission_classes = [IsAuthenticated]
 
 
 class StaffOnboardingProgressAPIView(generics.RetrieveAPIView):
@@ -490,6 +491,7 @@ class StaffDocumentCreateView(generics.CreateAPIView):
 class StaffDocumentListView(generics.ListAPIView):
     queryset = StaffDocuments.objects.all()
     serializer_class = StaffDocumentListSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class StaffPayrollUpdateView(generics.RetrieveUpdateAPIView):
@@ -538,7 +540,7 @@ class CompleteOnboardingView(generics.UpdateAPIView):
 class PositionListView(generics.ListAPIView):
     queryset = StaffPosition.objects.all()
     serializer_class = StaffPositionListSerializer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
 
@@ -587,8 +589,8 @@ class StaffLeaveApplicationListView(generics.ListAPIView):
     serializer_class = StaffLeaveApplicationListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = StaffLeaveApplicationFilter
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
+    permission_classes = [IsAuthenticated]
+    # allowed_roles = ALL_STAFF_ROLES
     pagination_class = None
 
     def get_queryset(self):
@@ -674,8 +676,8 @@ class StaffLeaveListView(generics.ListAPIView):
     serializer_class = StaffLeaveSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = StaffLeaveFilter
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
+    permission_classes = [IsAuthenticated]
+    # allowed_roles = ALL_STAFF_ROLES
     pagination_class = None
 
     def get_queryset(self):
@@ -708,8 +710,8 @@ class StaffLeaveEntitlementListView(generics.ListAPIView):
 
     queryset = StaffLeaveEntitlement.objects.all()
     serializer_class = StaffLeaveEntitlementDetailSerializer
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
+    permission_classes = [IsAuthenticated]
+    # allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = StaffLeaveEntitlementFilter
     ordering_fields = ["year", "total_days", "used_days", "remaining_days"]
@@ -907,17 +909,19 @@ class OvertimePaymentsUpdateView(generics.RetrieveUpdateAPIView):
     lookup_field = "pk"
     http_method_names = ["patch", "put"]
 
+
 class ApproveOvertimeRecordView(generics.UpdateAPIView):
     queryset = OvertimeRecords.objects.all()
     serializer_class = ApproveOvertimeSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'pk'
-    
+    lookup_field = "pk"
+
+
 class OvertimePaymentsAPIView(generics.ListAPIView):
     queryset = OvertimeRecords.objects.all()
     serializer_class = OvertimeRecordsListSerializer
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
+    permission_classes = [IsAuthenticated]
+    # allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
     filterset_class = OvertimePaymentsFilter
     pagination_class = None

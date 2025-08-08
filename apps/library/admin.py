@@ -25,6 +25,7 @@ class FineAdmin(admin.ModelAdmin):
     )
     list_filter = ("paid",)
 
+
 @admin.register(BorrowTransaction)
 class BorrowTransactionAdmin(admin.ModelAdmin):
     list_display = (

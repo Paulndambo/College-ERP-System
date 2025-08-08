@@ -1,5 +1,6 @@
-from apps.accounting.models import JournalEntry, Transaction  
+from apps.accounting.models import JournalEntry, Transaction
 from django.utils import timezone
+
 
 def create_journal_entry(description, reference, user, transactions):
     """
@@ -21,7 +22,7 @@ def create_journal_entry(description, reference, user, transactions):
         date=timezone.now().date(),
         description=description,
         reference=reference,
-        created_by=user
+        created_by=user,
     )
 
     total_debit = 0
@@ -32,7 +33,7 @@ def create_journal_entry(description, reference, user, transactions):
             journal=journal,
             account=tx["account"],
             amount=tx["amount"],
-            is_debit=tx["is_debit"]
+            is_debit=tx["is_debit"],
         )
         if tx["is_debit"]:
             total_debit += tx["amount"]
@@ -44,6 +45,7 @@ def create_journal_entry(description, reference, user, transactions):
 
     return journal
 
+
 def reverse_journal_entry(entry, user):
     if entry.reversed_entry:
         raise ValueError("This journal has already been reversed.")
@@ -52,7 +54,7 @@ def reverse_journal_entry(entry, user):
         date=timezone.now().date(),
         description=f"REVERSAL: {entry.description}",
         reference=f"REV-{entry.reference}",
-        created_by=user
+        created_by=user,
     )
 
     for tx in entry.transactions.all():
@@ -60,7 +62,7 @@ def reverse_journal_entry(entry, user):
             journal=reversed_entry,
             account=tx.account,
             amount=tx.amount,
-            is_debit=not tx.is_debit
+            is_debit=not tx.is_debit,
         )
 
     entry.reversed_entry = reversed_entry

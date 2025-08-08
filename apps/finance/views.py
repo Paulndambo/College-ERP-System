@@ -28,6 +28,7 @@ from apps.finance.serializers import (
 )
 from .models import FeeStructure, FeeStructureItem
 from apps.finance.models import LibraryFinePayment, Payment, FeePayment, Budget
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 
 date_today = datetime.now().date()
 
@@ -39,6 +40,7 @@ class FeeStructureListView(generics.ListAPIView):
     serializer_class = FeeStructureListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = FeeStructureFilter
+    permission_classes = [IsAuthenticated]
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -71,6 +73,7 @@ class FeeStructureRetrieveView(generics.RetrieveAPIView):
     queryset = FeeStructure.objects.prefetch_related("feeitems").all()
     serializer_class = FeeStructureListSerializer
     lookup_field = "id"
+    permission_classes = [IsAuthenticated]
 
 
 class FeeStructureCreateView(generics.CreateAPIView):
@@ -92,6 +95,7 @@ class FeeStructureDeleteView(generics.DestroyAPIView):
 
 class FeeStructureItemListView(generics.ListAPIView):
     serializer_class = FeeStructureItemListSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         fee_structure_id = self.request.query_params.get("fee_structure")
@@ -102,6 +106,7 @@ class FeeStructureItemListView(generics.ListAPIView):
 
 class FeeStructureItemByStructureView(generics.ListAPIView):
     serializer_class = FeeStructureItemListSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         fee_structure_id = self.kwargs.get("fee_structure_id")
