@@ -8,28 +8,33 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 CATEGORY_TYPE_CHOICES = [
-        ("fixed_asset", "Fixed Asset"),
-        ("inventory", "Inventory"),
-        ("consumable", "Consumable"),
-        ("service", "Service"),
-        ("other", "Other"),
-    ]
+    ("fixed_asset", "Fixed Asset"),
+    ("inventory", "Inventory"),
+    ("consumable", "Consumable"),
+    ("service", "Service"),
+    ("other", "Other"),
+]
+
+
 class Category(AbsoluteBaseModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     category_type = models.CharField(
-            max_length=20,
-            choices=CATEGORY_TYPE_CHOICES,
-            default="inventory",  
-        )
+        max_length=20,
+        choices=CATEGORY_TYPE_CHOICES,
+        default="inventory",
+    )
+
     def __str__(self):
         return self.name
+
 
 class UnitOfMeasure(AbsoluteBaseModel):
     name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
+
 
 class InventoryItem(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
@@ -41,23 +46,28 @@ class InventoryItem(AbsoluteBaseModel):
     quantity_in_stock = models.PositiveIntegerField(default=0)
     unit = models.ForeignKey(UnitOfMeasure, on_delete=models.SET_NULL, null=True)
     unit_valuation = models.DecimalField(
-        max_digits=12, decimal_places=2, 
-        null=True, blank=True,
-        default=0.00,
-        help_text="Cost per unit (for inventory items)"
-    )
-    total_valuation = models.DecimalField(
-        max_digits=14, decimal_places=2,
-        null=True, 
+        max_digits=12,
+        decimal_places=2,
+        null=True,
         blank=True,
         default=0.00,
-        help_text="Total value (for fixed assets or special cases)"
+        help_text="Cost per unit (for inventory items)",
     )
+    total_valuation = models.DecimalField(
+        max_digits=14,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        default=0.00,
+        help_text="Total value (for fixed assets or special cases)",
+    )
+
     def effective_total_valuation(self):
         """Return calculated total if unit_valuation is used, else fall back to stored total_valuation"""
         if self.unit_valuation is not None:
             return self.quantity_in_stock * self.unit_valuation
         return self.total_valuation
+
     def __str__(self):
         return f"{self.name} ({self.quantity_in_stock} {self.unit})"
 

@@ -201,6 +201,7 @@ class Payslip(AbsoluteBaseModel):
     PAYMENT_STATUS_CHOICES = [
         ("pending", "Pending"),
         ("processing", "Processing"),
+        ("partially_paid", "Partially Paid"),
         ("paid", "Paid"),
         ("reversed", "Reversed"),
         ("failed", "Failed"),
@@ -219,7 +220,7 @@ class Payslip(AbsoluteBaseModel):
     paye = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     generated_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
-        max_length=10,
+        max_length=50,
         choices=PAYMENT_STATUS_CHOICES,
         default="pending",
     )

@@ -29,6 +29,8 @@ class AccountAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("account_type")
+
+
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
     list_display = (
@@ -38,7 +40,8 @@ class TransactionAdmin(admin.ModelAdmin):
         "amount",
         "is_debit",
     )
-    
+
+
 @admin.register(JournalEntry)
 class JournalEntryAdmin(admin.ModelAdmin):
     list_display = (

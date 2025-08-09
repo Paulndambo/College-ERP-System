@@ -102,4 +102,3 @@ class GoodsReceivedAdmin(admin.ModelAdmin):
 @admin.register(VendorPayment)
 class VendorPaymentAdmin(admin.ModelAdmin):
     list_display = ("amount", "created_on")
-    

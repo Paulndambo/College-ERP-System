@@ -1,5 +1,6 @@
 from decimal import Decimal, ROUND_HALF_UP
 
+from apps.payroll.models import PaymentStatement
 from apps.staff.models import OvertimeRecords, Payslip, Staff
 
 
@@ -127,6 +128,10 @@ def process_payroll_monthly_period(payroll_period_start, payroll_period_end):
             net_pay=net_pay,
         )
 
+        PaymentStatement.objects.create(
+            payslip=payslip, total_amount_due=net_pay, outstanding_balance=net_pay
+        )
+
         print(
-            f"Payslip for {staff} | Gross: {gross_pay} | NSSF: {nssf} | NHIF: {nhif} | PAYE: {paye} | Net Pay: {net_pay}"
+            f"Payslip for {staff} | Gross: {gross_pay} | Net Pay: {net_pay} | Statement Created"
         )
