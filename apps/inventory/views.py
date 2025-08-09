@@ -139,11 +139,9 @@ class CategoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
-       
         if instance.inventoryitem_set.exists():
             return Response(
                 {"error": "Cannot delete this category because it is used in one or more inventory items."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
         return super().destroy(request, *args, **kwargs)
