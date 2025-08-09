@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.inventory.views import CategoriesAPIView, CategoryDetailAPIView, CreateCategoryAPIView, CreateUnitOfMeasureAPIView, InventoryItemsListView, UnitOfMeasureAPIView, UnitOfMeasureDetailAPIView
+from apps.inventory.views import CategoriesAPIView, CategoryDetailAPIView, CreateCategoryAPIView, CreateInventoryItemAPIView, CreateUnitOfMeasureAPIView, InventoryItemDetailAPIView, InventoryItemsListView, UnitOfMeasureAPIView, UnitOfMeasureDetailAPIView
 
 
 urlpatterns = [
@@ -11,5 +11,7 @@ urlpatterns = [
     path("categories/<int:pk>/", CategoryDetailAPIView.as_view(), name="categories-detail-update-delete"),
     path("categories/create/", CreateCategoryAPIView.as_view(), name="categories-create"),
     path("items/", InventoryItemsListView.as_view(), name="items-list"),
-   
+    path("items/create/", CreateInventoryItemAPIView.as_view(), name="items-create"),
+    path("items/<int:pk>/", InventoryItemDetailAPIView.as_view(), name="items-detail"),
+
 ]

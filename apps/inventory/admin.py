@@ -21,7 +21,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(InventoryItem)
 class InventoryItemAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "quantity_in_stock", "unit")
+    list_display = ("name", "category", "quantity_in_stock", "unit", "unit_valuation", "total_valuation")
     search_fields = ("name", "category__name")
     list_filter = ("category",)
 

@@ -36,7 +36,15 @@ class InventoryItemListSerializer(serializers.ModelSerializer):
         fields = "__all__"
         
 
-        
+class CreateInventoryItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryItem
+        fields = ["name", "description", "category", "quantity_in_stock", "unit", "unit_valuation", "total_valuation"]
+        extra_kwargs = {
+            'description': {'required': False},
+            'unit_valuation': {'required': False},
+            'total_valuation': {'required': False},
+        }        
 
     
 class CreateCategorySerializer(serializers.ModelSerializer):

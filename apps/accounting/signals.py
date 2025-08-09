@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from apps.finance.models import LibraryFinePayment
+from apps.inventory.models import InventoryItem
 from apps.procurement.models import GoodsReceived, VendorPayment
 from apps.accounting.services.journals import create_journal_entry
 from apps.accounting.models import Account
@@ -27,6 +28,7 @@ def create_goods_received_journal(sender, instance, created, **kwargs):
             {"account": payable, "amount": total, "is_debit": False},
         ],
     )
+
 
 @receiver(post_save, sender=GoodsReceived)
 def update_po_status(sender, instance, created, **kwargs):

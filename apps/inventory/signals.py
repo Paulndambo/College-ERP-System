@@ -1,10 +1,49 @@
+import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from apps.accounting.models import Account
+from apps.accounting.services.journals import create_journal_entry
 from apps.inventory.models import StockReceipt, StockIssue, InventoryItem, Category
 from apps.procurement.models import GoodsReceived, PurchaseItem
+from decimal import Decimal
+from django.db.models.signals import pre_save
+from .models import InventoryItem
+from apps.accounting.models import JournalEntry
+logger = logging.getLogger(__name__)
 
 
-# Update stock when a StockReceipt is created manually
+
+@receiver(post_save, sender=InventoryItem)
+def create_inventory_item_journal(sender, instance, created, **kwargs):
+
+    if not created:
+        return
+    if not instance.total_valuation or instance.total_valuation <= 0:
+        logger.info(f"[InventoryItem:{instance.id}] No valuation or non-positive valuation — skipping.")
+        
+        return
+
+    try:
+        inventory_acc = Account.objects.get(name="Inventory")
+        cash_acc = Account.objects.get(name="Cash")
+        logger.info(f"[InventoryItem:{instance.id}] Accounts found: Inventory & Cash")
+    except Account.DoesNotExist:
+        logger.error(f"[InventoryItem:{instance.id}] Required accounts not found.")
+        return
+
+    create_journal_entry(
+        description=f"Manual Inventory Addition: {instance.name}",
+        reference=f"INVITEM-{instance.id}",
+        user=getattr(instance, "created_by", None),
+        transactions=[
+            {"account": inventory_acc, "amount": instance.total_valuation, "is_debit": True},
+            {"account": cash_acc, "amount": instance.total_valuation, "is_debit": False},
+        ],
+    )
+
+    logger.info(f"[InventoryItem:{instance.id}] Journal entry created successfully.")
+    # print(f"DEBUG: Journal entry created successfully for InventoryItem {instance.id}")
+
 @receiver(post_save, sender=StockReceipt)
 def increase_stock_on_receipt(sender, instance, created, **kwargs):
     if created:
@@ -82,45 +121,3 @@ def sync_inventory_on_goods_received(sender, instance, created, **kwargs):
             remarks=f"Auto-created from GoodsReceived PO-{purchase_order.id}",
         )
 
-
-# Sync PurchaseItems to Inventory and update stock when GoodsReceived is created
-# @receiver(post_save, sender=GoodsReceived)
-# def sync_inventory_on_goods_received(sender, instance, created, **kwargs):
-#     if not created:
-#         return
-
-#     purchase_order = instance.purchase_order
-#     vendor = purchase_order.vendor
-
-#     # Get or create default category
-#     default_category, _ = Category.objects.get_or_create(
-#         name="Uncategorized",
-#         defaults={"description": "Default category for unspecified items"},
-#     )
-
-#     for item in purchase_order.items.all():
-#         category = item.category
-#         # Create or get the inventory item
-#         inventory_item, _ = InventoryItem.objects.get_or_create(
-#             name=item.name,
-#             category=category,
-#             defaults={
-#                 "description": item.description,
-#                 "unit": item.unit,
-#                 "category": category,
-#                 "valuation": item.unit_price * item.quantity
-#             },
-#         )
-
-#         # Increase inventory quantity
-#         inventory_item.quantity_in_stock += item.quantity
-#         inventory_item.save()
-
-#         # Log a StockReceipt for transparency
-#         StockReceipt.objects.create(
-#             inventory_item=inventory_item,
-#             purchase_order=purchase_order,
-#             vendor=vendor,
-#             quantity_received=item.quantity,
-#             remarks=f"Auto-created from GoodsReceived PO-{purchase_order.id}",
-#         )
