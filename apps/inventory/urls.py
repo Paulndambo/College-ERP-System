@@ -8,6 +8,8 @@ from apps.inventory.views import (
     CreateUnitOfMeasureAPIView,
     InventoryItemDetailAPIView,
     InventoryItemsListView,
+    StockIssueAPIView,
+    StockIssueCreateView,
     UnitOfMeasureAPIView,
     UnitOfMeasureDetailAPIView,
 )
@@ -41,4 +43,6 @@ urlpatterns = [
     path("items/", InventoryItemsListView.as_view(), name="items-list"),
     path("items/create/", CreateInventoryItemAPIView.as_view(), name="items-create"),
     path("items/<int:pk>/", InventoryItemDetailAPIView.as_view(), name="items-detail"),
+    path('items/issue/', StockIssueCreateView.as_view(), name='stock-issue'),
+    path('items/issue/records/', StockIssueAPIView.as_view(), name='stock-issue-records'),
 ]

@@ -4,7 +4,8 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 
 from rest_framework.pagination import PageNumberPagination
-
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +16,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 import logging
 from apps.accounting.models import Account
+from apps.inventory.filters import StockIssueFilter
 from apps.inventory.flters import InventoryItemFilter
 from apps.inventory.models import Category, InventoryItem, UnitOfMeasure, StockIssue
 from apps.inventory.serializers import (
@@ -23,6 +25,8 @@ from apps.inventory.serializers import (
     CreateInventoryItemSerializer,
     CreateUnitOfMeasureSerializer,
     InventoryItemListSerializer,
+    StockIssueListSerializer,
+    StockIssueSerializer,
     UnitOfMeasureListSerializer,
 )
 
@@ -398,3 +402,65 @@ class CategoryDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
             )
 
         return super().destroy(request, *args, **kwargs)
+
+
+class StockIssueCreateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = StockIssueSerializer
+
+    @swagger_auto_schema(
+        request_body=StockIssueSerializer,
+        responses={201: StockIssueSerializer}
+    )
+    def post(self, request, *args, **kwargs):
+        # Extract inventory_item & quantity from request
+        inventory_item_id = request.data.get("inventory_item")
+        quantity = request.data.get("quantity")
+
+        if inventory_item_id and quantity:
+            try:
+                item = InventoryItem.objects.get(id=inventory_item_id)
+            except InventoryItem.DoesNotExist:
+                return Response({"error": "Invalid inventory item"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if int(quantity) > item.quantity_in_stock:
+                return Response(
+                    {"error": "Not enough stock available for given item to issue the quantity entered"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save(issued_by=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class StockIssueAPIView(generics.ListAPIView):
+    queryset = StockIssue.objects.all().order_by("-created_on")
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = StockIssueListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StockIssueFilter
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            qs = self.get_queryset()
+            qs = self.filter_queryset(qs)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_qs = paginator.paginate_queryset(qs, request)
+                serializer = self.get_serializer(paginated_qs, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(qs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            return Response(str(exc), status=status.HTTP_400_BAD_REQUEST)

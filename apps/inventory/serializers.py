@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from apps.inventory.models import Category, InventoryItem, UnitOfMeasure
+from apps.inventory.models import Category, InventoryItem, StockIssue, UnitOfMeasure
+from apps.schools.serializers import DepartmentListSerializer
 from apps.users.serializers import UserSerializer
 
 CATEGORY_TYPE_LABELS = {
@@ -74,3 +75,41 @@ class CreateUnitOfMeasureSerializer(serializers.ModelSerializer):
     class Meta:
         model = UnitOfMeasure
         fields = ["name"]
+
+
+class StockIssueSerializer(serializers.ModelSerializer):
+    inventory_item_name = serializers.CharField(source='inventory_item.name', read_only=True)
+    unit = serializers.CharField(source='inventory_item.unit.name', read_only=True)
+
+    class Meta:
+        model = StockIssue
+        fields = [
+            'id',
+            'inventory_item',
+            'inventory_item_name',
+            'unit',
+            'quantity',
+            'issued_to',
+            'issued_by',
+            'remarks',
+            'issued_on',
+        ]
+        read_only_fields = ['id', 'issued_by', 'issued_on', 'inventory_item_name', 'unit']
+
+   
+class StockIssueListSerializer(serializers.ModelSerializer):
+    inventory_item = InventoryItemListSerializer()
+    issued_by = UserSerializer(read_only=True)
+    issued_to = DepartmentListSerializer(read_only=True)
+    class Meta:
+        model = StockIssue
+        fields = [
+            'id',
+            'inventory_item',
+            'quantity',
+            'issued_to',
+            'issued_by',
+            'remarks',
+            'issued_on',
+        ]
+        read_only_fields = ['id', 'issued_by', 'issued_on',]

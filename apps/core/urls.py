@@ -4,17 +4,27 @@ from .views import (
     CampusListView,
     CampusUpdateDeleteView,
     DashboardCountsRetrieveView,
+    ModulesListView,
     RecentActionsView,
+    RoleListCreateView,
+    RoleRetrieveUpdateDestroyView,
+    RolesListAPIView,
     StudyYearCreateView,
     StudyYearListView,
     StudyYearUpdateDeleteView,
-    UserRoleListView,
+    # UserRoleListView,
 )
 
 urlpatterns = [
+    
+    
+    path('roles/create/', RoleListCreateView.as_view(), name='role-list-create'),
+    path('roles/', RolesListAPIView.as_view(), name='role-list'),
+    path('modules/', ModulesListView.as_view(), name='modules-list-create'),
+    path('roles/<int:pk>/', RoleRetrieveUpdateDestroyView.as_view(), name='role-detail'),
     path("campus/create/", CampusCreateView.as_view(), name="campus-create"),
     path("campus/list/", CampusListView.as_view(), name="campus-list"),
-    path("user-roles/", UserRoleListView.as_view(), name="user-role-list"),
+    # path("user-roles/", UserRoleListView.as_view(), name="user-role-list"),
     path(
         "campus/update-delete/<int:pk>/",
         CampusUpdateDeleteView.as_view(),
