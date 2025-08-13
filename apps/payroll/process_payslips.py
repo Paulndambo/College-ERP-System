@@ -77,20 +77,33 @@ def calculate_nssf(gross_salary):
 def process_payroll_monthly_period(payroll_period_start, payroll_period_end):
     from decimal import Decimal
 
-    active_staff = Staff.objects.filter(status="Active")
+    # Pre-fetch all active staff with their payroll data in one query
+    active_staff = Staff.objects.select_related('staffpayroll').filter(status="Active")
+    
+    # Pre-fetch all overtime records for the period in one query
+    overtime_records = OvertimeRecords.objects.filter(
+        date__range=(payroll_period_start, payroll_period_end),
+        approved=True
+    ).select_related('staff')
+    
+    # Create a dictionary for quick overtime lookup
+    overtime_by_staff = {}
+    for record in overtime_records:
+        if record.staff_id not in overtime_by_staff:
+            overtime_by_staff[record.staff_id] = []
+        overtime_by_staff[record.staff_id].append(record)
+
+    payslips_to_create = []
+    
     for staff in active_staff:
         payroll = staff.staffpayroll
         if not payroll:
             continue
 
-        # Sum approved overtime in period
-        overtime_records = OvertimeRecords.objects.filter(
-            staff=staff,
-            date__range=(payroll_period_start, payroll_period_end),
-            approved=True,
-        )
+        # Calculate overtime from pre-fetched data
+        staff_overtime = overtime_by_staff.get(staff.id, [])
         total_overtime_pay = sum(
-            (o.hours * o.rate_per_hour for o in overtime_records), Decimal(0)
+            (o.hours * o.rate_per_hour for o in staff_overtime), Decimal(0)
         )
 
         total_allowances = (
@@ -110,10 +123,10 @@ def process_payroll_monthly_period(payroll_period_start, payroll_period_end):
         paye = calculate_paye(taxable_income)
 
         total_deductions = nssf + nhif + paye
-
         net_pay = gross_pay - total_deductions
 
-        payslip = Payslip.objects.create(
+        # Create payslip object (don't save yet)
+        payslip = Payslip(
             staff=staff,
             payroll_period_start=payroll_period_start,
             payroll_period_end=payroll_period_end,
@@ -126,7 +139,15 @@ def process_payroll_monthly_period(payroll_period_start, payroll_period_end):
             paye=paye,
             net_pay=net_pay,
         )
+        payslips_to_create.append(payslip)
 
         print(
             f"Payslip for {staff} | Gross: {gross_pay} | NSSF: {nssf} | NHIF: {nhif} | PAYE: {paye} | Net Pay: {net_pay}"
         )
+
+    # Bulk create all payslips in one operation
+    if payslips_to_create:
+        Payslip.objects.bulk_create(payslips_to_create)
+        print(f"Successfully created {len(payslips_to_create)} payslips")
+    else:
+        print("No payslips to create")

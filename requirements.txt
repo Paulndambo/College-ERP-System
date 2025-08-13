@@ -7,5 +7,4 @@ django-environ
 djangorestframework-simplejwt
 whitenoise
 python-dotenv
-pandas
 pillow

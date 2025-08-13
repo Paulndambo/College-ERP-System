@@ -26,7 +26,6 @@ from rest_framework.exceptions import ValidationError
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.parsers import MultiPartParser, FormParser
-import pandas as pd
 import io
 import csv
 from rest_framework.permissions import IsAuthenticated
@@ -64,7 +63,7 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
 
         file_extension = file_obj.name.split(".")[-1].lower()
 
-        if file_extension not in ["csv", "xls", "xlsx"]:
+        if file_extension not in ["csv", "CSV"]:
             raise CustomAPIException(
                 "Unsupported file format. Please upload a CSV or Excel file.",
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -74,8 +73,9 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
 
             if file_extension == "csv":
                 data = self._process_csv(file_obj)
+            
             else:
-                data = self._process_excel(file_obj)
+                data = []
 
             if not data:
                 raise CustomAPIException(
@@ -135,16 +135,6 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
         except Exception as e:
             raise CustomAPIException(
                 f"Error reading CSV file: {str(e)}",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
-
-    def _process_excel(self, file_obj):
-        try:
-            df = pd.read_excel(file_obj)
-            return df.to_dict("records")
-        except Exception as e:
-            raise CustomAPIException(
-                f"Error reading Excel file: {str(e)}",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 

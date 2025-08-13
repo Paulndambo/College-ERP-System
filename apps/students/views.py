@@ -13,7 +13,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
-import pandas as pd
+import csv
 from rest_framework.views import APIView
 import io
 from rest_framework import generics, status
@@ -162,7 +162,11 @@ class StudentAccountUpdateView(generics.UpdateAPIView):
 
 
 class StudentListView(generics.ListAPIView):
-    queryset = Student.objects.all()
+    queryset = Student.objects.select_related(
+        "user", "programme", "cohort", "campus"
+    ).prefetch_related(
+        'studentdocument_set', 'studenteducationhistory_set'
+    ).all()
     serializer_class = StudentListSerializer
     permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
@@ -172,8 +176,8 @@ class StudentListView(generics.ListAPIView):
 
     def get_queryset(self):
         return (
-            Student.objects.all()
-            .select_related("user", "programme", "cohort", "campus")
+            Student.objects.select_related("user", "programme", "cohort", "campus")
+            .prefetch_related('studentdocument_set', 'studenteducationhistory_set')
             .order_by("-created_on")
         )
 
@@ -203,7 +207,11 @@ class StudentListView(generics.ListAPIView):
 
 
 class AssessmentList(generics.ListAPIView):
-    queryset = Student.objects.all()
+    queryset = Student.objects.select_related(
+        "user", "programme", "cohort", "campus"
+    ).prefetch_related(
+        'studentdocument_set', 'studenteducationhistory_set'
+    ).all()
     serializer_class = StudentDetailSerialzer
     permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
@@ -213,8 +221,8 @@ class AssessmentList(generics.ListAPIView):
 
     def get_queryset(self):
         return (
-            Student.objects.all()
-            .select_related("user", "programme", "cohort", "campus")
+            Student.objects.select_related("user", "programme", "cohort", "campus")
+            .prefetch_related('studentdocument_set', 'studenteducationhistory_set')
             .order_by("-created_on")
         )
 
@@ -249,11 +257,15 @@ class AssessmentList(generics.ListAPIView):
 
 
 class StudentDetailView(generics.RetrieveAPIView):
-    queryset = Student.objects.all()
+    queryset = Student.objects.select_related(
+        "user", "programme", "cohort", "campus"
+    ).prefetch_related(
+        'studentdocument_set', 'studenteducationhistory_set'
+    ).all()
     serializer_class = StudentDetailSerialzer
-    permission_classes = [HasUserRole]
+    permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
-    look_up_field = "pk"
+    lookup_field = "pk"
 
 
 class StudentEducationHistoryListView(generics.ListAPIView):
@@ -492,9 +504,9 @@ class BulkStudentUploadView(generics.CreateAPIView):
 
         try:
             if file_extension == "csv":
-                df = pd.read_csv(file)
+                data = self._process_csv(file)
             else:
-                df = pd.read_excel(file)
+                data = []
         except Exception as e:
             raise CustomAPIException(
                 f"Error reading file: {str(e)}", status_code=status.HTTP_400_BAD_REQUEST
@@ -512,7 +524,7 @@ class BulkStudentUploadView(generics.CreateAPIView):
             "registration_number",
         ]
 
-        missing_columns = [col for col in required_columns if col not in df.columns]
+        missing_columns = [col for col in required_columns if col not in data.columns]
         if missing_columns:
             return Response(
                 {"error": f"Missing required columns: {', '.join(missing_columns)}"},
@@ -532,7 +544,7 @@ class BulkStudentUploadView(generics.CreateAPIView):
                     status_code=status.HTTP_400_BAD_REQUEST,
                 )
 
-            for index, row in df.iterrows():
+            for index, row in data.iterrows():
                 try:
 
                     with transaction.atomic():
@@ -544,9 +556,7 @@ class BulkStudentUploadView(generics.CreateAPIView):
                             "phone_number": str(row["phone_number"]).strip(),
                             "address": str(row["address"]).strip(),
                             "city": str(row["city"]).strip(),
-                            "date_of_birth": pd.to_datetime(
-                                row["date_of_birth"]
-                            ).strftime("%Y-%m-%d"),
+                            "date_of_birth": str(row["date_of_birth"]).strip(),
                             "registration_number": str(
                                 row["registration_number"]
                             ).strip(),
@@ -562,7 +572,7 @@ class BulkStudentUploadView(generics.CreateAPIView):
                         }
 
                         for model_field, df_field in optional_fields.items():
-                            if df_field in df.columns and pd.notna(row[df_field]):
+                            if df_field in data.columns and row[df_field] is not None:
                                 student_data[model_field] = str(row[df_field]).strip()
 
                         # Create the user object
@@ -646,3 +656,14 @@ class BulkStudentUploadView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+    def _process_csv(self, file_obj):
+        try:
+            decoded_file = file_obj.read().decode("utf-8").splitlines()
+            reader = csv.DictReader(decoded_file)
+            return list(reader)
+        except Exception as e:
+            raise CustomAPIException(
+                f"Error reading CSV file: {str(e)}",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )

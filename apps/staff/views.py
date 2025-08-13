@@ -61,7 +61,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
-import pandas as pd
+
 import io
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -224,7 +224,9 @@ class CreateStaffView(generics.CreateAPIView):
 
 
 class StaffUpdateView(generics.UpdateAPIView):
-    queryset = Staff.objects.all()
+    queryset = Staff.objects.select_related(
+        'user', 'department', 'position', 'campus'
+    ).all()
     serializer_class = StaffCreateSerializer
     lookup_field = "pk"
     permission_classes = [HasUserRole]
@@ -232,7 +234,11 @@ class StaffUpdateView(generics.UpdateAPIView):
 
 
 class StaffDetailAPIView(generics.RetrieveAPIView):
-    queryset = Staff.objects.all()
+    queryset = Staff.objects.select_related(
+        'user', 'department', 'position', 'campus'
+    ).prefetch_related(
+        'staffpayroll', 'staffdocuments', 'staffleaveentitlement_set'
+    ).all()
     serializer_class = StaffListDetailSerializer
     lookup_field = "pk"
     permission_classes = [IsAuthenticated]
@@ -242,7 +248,7 @@ class StaffDetailAPIView(generics.RetrieveAPIView):
 class StaffStatusToggleView(APIView):
     def post(self, request, pk):
         try:
-            staff = Staff.objects.get(pk=pk)
+            staff = Staff.objects.select_related('user').get(pk=pk)
         except Staff.DoesNotExist:
             return Response({"error": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -254,7 +260,6 @@ class StaffStatusToggleView(APIView):
                 )
             staff.status = "Active"
         else:
-
             staff.status = "Inactive"
 
         staff.save()
@@ -264,8 +269,12 @@ class StaffStatusToggleView(APIView):
 
 
 class StaffListView(generics.ListAPIView):
-    queryset = Staff.objects.all()
-    serializer_class = StaffListDetailSerializer
+    queryset = Staff.objects.select_related(
+        'user', 'department', 'position', 'campus'
+    ).prefetch_related(
+        'staffpayroll', 'staffdocuments', 'staffleaveentitlement_set'
+    ).all()
+    serializer_class = StaffListSerializer
     permission_classes = [IsAuthenticated]
     allowed_roles = ALL_STAFF_ROLES
     filter_backends = [DjangoFilterBackend]
@@ -273,7 +282,13 @@ class StaffListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
-        return Staff.objects.all().order_by("-created_on")
+        return (
+            Staff.objects.select_related(
+                'user', 'department', 'position', 'campus'
+            ).prefetch_related(
+                'staffpayroll', 'staffdocuments', 'staffleaveentitlement_set'
+            ).order_by("-created_on")
+        )
 
     def get_paginated_response(self, data):
         assert self.paginator is not None
@@ -301,7 +316,9 @@ class StaffListView(generics.ListAPIView):
 
 
 class ActiveStaffListView(generics.ListAPIView):
-    queryset = Staff.objects.filter(status="Active")
+    queryset = Staff.objects.select_related(
+        'user', 'department', 'position', 'campus'
+    ).filter(status="Active")
     serializer_class = StaffListDetailSerializer
     permission_classes = [HasUserRole]
     allowed_roles = ALL_STAFF_ROLES
