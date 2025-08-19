@@ -40,6 +40,7 @@ urlpatterns = [
     path("accounts/", include("apps.accounting.urls")),
     path("procurement/", include("apps.procurement.urls")),
     path("inventory/", include("apps.inventory.urls")),
+    path("studentsportal/", include("apps.studentsportal.urls")),
     path(
         "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),

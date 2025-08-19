@@ -2,6 +2,8 @@ from decimal import Decimal
 from django.db import models
 from apps.core.models import AbsoluteBaseModel
 
+from uuid import uuid4
+
 # Create your models here.
 STUDENT_FEES_TRANSACTION_TYPES = (
     ("Standard Invoice", "Standard Invoice"),
@@ -57,6 +59,7 @@ class StudentFeeInvoice(AbsoluteBaseModel):
 
 
 class StudentFeePayment(AbsoluteBaseModel):
+    reference = models.CharField(max_length=255, null=True, blank=True)
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_date = models.DateField()
@@ -74,6 +77,16 @@ class StudentFeePayment(AbsoluteBaseModel):
 
     def __str__(self):
         return self.student.registration_number
+    
+    def save(self, *args, **kwargs):
+        last_payment = StudentFeePayment.objects.filter(student=self.student).last()
+        if last_payment and not self.reference:
+            self.reference = f"FP-{uuid4().hex[:8].upper()}-{last_payment.id + 1}"
+        elif not self.reference:
+            self.reference = f"FP-{uuid4().hex[:8].upper()}-1"
+        else:
+            self.reference = f"FP-{uuid4().hex[:8].upper()}"
+        return super().save(*args, **kwargs)
 
 
 class StudentFeeLedger(AbsoluteBaseModel):
@@ -90,7 +103,7 @@ class StudentFeeLedger(AbsoluteBaseModel):
 
 class StudentFeeStatement(AbsoluteBaseModel):
     PAYMENT_METHODS = StudentFeePayment._meta.get_field("payment_method").choices
-
+    reference = models.CharField(max_length=255, null=True, blank=True)
     payment_method = models.CharField(
         max_length=255,
         choices=PAYMENT_METHODS,
@@ -119,3 +132,11 @@ class StudentFeeStatement(AbsoluteBaseModel):
 
     def __str__(self):
         return self.student.registration_number
+    
+    def save(self, *args, **kwargs):
+        last_statement = StudentFeeStatement.objects.filter(student=self.student).last()
+        if last_statement and not self.reference:
+            self.reference = f"FS-{uuid4().hex[:8].upper()}-{last_statement.id + 1}"
+        else:
+            self.reference = f"FS-{uuid4().hex[:8].upper()}"
+        return super().save(*args, **kwargs)

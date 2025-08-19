@@ -172,6 +172,9 @@ class CourseSession(AbsoluteBaseModel):
         ],
         default="Active",
     )
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, related_name="semesterssessions", null=True, blank=True
+    )
 
     def __str__(self):
         return self.course.name
