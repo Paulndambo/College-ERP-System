@@ -3,6 +3,7 @@ from rest_framework import serializers
 from apps.students.models import (
     MealCard, StudentAttendance, SemesterReporting
 )
+from apps.exams.models import ExamData
 
 
 ############# Student Related Serializers ############
@@ -40,3 +41,19 @@ class SemesterReportingSerializer(serializers.ModelSerializer):
     class Meta:
         model = SemesterReporting
         fields = '__all__'
+
+
+class ExamDataSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.user.name', read_only=True)
+    semester_name = serializers.CharField(source='semester.name', read_only=True)
+    cohort_name = serializers.CharField(source='cohort.name', read_only=True)
+    course_code = serializers.CharField(source='course.course_code', read_only=True)
+    course_name = serializers.CharField(source='course.name', read_only=True)
+    academic_year = serializers.CharField(source='semester.academic_year', read_only=True)
+    grade = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = ExamData
+        fields = "__all__"
+
+   

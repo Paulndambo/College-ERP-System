@@ -5,7 +5,7 @@ from apps.studentsportal.views import (
 )
 
 from apps.studentsportal.students.views import (
-    MealCardAPIView, StudentAttendanceAPIView, SemesterReportingAPIView
+    MealCardAPIView, StudentAttendanceAPIView, SemesterReportingAPIView, ExamDataAPIView
 )
 
 urlpatterns = [
@@ -17,4 +17,5 @@ urlpatterns = [
     path('student-meal-cards/', MealCardAPIView.as_view(), name='student-meal-cards'),
     path('class-attendances/', StudentAttendanceAPIView.as_view(), name='student-attendances'),
     path('semester-reportings/', SemesterReportingAPIView.as_view(), name='semester-reportings'),
+    path('exams-data/', ExamDataAPIView.as_view(), name='exams-data'),
 ]
