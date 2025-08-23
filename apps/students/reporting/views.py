@@ -8,8 +8,9 @@ from apps.students.reporting.filters import SemesterReportingFilter
 from apps.students.reporting.serializers import (
     SemesterReportingListSerializer,
     SemesterReportingSerializer,
+    StudentCourseEnrollmentSerializer
 )
-from apps.students.models import SemesterReporting
+from apps.students.models import SemesterReporting, StudentCourseEnrollment
 from apps.finance.models import FeeStructure
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from apps.student_finance.mixins import StudentInvoicingMixin
@@ -21,51 +22,6 @@ from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-
-"""By Paul - Semester Reporting API View"""
-# class SemesterReportingAPIView(generics.ListCreateAPIView):
-#     queryset = SemesterReporting.objects.all()
-#     serializer_class = SemesterReportingSerializer
-
-#     @transaction.atomic
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data)
-
-#         if serializer.is_valid(raise_exception=True):
-#             reporting = serializer.save()
-
-#             fee_structure = FeeStructure.objects.filter(
-#                 programme=reporting.student.programme,
-#                 semester__name=reporting.semester.name,
-#             ).first()
-
-#             if not fee_structure:
-#                 return Response(
-#                     {
-#                         "message": "No fee structure found for this programme and semester"
-#                     },
-#                     status=status.HTTP_404_NOT_FOUND,
-#                 )
-
-#             semester_total_fees = fee_structure.total_amount()
-
-#             success = StudentInvoicingMixin(
-#                 student=reporting.student,
-#                 semester=reporting.semester,
-#                 transaction_type="Standard Invoice",
-#                 amount=semester_total_fees,
-#             ).run()
-#             print("**********Success***********")
-#             print(success)
-#             print("**********Success***********")
-#             if success == True:
-#                 return Response(
-#                     {"message": "Student invoice created successfully"},
-#                     status=status.HTTP_201_CREATED,
-#                 )
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class SemesterReportingAPIView(APIView):
     """
@@ -144,3 +100,22 @@ class SemisterReportingList(generics.ListAPIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+### Units Registration API View
+class SemesterReportingCreateView(generics.CreateAPIView):
+    queryset = StudentCourseEnrollment.objects.all()
+    serializer_class = StudentCourseEnrollmentSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+
+        if serializer.is_valid():
+            reporting = serializer.save()
+            reporting.academic_year = reporting.semester.study_year
+            reporting.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        )

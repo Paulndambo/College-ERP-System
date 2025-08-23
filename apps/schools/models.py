@@ -28,6 +28,11 @@ SEMESTER_TYPES = (
     ("Semester Three", "Semester Three"),
 )
 
+COURSE_TYPES = (
+    ("Core", "Core"),
+    ("Elective", "Elective"),
+    ("Optional", "Optional"),
+)
 
 class School(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
@@ -67,17 +72,6 @@ class Programme(AbsoluteBaseModel):
 
     def __str__(self):
         return f"{self.level} of {self.name}"
-
-
-class Course(AbsoluteBaseModel):
-    course_code = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    school = models.ForeignKey(School, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.name
 
 
 class Semester(AbsoluteBaseModel):
@@ -152,6 +146,21 @@ class ProgrammeCohort(AbsoluteBaseModel):
     def get_academic_year(self):
         """Get academic year from the intake this cohort belongs to"""
         return self.intake.get_academic_year()
+    
+
+class Course(AbsoluteBaseModel):
+    course_code = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    school = models.ForeignKey(School, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
+    study_year = models.CharField(max_length=255, choices=COHORT_YEAR_CHOICES, null=True, blank=True)
+    credit_hours = models.FloatField(default=2.0)
+    semester = models.CharField(max_length=255, choices=SEMESTER_TYPES, null=True, blank=True)
+    course_type = models.CharField(max_length=255, choices=COURSE_TYPES, default="Core")
+
+    def __str__(self):
+        return self.name
 
 
 class CourseSession(AbsoluteBaseModel):
@@ -171,6 +180,9 @@ class CourseSession(AbsoluteBaseModel):
             ("Rescheduled", "Rescheduled"),
         ],
         default="Active",
+    )
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, related_name="semesterssessions", null=True, blank=True
     )
 
     def __str__(self):

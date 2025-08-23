@@ -54,7 +54,7 @@ class CohortsListView(ListView):
         context["search_query"] = self.request.GET.get("search", "")
         context["programmes"] = programmes
         context["semesters"] = semesters
-        context["cohort_years"] = ACADEMIC_YEARS
+       
         return context
 
 
