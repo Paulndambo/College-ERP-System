@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.studentsportal.views import (
+from apps.studentsportal.money.views import (
     StudentFeesPaymentsAPIView, StudentFeeInvoicesAPIView,
     StudentFeeLedgerAPIView, StudentFeeStatementAPIView
 )

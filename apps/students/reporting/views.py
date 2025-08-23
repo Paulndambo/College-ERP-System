@@ -8,8 +8,9 @@ from apps.students.reporting.filters import SemesterReportingFilter
 from apps.students.reporting.serializers import (
     SemesterReportingListSerializer,
     SemesterReportingSerializer,
+    StudentCourseEnrollmentSerializer
 )
-from apps.students.models import SemesterReporting
+from apps.students.models import SemesterReporting, StudentCourseEnrollment
 from apps.finance.models import FeeStructure
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from apps.student_finance.mixins import StudentInvoicingMixin
@@ -99,3 +100,22 @@ class SemisterReportingList(generics.ListAPIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+### Units Registration API View
+class SemesterReportingCreateView(generics.CreateAPIView):
+    queryset = StudentCourseEnrollment.objects.all()
+    serializer_class = StudentCourseEnrollmentSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        serializer = self.serializer_class(data=data)
+
+        if serializer.is_valid():
+            reporting = serializer.save()
+            reporting.academic_year = reporting.semester.study_year
+            reporting.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serializer.errors, status=status.HTTP_400_BAD_REQUEST
+        )

@@ -104,21 +104,10 @@ class StudentFeeLedger(AbsoluteBaseModel):
 class StudentFeeStatement(AbsoluteBaseModel):
     PAYMENT_METHODS = StudentFeePayment._meta.get_field("payment_method").choices
     reference = models.CharField(max_length=255, null=True, blank=True)
-    payment_method = models.CharField(
-        max_length=255,
-        choices=PAYMENT_METHODS,
-        null=True,
-        blank=True,
-    )
+    payment_method = models.CharField(max_length=255, choices=PAYMENT_METHODS, null=True, blank=True)
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
-    statement_type = models.CharField(
-        max_length=255, choices=STUDENT_FEE_STATEMENT_TYPES
-    )
-    transaction_type = models.CharField(
-        max_length=255,
-        choices=STUDENT_FEES_TRANSACTION_TYPES,
-        default="Standard Invoice",
-    )
+    statement_type = models.CharField(max_length=255, choices=STUDENT_FEE_STATEMENT_TYPES)
+    transaction_type = models.CharField(max_length=255, choices=STUDENT_FEES_TRANSACTION_TYPES, default="Standard Invoice")
     debit = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
     credit = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
