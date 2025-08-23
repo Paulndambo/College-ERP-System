@@ -8,6 +8,10 @@ from apps.studentsportal.students.views import (
     MealCardAPIView, StudentAttendanceAPIView, SemesterReportingAPIView, ExamDataAPIView
 )
 
+from apps.studentsportal.courses.views import (
+    CourseListView, StudentCourseEnrollmentView
+)
+
 urlpatterns = [
     path('fees-payments/', StudentFeesPaymentsAPIView.as_view(), name='student-fees-payments'),
     path('fees-invoices/', StudentFeeInvoicesAPIView.as_view(), name='student-fees-invoices'),
@@ -18,4 +22,7 @@ urlpatterns = [
     path('class-attendances/', StudentAttendanceAPIView.as_view(), name='student-attendances'),
     path('semester-reportings/', SemesterReportingAPIView.as_view(), name='semester-reportings'),
     path('exams-data/', ExamDataAPIView.as_view(), name='exams-data'),
+
+    path('courses/', CourseListView.as_view(), name='student-courses'),
+    path('course-enrollments/', StudentCourseEnrollmentView.as_view(), name='student-course-enrollments'),
 ]

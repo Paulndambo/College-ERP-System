@@ -1,6 +1,7 @@
 from django.db import models
 
 from apps.core.models import AbsoluteBaseModel
+from apps.core.constants import COHORT_YEAR_CHOICES
 
 # Create your models here.
 PROGRAMME_TYPES = (
@@ -12,15 +13,7 @@ PROGRAMME_TYPES = (
     ("PhD", "PhD"),
 )
 
-COHORT_YEAR_CHOICES = (
-    ("First Year", "First Year"),
-    ("Second Year", "Second Year"),
-    ("Third Year", "Third Year"),
-    ("Fourth Year", "Fourth Year"),
-    ("Fifth Year", "Fifth Year"),
-    ("Sixth Year", "Sixth Year"),
-    ("Seventh Year", "Seventh Year"),
-)
+
 
 SEMESTER_TYPES = (
     ("Semester One", "Semester One"),
@@ -84,7 +77,7 @@ class Semester(AbsoluteBaseModel):
     )
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.academic_year}"
 
     def derive_academic_year_from_dates(self):
         """
@@ -160,7 +153,7 @@ class Course(AbsoluteBaseModel):
     course_type = models.CharField(max_length=255, choices=COURSE_TYPES, default="Core")
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.course_code})"
 
 
 class CourseSession(AbsoluteBaseModel):

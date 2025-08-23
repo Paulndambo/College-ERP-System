@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 
-from apps.core.models import RolePermission, UserRole,Module
+from apps.core.models import RolePermission, UserRole,Module, AcademicYear
 
 
 # Register your models here.
@@ -16,3 +16,8 @@ class ModuleAdmin(admin.ModelAdmin):
 @admin.register(RolePermission)
 class RolePermissionAdmin(admin.ModelAdmin):
     list_display = ("id", "role","module",  "can_view", "created_on","updated_on")
+
+
+@admin.register(AcademicYear)
+class AcademicYearAdmin(admin.ModelAdmin):
+    list_display = ("id", "name", "start_date", "end_date", "is_current")

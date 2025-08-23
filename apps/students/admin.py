@@ -6,6 +6,7 @@ from apps.students.models import (
     StudentDocument,
     StudentAttendance,
     MealCard,
+    StudentCourseEnrollment
 )
 
 
@@ -54,3 +55,9 @@ class SemesterReportingAdmin(admin.ModelAdmin):
         "student__user__last_name",
         "academic_year",
     ]
+
+
+@admin.register(StudentCourseEnrollment)
+class StudentCourseEnrollmentAdmin(admin.ModelAdmin):
+    list_display = ["id", "student", "course", "semester", "approved"]
+    

@@ -4,6 +4,7 @@ import calendar
 from django.db import models
 
 from apps.core.models import AbsoluteBaseModel
+from apps.core.constants import COHORT_YEAR_CHOICES
 
 # Create your models here.
 STUDENT_STATUS_CHOICES = (
@@ -150,7 +151,8 @@ class StudentCourseEnrollment(AbsoluteBaseModel):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     course = models.ForeignKey("schools.Course", on_delete=models.CASCADE, related_name="studentcourses")
     semester = models.ForeignKey("schools.Semester", on_delete=models.CASCADE, related_name="studentsemesters")
-    academic_year = models.ForeignKey("core.AcademicYear", on_delete=models.CASCADE, related_name="studentacademicyears", null=True, blank=True)
+    #academic_year = models.ForeignKey("core.AcademicYear", on_delete=models.CASCADE, related_name="studentacademicyears", null=True, blank=True)
+    approved = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.student.user.username}: {self.course.name} ({self.semester.name})"

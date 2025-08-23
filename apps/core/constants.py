@@ -68,3 +68,14 @@ LEAVE_TYPES = [
 
 def payment_ref_generator():
     return uuid4().hex
+
+
+COHORT_YEAR_CHOICES = (
+    ("First Year", "First Year"),
+    ("Second Year", "Second Year"),
+    ("Third Year", "Third Year"),
+    ("Fourth Year", "Fourth Year"),
+    ("Fifth Year", "Fifth Year"),
+    ("Sixth Year", "Sixth Year"),
+    ("Seventh Year", "Seventh Year"),
+)
