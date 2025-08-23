@@ -178,7 +178,11 @@ class UnarchiveAccountTypeView(APIView):
 
 
 class JournalEntryListCreateView(generics.ListCreateAPIView):
-    queryset = JournalEntry.objects.all().prefetch_related("transactions").order_by("-created_on")
+    queryset = (
+        JournalEntry.objects.all()
+        .prefetch_related("transactions")
+        .order_by("-created_on")
+    )
 
     serializer_class = JournalEntrySerializer
 

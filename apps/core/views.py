@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from apps.core.filters import AcademicYearsFilter, CampusFilter
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -6,8 +7,8 @@ from apps.core.utils import ModelCountUtils
 from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
 from django.contrib.admin.models import LogEntry
-from .serializers import LogEntrySerializer
-from .models import Campus, StudyYear, UserRole
+from .serializers import LogEntrySerializer, ModuleSerializer, RoleSerializer
+from .models import Campus, Module, StudyYear, UserRole
 from .serializers import (
     CampusCreateSerializer,
     CampusListSerializer,
@@ -22,40 +23,40 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 
-class UserRoleListView(generics.ListAPIView):
-    queryset = UserRole.objects.all()
-    serializer_class = UserRoleListSerializer
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
-    filter_backends = [DjangoFilterBackend]
+# class UserRoleListView(generics.ListAPIView):
+#     queryset = UserRole.objects.all()
+#     serializer_class = UserRoleListSerializer
+#     permission_classes = [HasUserRole]
+#     allowed_roles = ALL_STAFF_ROLES
+#     filter_backends = [DjangoFilterBackend]
 
-    pagination_class = None
+#     pagination_class = None
 
-    def get_queryset(self):
-        return UserRole.objects.all().order_by("-created_on")
+#     def get_queryset(self):
+#         return UserRole.objects.all().order_by("-created_on")
 
-    def get_paginated_response(self, data):
-        return super().get_paginated_response(data)
+    # def get_paginated_response(self, data):
+    #     return super().get_paginated_response(data)
 
-    def list(self, request, *args, **kwargs):
-        try:
-            roles = self.get_queryset()
-            roles = self.filter_queryset(roles)
-            page = self.request.query_params.get("page", None)
-            if page:
-                self.pagination_class = PageNumberPagination
-                paginator = self.pagination_class()
-                paginated_roles = paginator.paginate_queryset(roles, request)
-                serializer = self.get_serializer(paginated_roles, many=True)
-                return paginator.get_paginated_response(serializer.data)
+    # def list(self, request, *args, **kwargs):
+    #     try:
+    #         roles = self.get_queryset()
+    #         roles = self.filter_queryset(roles)
+    #         page = self.request.query_params.get("page", None)
+    #         if page:
+    #             self.pagination_class = PageNumberPagination
+    #             paginator = self.pagination_class()
+    #             paginated_roles = paginator.paginate_queryset(roles, request)
+    #             serializer = self.get_serializer(paginated_roles, many=True)
+    #             return paginator.get_paginated_response(serializer.data)
 
-            serializer = self.get_serializer(roles, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    #         serializer = self.get_serializer(roles, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
 
-        except Exception as exc:
-            raise CustomAPIException(
-                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+    #     except Exception as exc:
+    #         raise CustomAPIException(
+    #             message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    #         )
 
 
 class CampusCreateView(generics.CreateAPIView):
@@ -107,6 +108,7 @@ class CampusListView(generics.ListAPIView):
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 
 class CampusUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
@@ -234,3 +236,79 @@ class RecentActionsView(APIView):
         )[:50]
         serializer = LogEntrySerializer(logs, many=True)
         return Response(serializer.data)
+
+
+
+
+
+class RolesListAPIView(generics.ListAPIView):
+    queryset = UserRole.objects.all()
+    serializer_class = UserRoleListSerializer
+    def get_paginated_response(self, data):
+        return super().get_paginated_response(data)
+
+    def list(self, request, *args, **kwargs):
+        try:
+            roles = self.get_queryset()
+            roles = self.filter_queryset(roles)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_roles = paginator.paginate_queryset(roles, request)
+                serializer = self.get_serializer(paginated_roles, many=True)
+                return paginator.get_paginated_response(serializer.data)
+
+            serializer = self.get_serializer(roles, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class RoleListCreateView(generics.CreateAPIView):
+    queryset = UserRole.objects.all()
+    serializer_class = RoleSerializer
+
+    def perform_create(self, serializer):
+        name = serializer.validated_data.get('name')
+        if UserRole.objects.filter(name__iexact=name).exists():
+            raise ValidationError({"error": "A role with this name already exists."})
+        serializer.save()
+
+
+class RoleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UserRole.objects.all()
+    serializer_class = RoleSerializer
+
+    def perform_update(self, serializer):
+        name = serializer.validated_data.get('name')
+        instance_id = self.get_object().id
+        if UserRole.objects.filter(name__iexact=name).exclude(id=instance_id).exists():
+            raise ValidationError({"error": "A role with this name already exists."})
+        serializer.save()
+class ModulesListView(generics.ListAPIView):
+    queryset = Module.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = ModuleSerializer
+    pagination_class = None
+
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            qs = self.get_queryset()
+            qs = self.filter_queryset(qs)
+            page = self.request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_modules = paginator.paginate_queryset(qs, request)
+                serializer = self.get_serializer(paginated_modules, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(qs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

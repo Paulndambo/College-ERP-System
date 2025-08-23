@@ -1,4 +1,3 @@
-
 import django_filters
 
 from apps.inventory.models import InventoryItem

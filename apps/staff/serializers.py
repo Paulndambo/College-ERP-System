@@ -368,7 +368,8 @@ class StaffPayrollListSerializer(StaffPayrollCreateSerializer):
 
 class StaffPaySlipSerializer(serializers.ModelSerializer):
     staff = StaffListDetailSerializer()
-
+    outstanding_balance = serializers.SerializerMethodField()
+    payment_status_label = serializers.SerializerMethodField()
     class Meta:
         model = Payslip
         fields = [
@@ -388,8 +389,15 @@ class StaffPaySlipSerializer(serializers.ModelSerializer):
             "created_on",
             "updated_on",
             "payment_status",
+            "outstanding_balance",
+            "payment_status_label",
         ]
-
+    def get_outstanding_balance(self, obj):
+        if hasattr(obj, "payment_statement"):
+            return obj.payment_statement.outstanding_balance
+        return None
+    def get_payment_status_label(self, obj):
+        return obj.get_payment_status_display()
 
 class CreateStaffLeaveApplicationSerializer(serializers.ModelSerializer):
     staff = serializers.PrimaryKeyRelatedField(

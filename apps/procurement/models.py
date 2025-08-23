@@ -28,14 +28,16 @@ DOCUMENT_TYPE_CHOICES = [
 ]
 
 BUSINESS_TYPE_CHOICES = [
-        ("individual", "Individual"),
-        ("sole_proprietor", "Sole Proprietor"),
-        ("partnership", "Partnership"),
-        ("limited", "Limited Company"),
-        ("ngo", "NGO"),
-        ("government", "Government"),
-        ("other", "Other"),
-    ]
+    ("individual", "Individual"),
+    ("sole_proprietor", "Sole Proprietor"),
+    ("partnership", "Partnership"),
+    ("limited", "Limited Company"),
+    ("ngo", "NGO"),
+    ("government", "Government"),
+    ("other", "Other"),
+]
+
+
 class Tender(AbsoluteBaseModel):
     status_choices = [
         ("open", "Open"),
@@ -47,7 +49,6 @@ class Tender(AbsoluteBaseModel):
         null=True,
         blank=True,
         help_text="Upload tender details and terms document",
-       
     )
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -78,14 +79,13 @@ class Tender(AbsoluteBaseModel):
         return self.title
 
 
-
 class Vendor(AbsoluteBaseModel):
     STATUS_CHOICES = [
         ("active", "Active"),
         ("inactive", "Inactive"),
         ("blacklisted", "Blacklisted"),
     ]
-   
+
     vendor_no = models.CharField(max_length=20, unique=True, blank=True, null=True)
     name = models.CharField(max_length=255)
     email = models.EmailField(blank=True, null=True)
@@ -117,13 +117,18 @@ class Vendor(AbsoluteBaseModel):
     )
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
+
     def save(self, *args, **kwargs):
         from apps.procurement.utils import generate_unique_vendor_no
+
         if not self.vendor_no:
             self.vendor_no = generate_unique_vendor_no()
         super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
+
+
 class TenderApplication(AbsoluteBaseModel):
     tender = models.ForeignKey(
         Tender, on_delete=models.CASCADE, related_name="applications"
@@ -133,29 +138,25 @@ class TenderApplication(AbsoluteBaseModel):
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
-    
+
     contact_person = models.CharField(max_length=255, blank=True, null=True)
     contact_person_phone = models.CharField(max_length=20, blank=True, null=True)
     contact_person_email = models.EmailField(blank=True, null=True)
-    
+
     business_type = models.CharField(
-    max_length=50,
-    choices=BUSINESS_TYPE_CHOICES,
-    blank=True,
-    null=True,
-    help_text="Type of business applying",
+        max_length=50,
+        choices=BUSINESS_TYPE_CHOICES,
+        blank=True,
+        null=True,
+        help_text="Type of business applying",
     )
 
     company_registration_number = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="Business registration number"
+        max_length=100, blank=True, help_text="Business registration number"
     )
 
     tax_pin = models.CharField(
-        max_length=100,
-        blank=True,
-        help_text="KRA PIN or equivalent"
+        max_length=100, blank=True, help_text="KRA PIN or equivalent"
     )
 
     status_choices = [
@@ -163,9 +164,10 @@ class TenderApplication(AbsoluteBaseModel):
         ("approved", "Approved"),
         ("rejected", "Rejected"),
         ("incomplete", "Incomplete"),
-       
     ]
-    status = models.CharField(max_length=20, choices=status_choices, default="incomplete")
+    status = models.CharField(
+        max_length=20, choices=status_choices, default="incomplete"
+    )
     reviewed_on = models.DateTimeField(null=True, blank=True)
     reviewed_by = models.ForeignKey(
         User,
@@ -178,15 +180,14 @@ class TenderApplication(AbsoluteBaseModel):
     def __str__(self):
         return f"{self.company_name} - {self.tender.title}"
 
-    
+
 class ApplicationDocument(AbsoluteBaseModel):
     """Documents submitted with tender applications"""
+
     application = models.ForeignKey(
-        TenderApplication,
-        on_delete=models.CASCADE,
-        related_name="documents"
+        TenderApplication, on_delete=models.CASCADE, related_name="documents"
     )
-    
+
     document_name = models.CharField(max_length=255)
     document_type = models.CharField(
         max_length=50,
@@ -194,19 +195,18 @@ class ApplicationDocument(AbsoluteBaseModel):
     )
     file = models.FileField(upload_to="application_documents/")
     description = models.TextField(blank=True)
-    
+
     def __str__(self):
         return f"{self.application.company_name} - {self.document_name}"
 
 
 class VendorDocument(AbsoluteBaseModel):
     """Documents for approved vendors (copied from application documents)"""
+
     vendor = models.ForeignKey(
-        Vendor,
-        on_delete=models.CASCADE,
-        related_name="documents"
+        Vendor, on_delete=models.CASCADE, related_name="documents"
     )
-    
+
     document_name = models.CharField(max_length=255)
     document_type = models.CharField(
         max_length=50,
@@ -214,15 +214,15 @@ class VendorDocument(AbsoluteBaseModel):
     )
     document_file = models.FileField(upload_to="vendor_documents/")
     description = models.TextField(blank=True)
-    
+
     source_application = models.ForeignKey(
         TenderApplication,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        help_text="Application this document was copied from"
+        help_text="Application this document was copied from",
     )
-    
+
     def __str__(self):
         return f"{self.vendor.name} - {self.document_name}"
 
@@ -237,7 +237,7 @@ class TenderAward(AbsoluteBaseModel):
     ]
     tender = models.ForeignKey(
         "Tender", on_delete=models.CASCADE, related_name="awards"
-   )
+    )
     vendor = models.ForeignKey(
         "Vendor", on_delete=models.CASCADE, related_name="awarded_tenders"
     )
@@ -248,18 +248,21 @@ class TenderAward(AbsoluteBaseModel):
         default=0.00,
         help_text="The final agreed amount for the award",
     )
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True
+    )
     amount_paid = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=0.00,
-        help_text="Total amount paid to vendor for this award"
+        help_text="Total amount paid to vendor for this award",
     )
+
     @property
     def balance_due(self):
         """Amount remaining to be paid"""
         return self.award_amount - self.amount_paid
-    
+
     @property
     def payment_status(self):
         """Get payment status"""
@@ -269,6 +272,7 @@ class TenderAward(AbsoluteBaseModel):
             return "Fully Paid"
         else:
             return "Partially Paid"
+
     def __str__(self):
         return (
             f"{self.vendor.name} awarded '{self.tender.title}' for {self.award_amount}"
@@ -288,17 +292,18 @@ class PurchaseOrder(AbsoluteBaseModel):
         default="pending",
     )
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
     @property
     def total_amount(self):
         total = self.items.aggregate(
             total=Sum(
                 ExpressionWrapper(
-                    F('quantity') * F('unit_price'),
-                    output_field=DecimalField()
+                    F("quantity") * F("unit_price"), output_field=DecimalField()
                 )
             )
-        )['total']
+        )["total"]
         return total or 0
+
     def __str__(self):
         return f"PO-{self.id} - {self.vendor.name}"
 
@@ -312,9 +317,10 @@ class PurchaseItem(AbsoluteBaseModel):
     name = models.CharField(
         max_length=100, help_text="Short name of the item e.g., 'Office Desk'"
     )
-    unit = models.ForeignKey("inventory.UnitOfMeasure", on_delete=models.SET_NULL, null=True)
+    unit = models.ForeignKey(
+        "inventory.UnitOfMeasure", on_delete=models.SET_NULL, null=True
+    )
 
-   
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
     category = models.ForeignKey(
         "inventory.Category", on_delete=models.SET_NULL, null=True, blank=True
@@ -351,12 +357,13 @@ class VendorPayment(AbsoluteBaseModel):
         ("Mpesa", "Mpesa"),
         ("Cheque", "Cheque"),
     ]
-    tender_award = models.ForeignKey(TenderAward, on_delete=models.CASCADE)  
+    tender_award = models.ForeignKey(TenderAward, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     description = models.TextField(blank=True, null=True)
     reference = models.CharField(max_length=50)
     payment_method = models.CharField(max_length=50, choices=PAYMENT_METHODS)
     paid_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
     @property
     def vendor(self):
         return self.tender_award.vendor
@@ -364,27 +371,25 @@ class VendorPayment(AbsoluteBaseModel):
     def __str__(self):
         return f"Payment to {self.tender_award.vendor.name} - {self.amount} ({self.reference})"
 
+
 class VendorPaymentStatement(AbsoluteBaseModel):
     """Track payment history and balance for tender awards"""
+
     STATEMENT_TYPES = [
         ("Award", "Award"),
         ("Payment", "Payment"),
     ]
-    
+
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     tender_award = models.ForeignKey(TenderAward, on_delete=models.CASCADE)
     statement_type = models.CharField(max_length=20, choices=STATEMENT_TYPES)
-    debit = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0'))
+    debit = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0"))
     credit = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     description = models.CharField(max_length=255)
     payment_method = models.CharField(
-        max_length=50, 
-        choices=VendorPayment.PAYMENT_METHODS,
-        blank=True, 
-        null=True
+        max_length=50, choices=VendorPayment.PAYMENT_METHODS, blank=True, null=True
     )
 
     def __str__(self):
         return f"{self.vendor.name} - {self.tender_award.tender.title} - {self.statement_type}"
-

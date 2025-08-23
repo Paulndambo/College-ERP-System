@@ -50,6 +50,29 @@ class StudyYear(AbsoluteBaseModel):
     def __str__(self):
         return self.name
 
+# Permissions
+class Module(AbsoluteBaseModel):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class RolePermission(AbsoluteBaseModel):
+    role = models.ForeignKey(UserRole, on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, on_delete=models.CASCADE)
+
+    can_view = models.BooleanField(default=True)
+    can_create = models.BooleanField(default=False)
+    can_edit = models.BooleanField(default=False)
+    can_delete = models.BooleanField(default=False)
+    can_approve = models.BooleanField(default=False)
+    can_export = models.BooleanField(default=False)
+    can_print = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.role.name} - {self.module.name}"
 
 class AcademicYear(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
