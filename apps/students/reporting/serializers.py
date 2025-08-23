@@ -3,7 +3,7 @@ from apps.schools.serializers import (
     ProgrammeCohortListSerializer,
     SemesterListSerializer,
 )
-from apps.students.models import SemesterReporting
+from apps.students.models import SemesterReporting, StudentCourseEnrollment
 from rest_framework.exceptions import ValidationError
 
 
@@ -80,3 +80,9 @@ class SemesterReportingListSerializer(serializers.ModelSerializer):
 
     def get_reg_no(self, obj):
         return obj.student.registration_number
+
+
+class StudentCourseEnrollmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentCourseEnrollment
+        fields = "__all__"

@@ -52,33 +52,21 @@ class Student(AbsoluteBaseModel):
     guardian_relationship = models.CharField(max_length=255, null=True)
     guardian_email = models.EmailField(null=True)
     status = models.CharField(max_length=255, choices=STUDENT_STATUS_CHOICES)
-    programme = models.ForeignKey(
-        "schools.Programme", on_delete=models.SET_NULL, null=True
-    )
-    cohort = models.ForeignKey(
-        "schools.ProgrammeCohort",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="cohortstudents",
-    )
-    hostel_room = models.ForeignKey(
-        "hostels.HostelRoom", on_delete=models.SET_NULL, null=True
-    )
+    programme = models.ForeignKey("schools.Programme", on_delete=models.SET_NULL, null=True)
+    cohort = models.ForeignKey("schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True, related_name="cohortstudents")
+    hostel_room = models.ForeignKey("hostels.HostelRoom", on_delete=models.SET_NULL, null=True)
     campus = models.ForeignKey("core.Campus", on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return (
-            f"{self.user.first_name} {self.user.last_name}: {self.registration_number}"
-        )
+        return f"{self.user.first_name} {self.user.last_name}: {self.registration_number}"
+        
 
     def name(self):
         return f"{self.user.first_name} {self.user.last_name}"
 
 
 class StudentEducationHistory(AbsoluteBaseModel):
-    student = models.ForeignKey(
-        "students.Student", on_delete=models.CASCADE, related_name="educationhistory"
-    )
+    student = models.ForeignKey("students.Student", on_delete=models.CASCADE, related_name="educationhistory")
     institution = models.CharField(max_length=255)
     level = models.CharField(max_length=255, choices=EDUCATION_LEVEL_CHOICES)
     grade_or_gpa = models.CharField(max_length=255, null=True)
@@ -94,9 +82,7 @@ class StudentDocument(AbsoluteBaseModel):
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
     document_type = models.CharField(max_length=255, null=True)
     document_name = models.CharField(max_length=255)
-    document_file = models.FileField(
-        upload_to="student_documents/", null=True, blank=True
-    )
+    document_file = models.FileField(upload_to="student_documents/", null=True, blank=True)
 
     def __str__(self):
         return f"{self.student.user.username}: {self.document.name}"
@@ -126,18 +112,10 @@ class StudentProgramme(AbsoluteBaseModel):
 
 
 class StudentAttendance(AbsoluteBaseModel):
-    student = models.ForeignKey(
-        "students.Student", on_delete=models.CASCADE, related_name="studentattendances"
-    )
-    session = models.ForeignKey(
-        "schools.CourseSession",
-        on_delete=models.CASCADE,
-        related_name="sessionattendances",
-    )
+    student = models.ForeignKey("students.Student", on_delete=models.CASCADE, related_name="studentattendances")
+    session = models.ForeignKey("schools.CourseSession", on_delete=models.CASCADE, related_name="sessionattendances")
     date = models.DateField()
-    status = models.CharField(
-        max_length=255, choices=ATTENDANCE_STATUS_CHOICES, default="Present"
-    )
+    status = models.CharField(max_length=255, choices=ATTENDANCE_STATUS_CHOICES, default="Present")
     reason = models.CharField(max_length=255, null=True)
 
     def __str__(self):
@@ -148,12 +126,7 @@ class StudentCheckIn(AbsoluteBaseModel):
     student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True)
     check_in_time = models.DateTimeField(auto_now_add=True)
     check_out_time = models.DateTimeField(null=True)
-    recorded_by = models.ForeignKey(
-        "users.User",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="studentcheckinofficers",
-    )
+    recorded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="studentcheckinofficers")
 
     def __str__(self):
         return self.user.first_name
@@ -164,17 +137,20 @@ class StudentCheckIn(AbsoluteBaseModel):
 
 class SemesterReporting(AbsoluteBaseModel):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    semester = models.ForeignKey(
-        "schools.Semester",
-        on_delete=models.SET_NULL,
-        null=True,
-        related_name="semesterreportings",
-    )
-    cohort = models.ForeignKey(
-        "schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True
-    )
+    semester = models.ForeignKey("schools.Semester", on_delete=models.SET_NULL, null=True, related_name="semesterreportings")
+    cohort = models.ForeignKey("schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True)
     academic_year = models.CharField(max_length=255, null=True)
     reported = models.BooleanField(default=False)
 
     def __str__(self):
         return self.semester.name
+
+
+class StudentCourseEnrollment(AbsoluteBaseModel):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey("schools.Course", on_delete=models.CASCADE, related_name="studentcourses")
+    semester = models.ForeignKey("schools.Semester", on_delete=models.CASCADE, related_name="studentsemesters")
+    academic_year = models.ForeignKey("core.AcademicYear", on_delete=models.CASCADE, related_name="studentacademicyears", null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.student.user.username}: {self.course.name} ({self.semester.name})"

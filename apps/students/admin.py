@@ -5,6 +5,7 @@ from apps.students.models import (
     Student,
     StudentDocument,
     StudentAttendance,
+    MealCard,
 )
 
 

@@ -464,3 +464,4 @@ class StockIssueAPIView(generics.ListAPIView):
 
         except Exception as exc:
             return Response(str(exc), status=status.HTTP_400_BAD_REQUEST)
+        return super().destroy(request, *args, **kwargs)
