@@ -1,4 +1,6 @@
 from django.urls import path
+
+from apps.staff.leaves.views import CreateLeavePolicyView, LeavePoliciesListView, LeavePolicyDetailView
 from .views import *
 
 urlpatterns = [
@@ -21,29 +23,20 @@ urlpatterns = [
         StaffStatusToggleView.as_view(),
         name="staff-toggle-status",
     ),
-    path(
-        "onboarding-progress/<int:pk>/",
-        StaffOnboardingProgressAPIView.as_view(),
-        name="onboarding progress",
-    ),
-    path(
-        "onboarding-progress/<int:pk>/complete/",
-        CompleteOnboardingView.as_view(),
-        name="complete-onboarding",
-    ),
+   
     path("details/<int:pk>/", StaffUpdateView.as_view(), name="staff-detail-update"),
-    path(
-        "payroll/detail/<int:pk>/",
-        StaffPayrollDetailView.as_view(),
-        name="detail-staff-payroll",
-    ),
-    path("payroll/", StaffPayrollListView.as_view(), name="payroll-list"),
-    path("payroll/create/", StaffPayrollCreateView.as_view(), name="payroll-create"),
-    path(
-        "payroll/<int:pk>/",
-        StaffPayrollUpdateView.as_view(),
-        name="payroll-detail-update",
-    ),
+    # path(
+    #     "payroll/detail/<int:pk>/",
+    #     StaffPayrollDetailView.as_view(),
+    #     name="detail-staff-payroll",
+    # ),
+    # path("payroll/", StaffPayrollListView.as_view(), name="payroll-list"),
+    # path("payroll/create/", StaffPayrollCreateView.as_view(), name="payroll-create"),
+    # path(
+    #     "payroll/<int:pk>/",
+    #     StaffPayrollUpdateView.as_view(),
+    #     name="payroll-detail-update",
+    # ),
     path("documents/", StaffDocumentListView.as_view(), name="documents-list"),
     path("payslips/", StaffPaySlipListView.as_view(), name="payslips-list"),
     path(
@@ -55,6 +48,17 @@ urlpatterns = [
         name="documents-detail-update",
     ),
     # leaves
+    path("leave-policies/", LeavePoliciesListView.as_view(), name="leave-policies"),
+    path(
+        "leave-policies/<int:pk>/",
+        LeavePolicyDetailView.as_view(),
+        name="leave-policy-detail",
+    ),
+    path(
+        "leave-policies/create/",
+        CreateLeavePolicyView.as_view(),
+        name="leave-policies-create",
+    ),
     path("leaves/", StaffLeaveListView.as_view(), name="staff-leaves"),
     path(
         "leave-applications/",

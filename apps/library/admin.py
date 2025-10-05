@@ -17,13 +17,15 @@ class FineAdmin(admin.ModelAdmin):
         "id",
         "borrow_transaction",
         "calculated_fine",
-        "fine_per_day",
-        "paid",
-        "status_text",
-        "created_on",
         "updated_on",
+        "status",
+        "member_name",
+        "book_title",
+        "is_overdue",
+      
+        
     )
-    list_filter = ("paid",)
+    list_filter = ("status",)
 
 
 @admin.register(BorrowTransaction)
@@ -38,8 +40,8 @@ class BorrowTransactionAdmin(admin.ModelAdmin):
         "issued_by",
         "status",
         "copy_number",
-        "days_overdue",
-        "is_overdue",
+        "renewal_count",
+        "max_renewals",
         "created_on",
         "updated_on",
     )

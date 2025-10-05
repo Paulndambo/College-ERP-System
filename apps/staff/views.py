@@ -15,14 +15,14 @@ from apps.staff.models import (
     StaffLeave,
     StaffLeaveApplication,
     StaffLeaveEntitlement,
-    StaffOnboardingProgress,
-    StaffPayroll,
+    # StaffOnboardingProgress,
+    # StaffPayroll,
     StaffPosition,
 )
 from rest_framework.views import APIView
 from apps.staff.serializers import (
     ApproveOvertimeSerializer,
-    CompleteOnboardingSerializer,
+    # CompleteOnboardingSerializer,
     CreateOvertimeRecordSerializer,
     CreateStaffLeaveApplicationSerializer,
     CreateStaffPositionSerializer,
@@ -31,16 +31,15 @@ from apps.staff.serializers import (
     StaffCreateSerializer,
     StaffDocumentCreateSerializer,
     StaffDocumentListSerializer,
-    StaffDocumentMultiCreateSerializer,
     StaffLeaveApplicationListSerializer,
     StaffLeaveEntitlementCreateUpdateSerializer,
     StaffLeaveEntitlementDetailSerializer,
     StaffLeaveSerializer,
     StaffListDetailSerializer,
-    StaffOnboardingProgressListSerializer,
+    # StaffOnboardingProgressListSerializer,
     StaffPaySlipSerializer,
-    StaffPayrollCreateSerializer,
-    StaffPayrollListSerializer,
+    # StaffPayrollCreateSerializer,
+    # StaffPayrollListSerializer,
     StaffPositionListSerializer,
     StaffStatusSerializer,
 )
@@ -201,13 +200,13 @@ class CreateStaffView(generics.CreateAPIView):
                 staff_serializer.is_valid(raise_exception=True)
 
                 staff = staff_serializer.save(staff_number=staff_number)
-                StaffOnboardingProgress.objects.create(
-                    staff=staff,
-                    user_created=True,
-                    staff_details_completed=True,
-                    payroll_setup_completed=False,
-                    documents_uploaded=False,
-                )
+                # StaffOnboardingProgress.objects.create(
+                #     staff=staff,
+                #     user_created=True,
+                #     staff_details_completed=True,
+                #     payroll_setup_completed=False,
+                #     documents_uploaded=False,
+                # )
                 return Response(
                     {
                         **staff_serializer.data,
@@ -374,66 +373,66 @@ class StaffPaySlipListView(generics.ListAPIView):
             )
 
 
-class StaffPayrollCreateView(generics.CreateAPIView):
-    queryset = StaffPayroll.objects.all()
-    serializer_class = StaffPayrollCreateSerializer
+# class StaffPayrollCreateView(generics.CreateAPIView):
+#     queryset = StaffPayroll.objects.all()
+#     serializer_class = StaffPayrollCreateSerializer
 
 
-class StaffPayrollListView(generics.ListAPIView):
-    queryset = StaffPayroll.objects.all()
-    serializer_class = StaffPayrollListSerializer
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = PayrollFilter
-    pagination_class = None
+# class StaffPayrollListView(generics.ListAPIView):
+#     queryset = StaffPayroll.objects.all()
+#     serializer_class = StaffPayrollListSerializer
+#     permission_classes = [HasUserRole]
+#     allowed_roles = ALL_STAFF_ROLES
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_class = PayrollFilter
+#     pagination_class = None
 
-    def get_queryset(self):
-        return StaffPayroll.objects.all().order_by("-created_on")
+    # def get_queryset(self):
+    #     return StaffPayroll.objects.all().order_by("-created_on")
 
-    def get_paginated_response(self, data):
-        assert self.paginator is not None
-        return self.paginator.get_paginated_response(data)
+    # def get_paginated_response(self, data):
+    #     assert self.paginator is not None
+    #     return self.paginator.get_paginated_response(data)
 
-    def list(self, request, *args, **kwargs):
-        try:
-            payroll_list = self.get_queryset()
-            payroll_list = self.filter_queryset(payroll_list)
-            page = self.request.query_params.get("page", None)
-            if page:
-                self.pagination_class = PageNumberPagination
-                paginator = self.pagination_class()
-                paginated_payroll_list = paginator.paginate_queryset(
-                    payroll_list, request
-                )
-                serializer = self.get_serializer(paginated_payroll_list, many=True)
-                return paginator.get_paginated_response(serializer.data)
+    # def list(self, request, *args, **kwargs):
+    #     try:
+    #         payroll_list = self.get_queryset()
+    #         payroll_list = self.filter_queryset(payroll_list)
+    #         page = self.request.query_params.get("page", None)
+    #         if page:
+    #             self.pagination_class = PageNumberPagination
+    #             paginator = self.pagination_class()
+    #             paginated_payroll_list = paginator.paginate_queryset(
+    #                 payroll_list, request
+    #             )
+    #             serializer = self.get_serializer(paginated_payroll_list, many=True)
+    #             return paginator.get_paginated_response(serializer.data)
 
-            serializer = self.get_serializer(payroll_list, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    #         serializer = self.get_serializer(payroll_list, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
 
-        except Exception as exc:
-            raise CustomAPIException(
-                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-class StaffPayrollDetailView(generics.RetrieveAPIView):
-    queryset = StaffPayroll.objects.all()
-    serializer_class = StaffPayrollCreateSerializer
-    lookup_field = "pk"
-    permission_classes = [IsAuthenticated]
+    #     except Exception as exc:
+    #         raise CustomAPIException(
+    #             message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+    #         )
 
 
-class StaffOnboardingProgressAPIView(generics.RetrieveAPIView):
-    queryset = StaffOnboardingProgress.objects.all()
-    serializer_class = StaffOnboardingProgressListSerializer
-    lookup_field = "pk"
+# class StaffPayrollDetailView(generics.RetrieveAPIView):
+#     queryset = StaffPayroll.objects.all()
+#     serializer_class = StaffPayrollCreateSerializer
+#     lookup_field = "pk"
+#     permission_classes = [IsAuthenticated]
+
+
+# class StaffOnboardingProgressAPIView(generics.RetrieveAPIView):
+#     queryset = StaffOnboardingProgress.objects.all()
+#     serializer_class = StaffOnboardingProgressListSerializer
+#     lookup_field = "pk"
 
 
 class StaffDocumentCreateView(generics.CreateAPIView):
     queryset = StaffDocuments.objects.all()
-    serializer_class = StaffDocumentMultiCreateSerializer
+    serializer_class = StaffDocumentCreateSerializer
 
     def create(self, request, *args, **kwargs):
         documents_json = request.data.get("documents")
@@ -494,10 +493,10 @@ class StaffDocumentListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class StaffPayrollUpdateView(generics.RetrieveUpdateAPIView):
-    queryset = StaffPayroll.objects.all()
-    serializer_class = StaffPayrollCreateSerializer
-    lookup_field = "pk"
+# class StaffPayrollUpdateView(generics.RetrieveUpdateAPIView):
+#     queryset = StaffPayroll.objects.all()
+#     serializer_class = StaffPayrollCreateSerializer
+#     lookup_field = "pk"
 
 
 class StaffDocumentUpdateView(generics.RetrieveUpdateAPIView):
@@ -506,35 +505,6 @@ class StaffDocumentUpdateView(generics.RetrieveUpdateAPIView):
     lookup_field = "pk"
 
 
-class CompleteOnboardingView(generics.UpdateAPIView):
-    queryset = StaffOnboardingProgress.objects.all()
-    serializer_class = CompleteOnboardingSerializer
-    lookup_field = "pk"
-
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-
-        if instance.onboarding_completed:
-            return Response(
-                {
-                    "message": "Onboarding already completed",
-                    "staff": str(instance.staff),
-                    "completed_on": instance.updated_on,
-                },
-                status=status.HTTP_200_OK,
-            )
-
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-
-        return Response(
-            {
-                "message": "Onboarding completed successfully",
-                "staff": str(instance.staff),
-                "data": serializer.data,
-            }
-        )
 
 
 class PositionListView(generics.ListAPIView):

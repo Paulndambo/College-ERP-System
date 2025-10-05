@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from apps.inventory.models import User
 from apps.users.serializers import UserSerializer
-from .models import Campus, RolePermission, StudyYear, UserRole,Module
+from .models import AcademicYear, Campus, RolePermission, StudyYear, UserRole,Module
 from django.contrib.admin.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
 
@@ -243,3 +243,15 @@ class RoleSerializer(serializers.ModelSerializer):
                 can_print =False,
             )
         return instance
+    
+    
+class AcademicYearListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AcademicYear
+        fields = ["id", "name", "start_date", "end_date"]
+
+
+class CreateAndUpdateAcademicYearSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AcademicYear
+        fields = ["name", "start_date", "end_date"]

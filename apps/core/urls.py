@@ -1,8 +1,11 @@
 from django.urls import path
 from .views import (
+    AcademicYearDetailView,
+    AcademicYearsListView,
     CampusCreateView,
     CampusListView,
     CampusUpdateDeleteView,
+    CreateAcademicYearView,
     CreateRoleView,
     DashboardCountsRetrieveView,
     LoggedInPermissionsView,
@@ -46,6 +49,13 @@ urlpatterns = [
         "studyyear/update-delete/<int:pk>/",
         StudyYearUpdateDeleteView.as_view(),
         name="studyyear-update-delete",
+    ),
+    path("academic-years/create/", CreateAcademicYearView.as_view(), name="academic-year-create"),
+    path("academic-years/list/", AcademicYearsListView.as_view(), name="academic-years-list"),
+    path(
+        "academic-years/<int:pk>/",
+        AcademicYearDetailView.as_view(),
+        name="academic-years-update-delete",
     ),
     # path("studyyear/list/", StudyYearListView.as_view(), name="studyyear-list"),
     path(

@@ -13,7 +13,7 @@ class StudentFeeInvoiceAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "student",
-        "description",
+        # "description",
         "reference",
         "semester",
         "amount",
@@ -54,7 +54,7 @@ class StudentFeeStatementAdmin(admin.ModelAdmin):
         "id",
         "student",
         "statement_type",
-        "transaction_type",
+        # "transaction_type",
         "semester",
         "academic_year",
         "debit",

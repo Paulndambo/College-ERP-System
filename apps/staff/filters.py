@@ -4,8 +4,7 @@ from .models import (
     Staff,
     StaffLeave,
     StaffLeaveApplication,
-    StaffLeaveEntitlement,
-    StaffPayroll,
+    StaffLeaveEntitlement
 )
 import django_filters
 
@@ -42,7 +41,7 @@ class PayrollFilter(django_filters.FilterSet):
     department = django_filters.NumberFilter(field_name="staff__department_id")
 
     class Meta:
-        model = StaffPayroll
+        model = Payslip
         fields = ["status", "department", "search"]
 
     def filter_by_all(self, queryset, name, value):

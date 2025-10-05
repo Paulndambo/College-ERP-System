@@ -68,7 +68,7 @@ class SemesterReportingListSerializer(serializers.ModelSerializer):
             "cohort",
             "student",
             "reg_no",
-            "academic_year",
+            # "academic_year",
             "semester",
             "reported",
             "created_on",

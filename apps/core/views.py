@@ -7,8 +7,8 @@ from apps.core.utils import ModelCountUtils
 from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
 from django.contrib.admin.models import LogEntry
-from .serializers import CreateAndUpdateRoleSerializer, LogEntrySerializer, LoggedInPermisionsSerializer, ModuleSerializer, RoleDetailWithPermissionsSerializer, RoleSerializer
-from .models import Campus, Module, RolePermission, StudyYear, UserRole
+from .serializers import AcademicYearListSerializer, CreateAndUpdateAcademicYearSerializer, CreateAndUpdateRoleSerializer, LogEntrySerializer, LoggedInPermisionsSerializer, ModuleSerializer, RoleDetailWithPermissionsSerializer, RoleSerializer
+from .models import AcademicYear, Campus, Module, RolePermission, StudyYear, UserRole
 from .serializers import (
     CampusCreateSerializer,
     CampusListSerializer,
@@ -410,3 +410,74 @@ class LoggedInPermissionsView(APIView):
     def get(self, request):
         serializer = LoggedInPermisionsSerializer(request.user)
         return Response(serializer.data)
+
+
+
+
+class CreateAcademicYearView(generics.CreateAPIView):
+    queryset = AcademicYear.objects.all()
+    serializer_class = CreateAndUpdateAcademicYearSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            name = request.data.get("name")
+            if AcademicYear.objects.filter(name__iexact=name).exists():
+                return Response(
+                    {"success": False, "error": "AcademicYear with this name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return super().create(request, *args, **kwargs)
+        except Exception as exc:
+            # logger.error(f"Error creating AcademicYear: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class AcademicYearsListView(generics.ListAPIView):
+    serializer_class = AcademicYearListSerializer
+    queryset = AcademicYear.objects.all().order_by("-created_on")
+
+    def get(self, request, *args, **kwargs):
+        try:
+            qs = self.get_queryset()
+            qs = self.filter_queryset(qs)
+            page = request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_qs = paginator.paginate_queryset(qs, request)
+                serializer = self.get_serializer(paginated_qs, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(qs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            # logger.error(f"Error listing AcademicYears: {str(e)}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class AcademicYearDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CreateAndUpdateAcademicYearSerializer
+    queryset = AcademicYear.objects.all()
+    lookup_field = "pk"
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            name = request.data.get("name")
+            if name and AcademicYear.objects.exclude(id=instance.id).filter(name__iexact=name).exists():
+                return Response(
+                    {"success": False, "error": "Another AcademicYear with this name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return super().update(request, *args, **kwargs)
+        except Exception as exc:
+            # logger.error(f"Error updating AcademicYear: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

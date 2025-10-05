@@ -5,6 +5,45 @@ from datetime import timedelta, date
 from apps.core.models import AbsoluteBaseModel
 from apps.finance.models import LibraryFinePayment
 
+class LibraryConfig(AbsoluteBaseModel):
+    name = models.CharField(max_length=100)  # e.g., "Staff Borrowing Rules"
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class LibraryConfigRule(AbsoluteBaseModel):
+    RULE_TYPE_CHOICES = [
+        ("Borrow", "Borrowing Rule"),
+        ("Fine", "Fine Rule"),
+        ("Other", "Other"),
+    ]
+
+    library_config = models.ForeignKey(
+        LibraryConfig,
+        on_delete=models.CASCADE,
+        related_name="rules"
+    )
+    rule_type = models.CharField(max_length=20, choices=RULE_TYPE_CHOICES)
+    name = models.CharField(max_length=100)  # e.g., "Default Borrow Days", "Max Renewals"
+
+    borrow_days = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Number of days allowed to borrow"
+    )
+    max_renewals = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Maximum times a book can be renewed"
+    )
+    fine_per_day = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True,
+        help_text="Fine charged per day"
+    )
+    rule_notes = models.TextField(null=True, blank=True, help_text="Optional notes")
+
+    def __str__(self):
+        return f"{self.library_config.name} - {self.name}"
 
 class Book(AbsoluteBaseModel):
     CATEGORY_CHOICES = [
@@ -44,12 +83,14 @@ class Member(AbsoluteBaseModel):
         return "Active" if self.active else "Inactive"
 
 
+
+
 class BorrowTransaction(AbsoluteBaseModel):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    book = models.ForeignKey("Book", on_delete=models.CASCADE)
     copy_number = models.CharField(max_length=50, null=True, blank=True)
-    member = models.ForeignKey(Member, on_delete=models.CASCADE)
+    member = models.ForeignKey("Member", on_delete=models.CASCADE)
     borrow_date = models.DateField(default=date.today)
-    due_date = models.DateField(null=True)  # Default 2-week loan
+    due_date = models.DateField(null=True)
     return_date = models.DateField(null=True, blank=True)
     status = models.CharField(
         max_length=255,
@@ -63,91 +104,48 @@ class BorrowTransaction(AbsoluteBaseModel):
     )
     issued_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
 
-    def save(self, *args, **kwargs):
-        if not self.copy_number and self.status == "Pending Return":
-            self.copy_number = self.assign_copy_number()
-        if not self.due_date:
-            self.due_date = now().date() + timedelta(days=14)
-        super().save(*args, **kwargs)
-
-    def assign_copy_number(self):
-        """Assign next available copy number"""
-
-        borrowed_copies = BorrowTransaction.objects.filter(
-            book=self.book, status="Pending Return"
-        ).values_list("copy_number", flat=True)
-
-        for i in range(1, self.book.total_copies + 1):
-            copy_number = f"{self.book.isbn or f'B{self.book.id}'}-{i:03d}"
-            if copy_number not in borrowed_copies:
-                return copy_number
-
-        return None
-
-    def is_overdue(self):
-        if self.return_date:
-            return self.return_date > self.due_date
-        return date.today() > self.due_date
-
-    def days_overdue(self):
-        days_count = 0
-        if self.return_date:
-            days_count = (self.return_date - self.due_date).days
-        days_count = (date.today() - self.due_date).days
-
-        return days_count if days_count > 0 else 0
+    # Renewal tracking
+    renewal_count = models.PositiveIntegerField(default=0)
+    max_renewals = models.PositiveIntegerField(null=True, blank=True)  
 
     def __str__(self):
         return f"{self.book.title} borrowed by {self.member.user.first_name}"
 
 
+
 class Fine(AbsoluteBaseModel):
+    STATUS_CHOICES = [
+        ("Upaid", "Unpaid"),
+        ("Requested", "Requested"),
+        ("Paid", "Paid"),
+    ]
+
     borrow_transaction = models.OneToOneField(
-        BorrowTransaction, on_delete=models.CASCADE
+        "BorrowTransaction", on_delete=models.CASCADE
     )
-    fine_per_day = models.DecimalField(
-        max_digits=5, decimal_places=2, default=0.50
-    )  # Default $0.50/day
-    calculated_fine = models.DecimalField(max_digits=7, decimal_places=2, default=0.00)
-    paid = models.BooleanField(default=False)
+    calculated_fine = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default="Unpaid"
+    )
 
-    def save(self, *args, **kwargs):
-        if not self.borrow_transaction.return_date:
-            overdue_days = (date.today() - self.borrow_transaction.due_date).days
-        else:
-            overdue_days = (
-                self.borrow_transaction.return_date - self.borrow_transaction.due_date
-            ).days
+    @property
+    def member_name(self):
+        return f"{self.borrow_transaction.member.user.first_name} {self.borrow_transaction.member.user.last_name}"
 
-        if overdue_days > 0:
-            if self.borrow_transaction.status == "Returned":
-                self.calculated_fine = Decimal(overdue_days) * Decimal(
-                    self.fine_per_day
-                )
-            elif self.borrow_transaction.status == "Lost":
-                self.calculated_fine = (
-                    Decimal(overdue_days) * Decimal(self.fine_per_day)
-                ) + Decimal(self.borrow_transaction.book.unit_price)
-        else:
-            if self.borrow_transaction.status == "Lost":
-                self.calculated_fine = Decimal(self.borrow_transaction.book.unit_price)
-            else:
-                self.calculated_fine = Decimal(0.00)
+    @property
+    def book_title(self):
+        return self.borrow_transaction.book.title
 
-        super().save(*args, **kwargs)
+    @property
+    def is_paid(self):
+        return self.status == "Paid"
 
-    def status_text(self):
-        text_value = ""
-        fine_payment = LibraryFinePayment.objects.filter(fine=self).first()
-        if fine_payment:
-            if fine_payment.paid:
-                text_value = "Paid"
-            else:
-                text_value = "Requested"
-        else:
-            text_value = "Paid" if self.paid else "Unpaid"
-
-        return text_value
+    @property
+    def is_overdue(self):
+        borrow = self.borrow_transaction
+        if borrow.return_date:
+            return borrow.return_date > borrow.due_date
+        return False if borrow.due_date is None else borrow.due_date < borrow.borrow_date
 
     def __str__(self):
-        return f"Fine for {self.borrow_transaction.book.title}: ${self.calculated_fine}"
+        return f"Fine for {self.book_title}: ${self.calculated_fine} - {self.status}"
