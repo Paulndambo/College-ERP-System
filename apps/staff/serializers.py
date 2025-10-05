@@ -55,46 +55,7 @@ class StaffDocumentCreateSerializer(serializers.ModelSerializer):
         model = StaffDocuments
         fields = ["staff", "document_type", "document_file", "notes"]
 
-    def create(self, validated_data):
 
-        document = super().create(validated_data)
-
-        self._update_documents_uploaded_status(document.staff)
-
-        return document
-
-    def _update_documents_uploaded_status(self, staff):
-
-        required_document_types = [
-            "KRA_PIN",
-            "ID",
-            "NSSF",
-            "NHIF",
-            "Career Certifications",
-        ]
-
-        uploaded_document_types = (
-            StaffDocuments.objects.filter(staff=staff)
-            .values_list("document_type", flat=True)
-            .distinct()
-        )
-
-        all_required_uploaded = all(
-            doc_type in uploaded_document_types for doc_type in required_document_types
-        )
-
-        if all_required_uploaded:
-            try:
-                onboarding_progress = StaffOnboardingProgress.objects.get(staff=staff)
-                if not onboarding_progress.documents_uploaded:
-                    onboarding_progress.documents_uploaded = True
-                    onboarding_progress.save()
-
-            except StaffOnboardingProgress.DoesNotExist:
-
-                StaffOnboardingProgress.objects.create(
-                    staff=staff, documents_uploaded=True
-                )
 
 
 class SingleStaffDocumentSerializer(serializers.Serializer):
@@ -103,108 +64,6 @@ class SingleStaffDocumentSerializer(serializers.Serializer):
     notes = serializers.CharField(required=False, allow_blank=True)
 
 
-class StaffDocumentMultiCreateSerializer(serializers.Serializer):
-    staff = serializers.PrimaryKeyRelatedField(queryset=Staff.objects.all())
-    documents = SingleStaffDocumentSerializer(many=True)
-
-    def create(self, validated_data):
-        staff = validated_data["staff"]
-        documents_data = validated_data["documents"]
-        print("documents_data", documents_data)
-
-        created_documents = []
-        for doc_data in documents_data:
-            document = StaffDocuments.objects.create(
-                staff=staff,
-                document_type=doc_data["document_type"],
-                document_file=doc_data["document_file"],
-                notes=doc_data.get("notes", ""),
-            )
-            created_documents.append(document)
-
-        self._update_documents_uploaded_status(staff)
-        return created_documents
-
-    def _update_documents_uploaded_status(self, staff):
-        required_document_types = [
-            "KRA_PIN",
-            "ID",
-            "NSSF",
-            "NHIF",
-            "Career Certifications",
-        ]
-        uploaded_document_types = (
-            StaffDocuments.objects.filter(staff=staff)
-            .values_list("document_type", flat=True)
-            .distinct()
-        )
-
-        all_required_uploaded = all(
-            doc_type in uploaded_document_types for doc_type in required_document_types
-        )
-
-        if all_required_uploaded:
-            try:
-                onboarding_progress = StaffOnboardingProgress.objects.get(staff=staff)
-                if not onboarding_progress.documents_uploaded:
-                    onboarding_progress.documents_uploaded = True
-                    onboarding_progress.save()
-            except StaffOnboardingProgress.DoesNotExist:
-                StaffOnboardingProgress.objects.create(
-                    staff=staff, documents_uploaded=True
-                )
-
-
-class CompleteOnboardingSerializer(serializers.ModelSerializer):
-    """
-    Serializer for marking onboarding as complete
-    This is the final step that sets onboarding_completed = True
-    """
-
-    class Meta:
-        model = StaffOnboardingProgress
-        fields = ["id", "onboarding_completed"]
-        read_only_fields = ["id"]
-
-    def update(self, instance, validated_data):
-
-        if validated_data.get("onboarding_completed", False):
-            if not (
-                instance.user_created
-                and instance.staff_details_completed
-                and instance.payroll_setup_completed
-                and instance.documents_uploaded
-            ):
-                raise serializers.ValidationError(
-                    {
-                        "onboarding_completed": "Cannot complete onboarding. All prerequisite steps must be completed first.",
-                        "missing_steps": self._get_missing_steps(instance),
-                    }
-                )
-
-            instance.onboarding_completed = True
-            instance.save()
-
-            staff = instance.staff
-            if staff.onboarding_status != "Completed":
-                staff.onboarding_status = "Completed"
-                staff.status = "Active"
-                staff.save()
-
-        return instance
-
-    def _get_missing_steps(self, instance):
-        """Return list of incomplete onboarding steps"""
-        missing_steps = []
-        if not instance.user_created:
-            missing_steps.append("user_created")
-        if not instance.staff_details_completed:
-            missing_steps.append("staff_details_completed")
-        if not instance.payroll_setup_completed:
-            missing_steps.append("payroll_setup_completed")
-        if not instance.documents_uploaded:
-            missing_steps.append("documents_uploaded")
-        return missing_steps
 
 
 class StaffDocumentListSerializer(StaffDocumentCreateSerializer):
@@ -233,26 +92,12 @@ class CreateStaffPositionSerializer(serializers.ModelSerializer):
         fields = ["name"]
 
 
-class StaffOnboardingProgressSimpleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StaffOnboardingProgress
-        fields = [
-            "id",
-            "user_created",
-            "staff_details_completed",
-            "documents_uploaded",
-            "payroll_setup_completed",
-            "onboarding_completed",
-            "created_on",
-            "updated_on",
-        ]
-
 
 class StaffListDetailSerializer(serializers.ModelSerializer):
     department = DepartmentListSerializer()
     user = UserSerializer()
     position = StaffPositionListSerializer()
-    onboarding_progress = serializers.SerializerMethodField()
+ 
 
     class Meta:
         model = Staff
@@ -263,8 +108,7 @@ class StaffListDetailSerializer(serializers.ModelSerializer):
             "department",
             "position",
             "status",
-            "onboarding_status",
-            "onboarding_progress",
+         
             "created_on",
             "updated_on",
         ]
@@ -272,98 +116,6 @@ class StaffListDetailSerializer(serializers.ModelSerializer):
             "user": {"required": False},
         }
 
-    def get_onboarding_progress(self, obj):
-        try:
-            onboarding_progress = StaffOnboardingProgress.objects.get(staff=obj)
-            return StaffOnboardingProgressSimpleSerializer(onboarding_progress).data
-        except StaffOnboardingProgress.DoesNotExist:
-            return None
-
-
-class StaffOnboardingProgressListSerializer(serializers.ModelSerializer):
-    staff = StaffListDetailSerializer()
-
-    class Meta:
-        model = StaffOnboardingProgress
-        fields = [
-            "id",
-            "staff",
-            "user_created",
-            "staff_details_completed",
-            "documents_uploaded",
-            "payroll_setup_completed",
-            "onboarding_completed",
-            "created_on",
-            "updated_on",
-        ]
-        extra_kwargs = {
-            "staff": {"required": False},
-        }
-
-
-class StaffPayrollCreateSerializer(serializers.ModelSerializer):
-    staff = serializers.PrimaryKeyRelatedField(queryset=Staff.objects.all())
-
-    class Meta:
-        model = StaffPayroll
-        fields = [
-            "id",
-            "staff",
-            "basic_salary",
-            "house_allowance",
-            "transport_allowance",
-            "other_allowances",
-            "nssf_number",
-            "nhif_number",
-            "kra_pin",
-            "bank_name",
-            "bank_account_number",
-            "mpesa_number",
-            "payment_frequency",
-        ]
-
-    def validate_staff(self, value):
-        if StaffPayroll.objects.filter(staff=value).exists():
-            raise serializers.ValidationError("Staff payroll already exists.")
-        return value
-
-    def create(self, validated_data):
-
-        payroll = super().create(validated_data)
-        try:
-            onboarding_progress = StaffOnboardingProgress.objects.get(
-                staff=payroll.staff
-            )
-            onboarding_progress.payroll_setup_completed = True
-            onboarding_progress.save()
-        except StaffOnboardingProgress.DoesNotExist:
-            pass
-
-        return payroll
-
-
-class StaffPayrollListSerializer(StaffPayrollCreateSerializer):
-    staff = StaffListDetailSerializer()
-
-    class Meta:
-        model = StaffPayroll
-        fields = [
-            "id",
-            "staff",
-            "basic_salary",
-            "house_allowance",
-            "transport_allowance",
-            "other_allowances",
-            "nssf_number",
-            "nhif_number",
-            "kra_pin",
-            "bank_name",
-            "bank_account_number",
-            "mpesa_number",
-            "payment_frequency",
-            "created_on",
-            "updated_on",
-        ]
 
 
 class StaffPaySlipSerializer(serializers.ModelSerializer):

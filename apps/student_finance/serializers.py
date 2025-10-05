@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from apps.schools.serializers import SemesterListSerializer
 from apps.student_finance.models import (
+    InvoiceType,
     StudentFeeLedger,
     StudentFeeInvoice,
     StudentFeePayment,
@@ -27,7 +28,7 @@ class StudentFeeInvoiceListSerializer(serializers.ModelSerializer):
             "id",
             "amount",
             "amount_paid",
-            "description",
+            # "description",
             "reference",
             "bal_due",
             "semester",
@@ -115,3 +116,17 @@ class StudentFeePaymentSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     payment_method = serializers.ChoiceField(choices=["Mpesa", "Cash", "Bank Transfer"])
     semester = serializers.IntegerField(required=False)
+
+class InvoiceTypeListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceType
+        fields = ["id", "name", "description", "is_fee_type", "is_active"]
+
+
+class CreateAndUpdateInvoiceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvoiceType
+        fields = [ "name", 
+                  "description",
+                #   "is_fee_type", 
+                  "is_active"]

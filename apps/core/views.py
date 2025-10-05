@@ -7,8 +7,8 @@ from apps.core.utils import ModelCountUtils
 from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
 from django.contrib.admin.models import LogEntry
-from .serializers import LogEntrySerializer, ModuleSerializer, RoleSerializer
-from .models import Campus, Module, StudyYear, UserRole
+from .serializers import AcademicYearListSerializer, CreateAndUpdateAcademicYearSerializer, CreateAndUpdateRoleSerializer, LogEntrySerializer, LoggedInPermisionsSerializer, ModuleSerializer, RoleDetailWithPermissionsSerializer, RoleSerializer
+from .models import AcademicYear, Campus, Module, RolePermission, StudyYear, UserRole
 from .serializers import (
     CampusCreateSerializer,
     CampusListSerializer,
@@ -265,50 +265,219 @@ class RolesListAPIView(generics.ListAPIView):
         except Exception as exc:
             return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class RoleListCreateView(generics.CreateAPIView):
+class CreateRoleView(generics.CreateAPIView):
+    """
+    API endpoint to create a UserRole.
+    Automatically sets created_by to the current user.
+    Returns custom JSON if a role with the same name already exists.
+    """
+
     queryset = UserRole.objects.all()
-    serializer_class = RoleSerializer
+    serializer_class = CreateAndUpdateRoleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        # Check for an existing role with the same name (case-insensitive)
+        role_name = request.data.get("name", "").strip()
+        if UserRole.objects.filter(name__iexact=role_name).exists():
+            return Response(
+                {"error": f"A role with the name '{role_name}' already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # If no duplicate, proceed with normal creation
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
-        name = serializer.validated_data.get('name')
-        if UserRole.objects.filter(name__iexact=name).exists():
-            raise ValidationError({"error": "A role with this name already exists."})
+        # Save with created_by filled automatically by the HiddenField
         serializer.save()
 
 
-class RoleRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class UpdateDeleteRoleView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint to update or delete a UserRole.
+    Uses pk for lookup and checks for duplicate names on update.
+    """
+
     queryset = UserRole.objects.all()
-    serializer_class = RoleSerializer
+    serializer_class = CreateAndUpdateRoleSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "pk"
+    http_method_names = ["patch", "put", "delete"]
+
+    def update(self, request, *args, **kwargs):
+        # Get the current instance being updated
+        instance = self.get_object()
+        new_name = request.data.get("name", "").strip()
+
+        # Check for duplicate names excluding this instance
+        if (
+            UserRole.objects.filter(name__iexact=new_name)
+            .exclude(pk=instance.pk)
+            .exists()
+        ):
+            return Response(
+                {"error": f"A role with the name '{new_name}' already exists."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Proceed with normal update
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=kwargs.get("partial", False)
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_update(self, serializer):
-        name = serializer.validated_data.get('name')
-        instance_id = self.get_object().id
-        if UserRole.objects.filter(name__iexact=name).exclude(id=instance_id).exists():
-            raise ValidationError({"error": "A role with this name already exists."})
+        # Save the updated role
         serializer.save()
-class ModulesListView(generics.ListAPIView):
-    queryset = Module.objects.all()
-    permission_classes = [IsAuthenticated]
-    serializer_class = ModuleSerializer
-    pagination_class = None
+        
+class RoleDetailPermissionsView(generics.RetrieveAPIView):
+    """
+    GET /api/roles/<pk>/permissions/
+    Returns role info + ALL modules with current permissions.
+    """
 
-    def get_paginated_response(self, data):
-        assert self.paginator is not None
-        return self.paginator.get_paginated_response(data)
+    queryset = UserRole.objects.all()
+    serializer_class = RoleDetailWithPermissionsSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "pk"
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class UpdateRolePermissionsView(generics.UpdateAPIView):
+    """
+    PATCH /api/roles/<pk>/permissions/
+    Expects: {"permissions": [ {module_id, can_view, ...}, ... ]}
+    """
+
+    queryset = UserRole.objects.all()
+    permission_classes = [IsAuthenticated]
+    lookup_field = "pk"
+
+    def update(self, request, *args, **kwargs):
+        role = self.get_object()
+        perms = request.data.get("permissions", [])
+        if not isinstance(perms, list):
+            return Response({"error": "permissions must be a list"}, status=400)
+        sent_module_ids = []
+        for p in perms:
+
+            module_id = p.get("module_id")
+            if not module_id:
+                continue
+
+            sent_module_ids.append(module_id)
+            module = Module.objects.filter(pk=module_id).first()
+            if not module:
+                continue
+
+            obj, created = RolePermission.objects.get_or_create(
+                role=role, module=module
+            )
+            # Update fields
+            for field in [
+                "can_view",
+                "can_create",
+                "can_edit",
+                "can_delete",
+                "can_approve",
+                "can_export",
+                "can_print",
+                "can_view_all",
+            ]:
+                setattr(obj, field, bool(p.get(field, False)))
+            obj.save()
+            RolePermission.objects.filter(role=role).exclude(
+                module_id__in=sent_module_ids
+            ).delete()
+
+        # Return the fresh detail
+        serializer = RoleDetailWithPermissionsSerializer(role)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class LoggedInPermissionsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = LoggedInPermisionsSerializer(request.user)
+        return Response(serializer.data)
+
+
+
+
+class CreateAcademicYearView(generics.CreateAPIView):
+    queryset = AcademicYear.objects.all()
+    serializer_class = CreateAndUpdateAcademicYearSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            name = request.data.get("name")
+            if AcademicYear.objects.filter(name__iexact=name).exists():
+                return Response(
+                    {"success": False, "error": "AcademicYear with this name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return super().create(request, *args, **kwargs)
+        except Exception as exc:
+            # logger.error(f"Error creating AcademicYear: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class AcademicYearsListView(generics.ListAPIView):
+    serializer_class = AcademicYearListSerializer
+    queryset = AcademicYear.objects.all().order_by("-created_on")
 
     def get(self, request, *args, **kwargs):
         try:
             qs = self.get_queryset()
             qs = self.filter_queryset(qs)
-            page = self.request.query_params.get("page", None)
+            page = request.query_params.get("page", None)
             if page:
                 self.pagination_class = PageNumberPagination
                 paginator = self.pagination_class()
-                paginated_modules = paginator.paginate_queryset(qs, request)
-                serializer = self.get_serializer(paginated_modules, many=True)
+                paginated_qs = paginator.paginate_queryset(qs, request)
+                serializer = self.get_serializer(paginated_qs, many=True)
                 return paginator.get_paginated_response(serializer.data)
             serializer = self.get_serializer(qs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            # logger.error(f"Error listing AcademicYears: {str(e)}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
+
+class AcademicYearDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CreateAndUpdateAcademicYearSerializer
+    queryset = AcademicYear.objects.all()
+    lookup_field = "pk"
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            name = request.data.get("name")
+            if name and AcademicYear.objects.exclude(id=instance.id).filter(name__iexact=name).exists():
+                return Response(
+                    {"success": False, "error": "Another AcademicYear with this name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return super().update(request, *args, **kwargs)
         except Exception as exc:
-            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # logger.error(f"Error updating AcademicYear: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

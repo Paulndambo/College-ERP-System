@@ -469,8 +469,7 @@ class BorrowTransactionUpdateSerializer(serializers.ModelSerializer):
 class BorrowTransactionListSerializer(serializers.ModelSerializer):
     """Serializer for listing borrow transactions with nested details"""
 
-    # book = BookListSerializer(read_only=True)
-    # member = MemberListSerializer(read_only=True)
+   
     book = BookSimpleSerializer(read_only=True)
     member = MemberSimpleSerializer(read_only=True)
     issued_by = UserSerializer(read_only=True)
@@ -495,17 +494,7 @@ class BorrowTransactionListSerializer(serializers.ModelSerializer):
             "updated_on",
         ]
 
-    # def update(self, instance, validated_data):
-    #     if "status" in validated_data and validated_data["status"] == "Returned":
-    #         if not validated_data.get("return_date"):
-    #             validated_data["return_date"] = timezone.now().date()
-
-    #         if instance.status != "Returned":
-    #             instance.book.copies_available += 1
-    #             instance.book.save()
-
-    #     return super().update(instance, validated_data)
-
+   
 
 # ==================== FINE SERIALIZERS ====================
 
@@ -515,7 +504,7 @@ class FineCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Fine
-        fields = ["borrow_transaction", "fine_per_day", "paid"]
+        fields = ["borrow_transaction","paid"]
 
 
 class FineUpdateSerializer(serializers.ModelSerializer):

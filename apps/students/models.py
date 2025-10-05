@@ -104,7 +104,7 @@ class StudentProgramme(AbsoluteBaseModel):
     programme = models.ForeignKey("schools.Programme", on_delete=models.CASCADE)
     start_date = models.DateField()
     end_date = models.DateField(null=True)
-    current_year = models.CharField(max_length=255, null=True)
+    # current_year = models.CharField(max_length=255, null=True)
     current_semester = models.CharField(max_length=255, null=True)
 
     def __str__(self):
@@ -135,16 +135,60 @@ class StudentCheckIn(AbsoluteBaseModel):
         return "Yes" if self.check_out_time else "No"
 
 
-class SemesterReporting(AbsoluteBaseModel):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    semester = models.ForeignKey("schools.Semester", on_delete=models.SET_NULL, null=True, related_name="semesterreportings")
-    cohort = models.ForeignKey("schools.ProgrammeCohort", on_delete=models.SET_NULL, null=True)
-    academic_year = models.CharField(max_length=255, null=True)
-    reported = models.BooleanField(default=False)
+class Promotion(AbsoluteBaseModel):
+    student = models.ForeignKey(
+        "students.Student", on_delete=models.CASCADE, related_name="promotions"
+    )
+    study_year = models.ForeignKey(
+        "core.StudyYear", on_delete=models.CASCADE, related_name="promotions"
+    )
+    promoted_on = models.DateField(auto_now_add=True)
+    # status = models.CharField(
+    #     max_length=20, choices=PROMOTION_STATUS_CHOICES, default="Pending"
+    # )
+    done_by = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_promotions"
+    )
 
     def __str__(self):
-        return self.semester.name
+        return f"{self.student.name()} → {self.study_year.name}"
 
+    @property
+    def is_approved(self):
+        return self.status == "Approved"
+
+    # @property
+    # def display_status(self):
+    #     return self.status
+
+
+class SemesterReporting(AbsoluteBaseModel):
+    student = models.ForeignKey(
+        "students.Student", on_delete=models.CASCADE, related_name="semester_reportings"
+    )
+    semester = models.ForeignKey(
+        "schools.Semester", on_delete=models.SET_NULL, null=True, related_name="semester_reports"
+    )
+    done_by = models.ForeignKey(
+        "users.User", on_delete=models.SET_NULL, null=True, blank=True, related_name="approved_semester_reports"
+    )
+    # status = models.CharField(
+    #     max_length=20, choices=SEMESTER_REPORT_STATUS_CHOICES, default="Pending"
+    # )
+
+    def __str__(self):
+        semester_name = self.semester.name if self.semester else "Unknown Semester"
+        return f"{self.student.name()} - {semester_name}"
+
+    # @property
+    # def display_status(self):
+    #     return self.status
+
+    @property
+    def academic_year(self):
+        if self.semester:
+            return self.semester.academic_year.name
+        return None
 
 class StudentCourseEnrollment(AbsoluteBaseModel):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)

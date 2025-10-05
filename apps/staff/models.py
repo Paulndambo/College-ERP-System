@@ -59,58 +59,51 @@ class Staff(AbsoluteBaseModel):
     status = models.CharField(
         max_length=20, choices=STAFF_STATUS_CHOICES, default="Inactive"
     )
-    onboarding_status = models.CharField(
-        max_length=20, choices=ONBOARDING_STATUS_CHOICES, default="Not Started"
-    )
-
-    @classmethod
-    def generate_staff_number(cls, department):
-        """Generate unique staff number with department prefix + sequential number"""
-        from apps.users.models import User
-
-        dept_prefix = department.name[:3].upper()
-        max_attempts = 1000  # Prevent infinite loops
-
-        for attempt in range(max_attempts):
-            # Get the next sequential number
-            existing_staff = (
-                cls.objects.filter(staff_number__startswith=dept_prefix)
-                .order_by("-staff_number")
-                .first()
-            )
-
-            if existing_staff:
-                try:
-                    last_number = int(existing_staff.staff_number[3:])
-                    next_number = last_number + 1 + attempt
-                except ValueError:
-                    next_number = 1 + attempt
-            else:
-                next_number = 1 + attempt
-
-            proposed_staff_number = f"{dept_prefix}{next_number:03d}"
-
-            staff_exists = cls.objects.filter(
-                staff_number=proposed_staff_number
-            ).exists()
-            user_exists = User.objects.filter(username=proposed_staff_number).exists()
-
-            if not staff_exists and not user_exists:
-                return proposed_staff_number
-
-        raise ValueError(
-            f"Unable to generate unique staff number for department {department.name}"
-        )
-
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+class StaffCourseAssignment(AbsoluteBaseModel):
+    staff = models.ForeignKey(
+        'Staff',
+        on_delete=models.CASCADE,
+        related_name='course_assignments'  # staff.course_assignments - all assignments
+    )
+    course = models.ForeignKey(
+        'schools.Course',
+        on_delete=models.CASCADE,
+        related_name='staff_assignments'  # course.staff_assignments - all assignments
+    )
+    assigned_date = models.DateField(auto_now_add=True)
+    active = models.BooleanField(default=True)
 
+
+    def __str__(self):
+        return f"{self.staff} - {self.course}"
+
+class LeavePolicy(AbsoluteBaseModel):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    default_days = models.PositiveIntegerField()  
+    requires_document_after = models.PositiveIntegerField(
+        default=0,
+        help_text="Require medical certificate or proof if leave exceeds this many consecutive days",
+    )
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="leave_policies_created",
+    )
+
+    def __str__(self):
+        return f"{self.name}"
 
 class StaffLeaveApplication(AbsoluteBaseModel):
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE)
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="leave_applications" ,null=True, blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
-    leave_type = models.CharField(max_length=255, choices=LEAVE_TYPES)
+    leave_type = models.ForeignKey(LeavePolicy, on_delete=models.CASCADE, related_name="leave_applications")
     reason = models.CharField(max_length=255)
 
     status = models.CharField(
@@ -142,51 +135,25 @@ class StaffLeave(AbsoluteBaseModel):
         return f"{self.application.staff.user.first_name} {self.application.staff.user.last_name}"
 
 
+
+
 class StaffLeaveEntitlement(AbsoluteBaseModel):
-    staff = models.OneToOneField(Staff, on_delete=models.CASCADE)
-    year = models.PositiveIntegerField(default=timezone.now().year)
-    total_days = models.PositiveIntegerField(default=21)
-    used_days = models.PositiveIntegerField(default=0)
+    staff = models.ForeignKey(
+        "Staff", on_delete=models.CASCADE, related_name="leave_balances",null=True, blank=True
+    )
+    leave_type = models.ForeignKey(
+        LeavePolicy, on_delete=models.CASCADE, related_name="balances"
+    )
+    year = models.PositiveIntegerField()
+    allocated_days = models.PositiveIntegerField()
+    used_days = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
     @property
     def remaining_days(self):
-        return self.total_days - self.used_days
-
-
-class StaffPayroll(AbsoluteBaseModel):
-    PAYMENT_FREQUENCY_CHOICES = [
-        ("Monthly", "Monthly"),
-        ("Bi-Monthly", "Bi-Monthly"),
-        ("Weekly", "Weekly"),
-        ("Quarterly", "Quarterly"),
-    ]
-    staff = models.OneToOneField(Staff, on_delete=models.CASCADE)
-    basic_salary = models.DecimalField(max_digits=12, decimal_places=2)
-    house_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    transport_allowance = models.DecimalField(
-        max_digits=12, decimal_places=2, default=0
-    )
-    other_allowances = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-
-    nssf_number = models.CharField(max_length=50, null=True, blank=True)
-    nhif_number = models.CharField(max_length=50, null=True, blank=True)
-    kra_pin = models.CharField(max_length=50, null=True, blank=True)
-
-    bank_name = models.CharField(max_length=255, null=True, blank=True)
-    bank_account_number = models.CharField(max_length=255, null=True, blank=True)
-    mpesa_number = models.CharField(
-        max_length=12,
-        null=True,
-        blank=True,
-    )
-    payment_frequency = models.CharField(
-        max_length=20,
-        choices=PAYMENT_FREQUENCY_CHOICES,
-        default="Monthly",
-    )
+        return self.allocated_days - self.used_days
 
     def __str__(self):
-        return f"Payroll for {self.staff}"
+        return f"{self.staff.user.email} - {self.leave_type.name} ({self.year})"
 
 
 class OvertimeRecords(AbsoluteBaseModel):
@@ -196,37 +163,30 @@ class OvertimeRecords(AbsoluteBaseModel):
     rate_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
     approved = models.BooleanField(default=False)
 
-
-class Payslip(AbsoluteBaseModel):
-    PAYMENT_STATUS_CHOICES = [
-        ("pending", "Pending"),
-        ("processing", "Processing"),
-        ("partially_paid", "Partially Paid"),
-        ("paid", "Paid"),
-        ("reversed", "Reversed"),
-        ("failed", "Failed"),
+class StaffPaymentMethod(AbsoluteBaseModel):
+    """
+    Stores staff's payment channels (bank, mobile money, etc.)
+    """
+    PAYMENT_METHOD_CHOICES = [
+        ("bank", "Bank Transfer"),
+        ("mpesa", "M-Pesa"),
+        ("cash", "Cash"),
+        ("other", "Other"),
     ]
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="payslips")
-    payroll_period_start = models.DateField()
-    payroll_period_end = models.DateField()
 
-    basic_salary = models.DecimalField(max_digits=12, decimal_places=2)
-    total_allowances = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total_overtime = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total_deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    net_pay = models.DecimalField(max_digits=12, decimal_places=2)
-    nssf = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    nhif = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    paye = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    generated_at = models.DateTimeField(auto_now_add=True)
-    payment_status = models.CharField(
-        max_length=50,
-        choices=PAYMENT_STATUS_CHOICES,
-        default="pending",
+    staff = models.ForeignKey(
+        Staff, on_delete=models.CASCADE, related_name="payment_methods"
     )
+    method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
+
+    bank_name = models.CharField(max_length=255, null=True, blank=True)
+    bank_account_number = models.CharField(max_length=255, null=True, blank=True)
+    mpesa_number = models.CharField(max_length=20, null=True, blank=True)
+
+    is_primary = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Payslip for {self.staff} ({self.payroll_period_start} to {self.payroll_period_end})"
+        return f"{self.staff} - {self.get_method_display()}"
 
 
 class StaffDocuments(AbsoluteBaseModel):
@@ -253,10 +213,196 @@ class StaffDocuments(AbsoluteBaseModel):
         return f"{self.staff} - {self.document_type}"
 
 
-class StaffOnboardingProgress(AbsoluteBaseModel):
+
+
+class Deduction(AbsoluteBaseModel):
+    """
+    High-level deduction types (NHIF, PAYE, SACCO loan, Union dues, etc.).
+    Defines whether this deduction is typically percentage or fixed.
+    """
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True, null=True)
+
+    DEDUCTION_TYPE_CHOICES = [
+        ("percentage", "Percentage Based (with bands)"),
+        ("fixed", "Fixed Amount (SACCO, union dues, loans)"),
+    ]
+    deduction_type = models.CharField(
+        max_length=20, choices=DEDUCTION_TYPE_CHOICES, default="percentage"
+    )
+
+    is_mandatory = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class DeductionRule(AbsoluteBaseModel):
+    """
+    Defines the actual rule for a Deduction.
+
+    - For percentage type: fill min_salary, max_salary, and percentage.
+    - For fixed type: fill amount only.
+    """
+    deduction = models.ForeignKey(
+        Deduction, on_delete=models.CASCADE, related_name="rules"
+    )
+
+    # For percentage-based rules:
+    min_salary = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+    max_salary = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+    percentage = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        help_text="For percentage-based deductions."
+    )
+
+    # For fixed deductions (like SACCO, union dues):
+    amount = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        help_text="For fixed deductions."
+    )
+
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["min_salary"]
+
+    def __str__(self):
+        return f"{self.deduction.name} rule"
+
+
+class StaffDeduction(AbsoluteBaseModel):
+    """
+    Link a deduction to a specific staff member.
+    Useful for SACCO loans, union dues or any deduction that applies to staff.
+    All amounts/percentages come from DeductionRule.
+    """
+    staff = models.ForeignKey(
+        Staff, on_delete=models.CASCADE, related_name="staff_deductions"
+    )
+    deduction = models.ForeignKey(
+        Deduction, on_delete=models.CASCADE, related_name="staff_deductions"
+    )
+
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.staff} - {self.deduction.name}"
+
+
+
+class Allowance(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    is_taxable = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class StaffAllowance(models.Model):
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="allowances")
+    allowance = models.ForeignKey(Allowance, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    effective_date = models.DateField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.staff} - {self.allowance}"
+    
+    
+
+
+
+class StaffStatutoryInfo(models.Model):
+    """
+    Stores all statutory IDs for a staff member
+    (KRA, NSSF, NHIF, HELB, etc.)
+    """
+    staff = models.OneToOneField(
+        Staff, on_delete=models.CASCADE, related_name="statutory_info"
+    )
+    kra_pin = models.CharField(max_length=20, blank=True, null=True)
+    nssf_number = models.CharField(max_length=20, blank=True, null=True)
+    nhif_number = models.CharField(max_length=20, blank=True, null=True)
+    helb_number = models.CharField(max_length=20, blank=True, null=True)  # optional
+    other_identifier = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f"Statutory Info for {self.staff}"
+
+
+class EmploymentContract(AbsoluteBaseModel):
+    PAYMENT_FREQUENCY_CHOICES = [
+        ("Monthly", "Monthly"),
+        ("Bi-Monthly", "Bi-Monthly"),
+        ("Weekly", "Weekly"),
+        ("Quarterly", "Quarterly"),
+    ]
     staff = models.OneToOneField(Staff, on_delete=models.CASCADE)
-    user_created = models.BooleanField(default=True)
-    staff_details_completed = models.BooleanField(default=True)
-    payroll_setup_completed = models.BooleanField(default=False)
-    documents_uploaded = models.BooleanField(default=False)
-    onboarding_completed = models.BooleanField(default=False)
+    basic_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    salary_currency = models.CharField(max_length=10, default="KES")
+    payment_frequency = models.CharField(
+        max_length=20,
+        choices=PAYMENT_FREQUENCY_CHOICES,
+        default="Monthly",
+    )
+
+    def __str__(self):
+        return f"Contract for {self.staff}"
+class PayrollRun(models.Model):
+    period_start = models.DateField()
+    period_end = models.DateField()
+    STATUS_CHOICES = [
+        ("Draft", "Draft"),
+        ("Processing", "Processing"),
+        ("Completed", "Completed"),
+        ("Reversed", "Reversed"),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Draft")
+
+    def __str__(self):
+        return f"Payroll Run {self.period_start} - {self.period_end}"
+
+class Payslip(AbsoluteBaseModel):
+    PAYMENT_STATUS_CHOICES = [
+        ("Pending", "Pending"),
+        ("Processing", "Processing"),
+        ("Partially Paid", "Partially Paid"),
+        ("Processed", "Processed"),
+        ("Reversed", "Reversed"),
+        ("Failed", "Failed"),
+    ]
+    payroll_run = models.ForeignKey(  
+        PayrollRun,
+        on_delete=models.CASCADE,
+        related_name="payslips",
+        blank=True,
+        null=True
+    )
+    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="payslips")
+    basic_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    total_allowances = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_overtime = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    net_pay = models.DecimalField(max_digits=12, decimal_places=2)
+    generated_at = models.DateTimeField(auto_now_add=True)
+    payment_status = models.CharField(
+        max_length=50,
+        choices=PAYMENT_STATUS_CHOICES,
+        default="Pending",
+    )
+
+    def __str__(self):
+        return f"Payslip for {self.staff} {self.payroll_run}"
+
+class PayslipDeduction(models.Model):
+    payslip = models.ForeignKey('Payslip', on_delete=models.CASCADE, related_name='deductions')
+    deduction = models.ForeignKey("Deduction", on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)

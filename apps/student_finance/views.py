@@ -12,6 +12,7 @@ from apps.student_finance.filters import (
 )
 from apps.student_finance.mixins import StudentInvoicingMixin
 from apps.student_finance.models import (
+    InvoiceType,
     StudentFeeInvoice,
     StudentFeePayment,
     StudentFeeLedger,
@@ -20,7 +21,9 @@ from apps.student_finance.models import (
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from apps.student_finance.serializers import (
+    CreateAndUpdateInvoiceTypeSerializer,
     FeeLedgeListSerializer,
+    InvoiceTypeListSerializer,
     StudentFeeInvoiceListSerializer,
     StudentFeePaymentListSerializer,
     StudentFeeLedgerSerializer,
@@ -281,3 +284,71 @@ class TotalCollectedFeesView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+class CreateInvoiceTypeView(generics.CreateAPIView):
+    queryset = InvoiceType.objects.all()
+    serializer_class = CreateAndUpdateInvoiceTypeSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            name = request.data.get("name")
+            if InvoiceType.objects.filter(name__iexact=name).exists():
+                return Response(
+                    {"success": False, "error": "InvoiceType with this name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return super().create(request, *args, **kwargs)
+        except Exception as exc:
+            # logger.error(f"Error creating InvoiceType: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class InvoiceTypesListView(generics.ListAPIView):
+    serializer_class = InvoiceTypeListSerializer
+    queryset = InvoiceType.objects.all().order_by("-created_on")
+
+    def get(self, request, *args, **kwargs):
+        try:
+            qs = self.get_queryset()
+            qs = self.filter_queryset(qs)
+            page = request.query_params.get("page", None)
+            if page:
+                self.pagination_class = PageNumberPagination
+                paginator = self.pagination_class()
+                paginated_qs = paginator.paginate_queryset(qs, request)
+                serializer = self.get_serializer(paginated_qs, many=True)
+                return paginator.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(qs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            # logger.error(f"Error listing InvoiceTypes: {str(e)}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class InvoiceTypeDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CreateAndUpdateInvoiceTypeSerializer
+    queryset = InvoiceType.objects.all()
+    lookup_field = "pk"
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            name = request.data.get("name")
+            if name and InvoiceType.objects.exclude(id=instance.id).filter(name__iexact=name).exists():
+                return Response(
+                    {"success": False, "error": "Another InvoiceType with this name already exists."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            return super().update(request, *args, **kwargs)
+        except Exception as exc:
+            # logger.error(f"Error updating InvoiceType: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

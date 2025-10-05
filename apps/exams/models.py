@@ -21,6 +21,9 @@ class ExamData(AbsoluteBaseModel):
         null=True,
         related_name="cohortmarks",
     )
+    study_year = models.ForeignKey(
+        "core.StudyYear", on_delete=models.SET_NULL, null=True, blank=True, related_name="yearmarks"
+    )
     course = models.ForeignKey("schools.Course", on_delete=models.CASCADE)
     cat_one = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     cat_two = models.DecimalField(max_digits=10, decimal_places=2, default=0)

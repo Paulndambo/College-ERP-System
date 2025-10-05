@@ -76,7 +76,7 @@ class Programme(AbsoluteBaseModel):
 
 class Semester(AbsoluteBaseModel):
     name = models.CharField(max_length=255, choices=SEMESTER_TYPES, null=True)
-    academic_year = models.CharField(max_length=255)
+    academic_year = models.ForeignKey("core.AcademicYear", on_delete=models.CASCADE, related_name="semesters")
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     status = models.CharField(
@@ -86,49 +86,11 @@ class Semester(AbsoluteBaseModel):
     def __str__(self):
         return self.name
 
-    def derive_academic_year_from_dates(self):
-        """
-        Derive academic year - now with a clear hierarchy:
-        1. Use cohort intake academic year if available
-        2. Fall back to date-based calculation
-        """
-        if not self.start_date or not self.end_date:
-            return ""
-
-        return self._calculate_from_dates()
-
-    def _calculate_from_dates(self):
-        start_year = self.start_date.year
-        end_year = self.end_date.year
-        start_month = self.start_date.month
-
-        if start_year != end_year:
-            return f"{start_year}/{end_year}"
-
-        if start_month >= 9:
-            return f"{start_year}/{start_year + 1}"
-        else:
-            return f"{start_year - 1}/{start_year}"
-
-    def save(self, *args, **kwargs):
-        """Auto-populate academic_year if not provided"""
-        if not self.academic_year and self.start_date and self.end_date:
-            self.academic_year = self.derive_academic_year_from_dates()
-        super().save(*args, **kwargs)
-
-    def clean(self):
-        """Validate that end_date is after start_date"""
-        from django.core.exceptions import ValidationError
-
-        if self.start_date and self.end_date:
-            if self.end_date <= self.start_date:
-                raise ValidationError("End date must be after start date")
-
 
 class ProgrammeCohort(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
-    current_year = models.CharField(max_length=255, choices=COHORT_YEAR_CHOICES)
+    current_year = models.ForeignKey("core.StudyYear", on_delete=models.CASCADE, related_name="cohorts")
     current_semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     intake = models.ForeignKey("admissions.Intake", on_delete=models.CASCADE, null=True)
     status = models.CharField(
@@ -143,9 +105,6 @@ class ProgrammeCohort(AbsoluteBaseModel):
     def students_count(self):
         return self.cohortstudents.all().count()
 
-    def get_academic_year(self):
-        """Get academic year from the intake this cohort belongs to"""
-        return self.intake.get_academic_year()
     
 
 class Course(AbsoluteBaseModel):
@@ -154,9 +113,9 @@ class Course(AbsoluteBaseModel):
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
-    study_year = models.CharField(max_length=255, choices=COHORT_YEAR_CHOICES, null=True, blank=True)
+    study_year = models.ForeignKey("core.StudyYear", on_delete=models.CASCADE, related_name="courses")
     credit_hours = models.FloatField(default=2.0)
-    semester = models.CharField(max_length=255, choices=SEMESTER_TYPES, null=True, blank=True)
+    semester = models.ForeignKey("Semester", on_delete=models.CASCADE, related_name="courses")
     course_type = models.CharField(max_length=255, choices=COURSE_TYPES, default="Core")
 
     def __str__(self):
@@ -167,7 +126,7 @@ class CourseSession(AbsoluteBaseModel):
     cohort = models.ForeignKey(
         ProgrammeCohort, on_delete=models.CASCADE, related_name="cohortsessions"
     )
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="coursesessions")
     start_time = models.DateTimeField(null=True)
     period = models.FloatField(default=2)
     status = models.CharField(

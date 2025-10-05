@@ -1,27 +1,40 @@
 from django.urls import path
 from .views import (
+    AcademicYearDetailView,
+    AcademicYearsListView,
     CampusCreateView,
     CampusListView,
     CampusUpdateDeleteView,
+    CreateAcademicYearView,
+    CreateRoleView,
     DashboardCountsRetrieveView,
-    ModulesListView,
+    LoggedInPermissionsView,
     RecentActionsView,
-    RoleListCreateView,
-    RoleRetrieveUpdateDestroyView,
+    RoleDetailPermissionsView,
     RolesListAPIView,
     StudyYearCreateView,
     StudyYearListView,
     StudyYearUpdateDeleteView,
+    UpdateDeleteRoleView,
+    UpdateRolePermissionsView,
     # UserRoleListView,
 )
 
 urlpatterns = [
-    
-    
-    path('roles/create/', RoleListCreateView.as_view(), name='role-list-create'),
-    path('roles/', RolesListAPIView.as_view(), name='role-list'),
-    path('modules/', ModulesListView.as_view(), name='modules-list-create'),
-    path('roles/<int:pk>/', RoleRetrieveUpdateDestroyView.as_view(), name='role-detail'),
+    path("roles/", RolesListAPIView.as_view(), name="role-list"),
+    path("roles/create/", CreateRoleView.as_view(), name="role-create"),
+    path("roles/<int:pk>/", UpdateDeleteRoleView.as_view(), name="role-update-delete"),
+    path(
+        "roles/<int:pk>/permissions/",
+        RoleDetailPermissionsView.as_view(),
+        name="role-permissions",
+    ),
+    path(
+        "roles/<int:pk>/permissions/update/",
+        UpdateRolePermissionsView.as_view(),
+        name="role-permissions-update",
+    ),
+     path("permissions/", LoggedInPermissionsView.as_view(), name="user-permissions"),
     path("campus/create/", CampusCreateView.as_view(), name="campus-create"),
     path("campus/list/", CampusListView.as_view(), name="campus-list"),
     # path("user-roles/", UserRoleListView.as_view(), name="user-role-list"),
@@ -36,6 +49,13 @@ urlpatterns = [
         "studyyear/update-delete/<int:pk>/",
         StudyYearUpdateDeleteView.as_view(),
         name="studyyear-update-delete",
+    ),
+    path("academic-years/create/", CreateAcademicYearView.as_view(), name="academic-year-create"),
+    path("academic-years/list/", AcademicYearsListView.as_view(), name="academic-years-list"),
+    path(
+        "academic-years/<int:pk>/",
+        AcademicYearDetailView.as_view(),
+        name="academic-years-update-delete",
     ),
     # path("studyyear/list/", StudyYearListView.as_view(), name="studyyear-list"),
     path(
