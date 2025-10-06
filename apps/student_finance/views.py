@@ -246,13 +246,15 @@ class TotalCollectedFeesView(APIView):
             semester_info = {
                 "id": semester.id,
                 "name": semester.name,
-                "academic_year": (
-                    semester.academic_year
-                    if hasattr(semester, "academic_year")
-                    else None
-                ),
+                "academic_year": {
+                    "id": semester.academic_year.id,
+                    "name": semester.academic_year.name,
+                    "start_date": semester.academic_year.start_date,
+                    "end_date": semester.academic_year.end_date,
+                } if semester.academic_year else None,
                 "status": semester.status,
             }
+
 
         return Response(
             {
