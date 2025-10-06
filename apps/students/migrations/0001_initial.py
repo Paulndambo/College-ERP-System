@@ -9,143 +9,314 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('core', '0001_initial'),
-        ('hostels', '0001_initial'),
-        ('schools', '0001_initial'),
+        ("core", "0001_initial"),
+        ("hostels", "0001_initial"),
+        ("schools", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MealCard',
+            name="MealCard",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('card_number', models.CharField(max_length=255)),
-                ('month', models.CharField(choices=[('January', 'January'), ('February', 'February'), ('March', 'March'), ('April', 'April'), ('May', 'May'), ('June', 'June'), ('July', 'July'), ('August', 'August'), ('September', 'September'), ('October', 'October'), ('November', 'November'), ('December', 'December')], default='September', max_length=255)),
-                ('year', models.IntegerField(default=2025)),
-                ('expiry_date', models.DateField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("card_number", models.CharField(max_length=255)),
+                (
+                    "month",
+                    models.CharField(
+                        choices=[
+                            ("January", "January"),
+                            ("February", "February"),
+                            ("March", "March"),
+                            ("April", "April"),
+                            ("May", "May"),
+                            ("June", "June"),
+                            ("July", "July"),
+                            ("August", "August"),
+                            ("September", "September"),
+                            ("October", "October"),
+                            ("November", "November"),
+                            ("December", "December"),
+                        ],
+                        default="September",
+                        max_length=255,
+                    ),
+                ),
+                ("year", models.IntegerField(default=2025)),
+                ("expiry_date", models.DateField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentAttendance',
+            name="StudentAttendance",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('date', models.DateField()),
-                ('status', models.CharField(choices=[('Present', 'Present'), ('Absent', 'Absent')], default='Present', max_length=255)),
-                ('reason', models.CharField(max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("date", models.DateField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("Present", "Present"), ("Absent", "Absent")],
+                        default="Present",
+                        max_length=255,
+                    ),
+                ),
+                ("reason", models.CharField(max_length=255, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentCheckIn',
+            name="StudentCheckIn",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('check_in_time', models.DateTimeField(auto_now_add=True)),
-                ('check_out_time', models.DateTimeField(null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("check_in_time", models.DateTimeField(auto_now_add=True)),
+                ("check_out_time", models.DateTimeField(null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentCourseEnrollment',
+            name="StudentCourseEnrollment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentDocument',
+            name="StudentDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('document_type', models.CharField(max_length=255, null=True)),
-                ('document_name', models.CharField(max_length=255)),
-                ('document_file', models.FileField(blank=True, null=True, upload_to='student_documents/')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("document_type", models.CharField(max_length=255, null=True)),
+                ("document_name", models.CharField(max_length=255)),
+                (
+                    "document_file",
+                    models.FileField(
+                        blank=True, null=True, upload_to="student_documents/"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentEducationHistory',
+            name="StudentEducationHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('institution', models.CharField(max_length=255)),
-                ('level', models.CharField(choices=[('Primary School', 'Primary School'), ('Secondary School', 'Secondary School'), ('College', 'College'), ('University', 'University')], max_length=255)),
-                ('grade_or_gpa', models.CharField(max_length=255, null=True)),
-                ('major', models.CharField(max_length=255, null=True)),
-                ('year', models.CharField(max_length=255, null=True)),
-                ('graduated', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("institution", models.CharField(max_length=255)),
+                (
+                    "level",
+                    models.CharField(
+                        choices=[
+                            ("Primary School", "Primary School"),
+                            ("Secondary School", "Secondary School"),
+                            ("College", "College"),
+                            ("University", "University"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("grade_or_gpa", models.CharField(max_length=255, null=True)),
+                ("major", models.CharField(max_length=255, null=True)),
+                ("year", models.CharField(max_length=255, null=True)),
+                ("graduated", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentProgramme',
+            name="StudentProgramme",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField(null=True)),
-                ('current_semester', models.CharField(max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField(null=True)),
+                ("current_semester", models.CharField(max_length=255, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='SemesterReporting',
+            name="SemesterReporting",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('reported', models.BooleanField(default=False)),
-                ('cohort', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.programmecohort')),
-                ('semester', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='semesterreportings', to='schools.semester')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("reported", models.BooleanField(default=False)),
+                (
+                    "cohort",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="schools.programmecohort",
+                    ),
+                ),
+                (
+                    "semester",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="semesterreportings",
+                        to="schools.semester",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Student',
+            name="Student",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('registration_number', models.CharField(max_length=255)),
-                ('guardian_name', models.CharField(max_length=255, null=True)),
-                ('guardian_phone_number', models.CharField(max_length=255, null=True)),
-                ('guardian_relationship', models.CharField(max_length=255, null=True)),
-                ('guardian_email', models.EmailField(max_length=254, null=True)),
-                ('status', models.CharField(choices=[('Active', 'Active'), ('Inactive', 'Inactive'), ('Graduated', 'Graduated'), ('Dropped', 'Dropped'), ('Suspended', 'Suspended')], max_length=255)),
-                ('campus', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.campus')),
-                ('cohort', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cohortstudents', to='schools.programmecohort')),
-                ('hostel_room', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='hostels.hostelroom')),
-                ('programme', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.programme')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("registration_number", models.CharField(max_length=255)),
+                ("guardian_name", models.CharField(max_length=255, null=True)),
+                ("guardian_phone_number", models.CharField(max_length=255, null=True)),
+                ("guardian_relationship", models.CharField(max_length=255, null=True)),
+                ("guardian_email", models.EmailField(max_length=254, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Active", "Active"),
+                            ("Inactive", "Inactive"),
+                            ("Graduated", "Graduated"),
+                            ("Dropped", "Dropped"),
+                            ("Suspended", "Suspended"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "campus",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="core.campus",
+                    ),
+                ),
+                (
+                    "cohort",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="cohortstudents",
+                        to="schools.programmecohort",
+                    ),
+                ),
+                (
+                    "hostel_room",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="hostels.hostelroom",
+                    ),
+                ),
+                (
+                    "programme",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="schools.programme",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

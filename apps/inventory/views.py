@@ -409,8 +409,7 @@ class StockIssueCreateView(APIView):
     serializer_class = StockIssueSerializer
 
     @swagger_auto_schema(
-        request_body=StockIssueSerializer,
-        responses={201: StockIssueSerializer}
+        request_body=StockIssueSerializer, responses={201: StockIssueSerializer}
     )
     def post(self, request, *args, **kwargs):
         # Extract inventory_item & quantity from request
@@ -421,28 +420,34 @@ class StockIssueCreateView(APIView):
             try:
                 item = InventoryItem.objects.get(id=inventory_item_id)
             except InventoryItem.DoesNotExist:
-                return Response({"error": "Invalid inventory item"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Invalid inventory item"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             if int(quantity) > item.quantity_in_stock:
                 return Response(
-                    {"error": "Not enough stock available for given item to issue the quantity entered"},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {
+                        "error": "Not enough stock available for given item to issue the quantity entered"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save(issued_by=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    
+
+
 class StockIssueAPIView(generics.ListAPIView):
     queryset = StockIssue.objects.all().order_by("-created_on")
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = StockIssueListSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = StockIssueFilter
+
     def get_paginated_response(self, data):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)

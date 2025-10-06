@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from apps.core.models import UserRole, Module, RolePermission
 
+
 class Command(BaseCommand):
     help = "Create admin role and assign all permissions to all modules"
 
@@ -8,7 +9,7 @@ class Command(BaseCommand):
         # Create or get admin role
         admin_role, created = UserRole.objects.get_or_create(
             name="Admin",
-            defaults={"description": "Administrator with full access to all modules"}
+            defaults={"description": "Administrator with full access to all modules"},
         )
         if created:
             self.stdout.write(self.style.SUCCESS("Admin role created"))
@@ -32,11 +33,15 @@ class Command(BaseCommand):
                     "can_export": True,
                     "can_print": True,
                     "can_view_all": True,
-                }
+                },
             )
             if created_perm:
                 created_count += 1
-                self.stdout.write(self.style.SUCCESS(f"Permissions assigned for module: {module.name}"))
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Permissions assigned for module: {module.name}"
+                    )
+                )
             else:
                 # Update existing permissions to full access
                 perm.can_view = True
@@ -49,8 +54,12 @@ class Command(BaseCommand):
                 perm.can_view_all = True
                 perm.save()
                 updated_count += 1
-                self.stdout.write(self.style.WARNING(f"Updated permissions for module: {module.name}"))
+                self.stdout.write(
+                    self.style.WARNING(f"Updated permissions for module: {module.name}")
+                )
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. Created: {created_count}, Updated: {updated_count} permissions for Admin role."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Done. Created: {created_count}, Updated: {updated_count} permissions for Admin role."
+            )
+        )

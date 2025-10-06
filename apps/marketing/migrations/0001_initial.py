@@ -8,93 +8,221 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Campaign',
+            name="Campaign",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('image', models.ImageField(blank=True, null=True, upload_to='campaigns_images/')),
-                ('campaign_type', models.CharField(choices=[('Email', 'Email Campaign'), ('Social Media', 'Social Media Campaign'), ('Webinar', 'Webinar'), ('Event', 'Event'), ('Phone Call', 'Phone Call')], max_length=50)),
-                ('start_date', models.DateTimeField()),
-                ('end_date', models.DateTimeField()),
-                ('description', models.TextField()),
-                ('status', models.CharField(choices=[('Draft', 'Draft'), ('In Progress', 'In Progress'), ('Completed', 'Completed')], default='Draft', max_length=50)),
-                ('views', models.IntegerField(default=0)),
-                ('slug', models.SlugField(blank=True, null=True, unique=True)),
-                ('campaign_link', models.URLField(blank=True, null=True)),
-                ('budget', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "image",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="campaigns_images/"
+                    ),
+                ),
+                (
+                    "campaign_type",
+                    models.CharField(
+                        choices=[
+                            ("Email", "Email Campaign"),
+                            ("Social Media", "Social Media Campaign"),
+                            ("Webinar", "Webinar"),
+                            ("Event", "Event"),
+                            ("Phone Call", "Phone Call"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("start_date", models.DateTimeField()),
+                ("end_date", models.DateTimeField()),
+                ("description", models.TextField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Draft", "Draft"),
+                            ("In Progress", "In Progress"),
+                            ("Completed", "Completed"),
+                        ],
+                        default="Draft",
+                        max_length=50,
+                    ),
+                ),
+                ("views", models.IntegerField(default=0)),
+                ("slug", models.SlugField(blank=True, null=True, unique=True)),
+                ("campaign_link", models.URLField(blank=True, null=True)),
+                (
+                    "budget",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Interaction',
+            name="Interaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('interaction_type', models.CharField(choices=[('Email', 'Email'), ('Phone', 'Phone'), ('SMS', 'SMS'), ('Meeting', 'Meeting'), ('Event', 'Event')], max_length=20)),
-                ('notes', models.TextField(help_text='Details of the interaction')),
-                ('date', models.DateTimeField(default=django.utils.timezone.now)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "interaction_type",
+                    models.CharField(
+                        choices=[
+                            ("Email", "Email"),
+                            ("Phone", "Phone"),
+                            ("SMS", "SMS"),
+                            ("Meeting", "Meeting"),
+                            ("Event", "Event"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("notes", models.TextField(help_text="Details of the interaction")),
+                ("date", models.DateTimeField(default=django.utils.timezone.now)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Lead',
+            name="Lead",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('first_name', models.CharField(max_length=255)),
-                ('last_name', models.CharField(max_length=255)),
-                ('email', models.EmailField(max_length=254)),
-                ('phone_number', models.CharField(blank=True, max_length=15, null=True)),
-                ('gender', models.CharField(blank=True, choices=[('Male', 'Male'), ('Female', 'Female')], max_length=10, null=True)),
-                ('source', models.CharField(max_length=100)),
-                ('city', models.CharField(blank=True, max_length=255, null=True)),
-                ('country', models.CharField(blank=True, max_length=255, null=True)),
-                ('status', models.CharField(choices=[('New', 'New'), ('Contacted', 'Contacted'), ('Interested', 'Interested'), ('Application in Progress', 'Application in Progress'), ('Converted', 'Converted'), ('Lost', 'Lost')], default='New', max_length=50)),
-                ('score', models.IntegerField(default=0, help_text='Lead scoring to prioritize leads')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("first_name", models.CharField(max_length=255)),
+                ("last_name", models.CharField(max_length=255)),
+                ("email", models.EmailField(max_length=254)),
+                (
+                    "phone_number",
+                    models.CharField(blank=True, max_length=15, null=True),
+                ),
+                (
+                    "gender",
+                    models.CharField(
+                        blank=True,
+                        choices=[("Male", "Male"), ("Female", "Female")],
+                        max_length=10,
+                        null=True,
+                    ),
+                ),
+                ("source", models.CharField(max_length=100)),
+                ("city", models.CharField(blank=True, max_length=255, null=True)),
+                ("country", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("New", "New"),
+                            ("Contacted", "Contacted"),
+                            ("Interested", "Interested"),
+                            ("Application in Progress", "Application in Progress"),
+                            ("Converted", "Converted"),
+                            ("Lost", "Lost"),
+                        ],
+                        default="New",
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "score",
+                    models.IntegerField(
+                        default=0, help_text="Lead scoring to prioritize leads"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='LeadStage',
+            name="LeadStage",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('stage', models.CharField(choices=[('New', 'New'), ('Contacted', 'Contacted'), ('Interested', 'Interested'), ('Application in Progress', 'Application in Progress'), ('Converted', 'Converted'), ('Lost', 'Lost')], max_length=50)),
-                ('date_reached', models.DateTimeField(default=django.utils.timezone.now)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "stage",
+                    models.CharField(
+                        choices=[
+                            ("New", "New"),
+                            ("Contacted", "Contacted"),
+                            ("Interested", "Interested"),
+                            ("Application in Progress", "Application in Progress"),
+                            ("Converted", "Converted"),
+                            ("Lost", "Lost"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "date_reached",
+                    models.DateTimeField(default=django.utils.timezone.now),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Task',
+            name="Task",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('due_date', models.DateTimeField()),
-                ('completed', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                ("due_date", models.DateTimeField()),
+                ("completed", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

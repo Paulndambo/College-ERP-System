@@ -7,41 +7,96 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='MealCardPayment',
+            name="MealCardPayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('card_number', models.CharField(max_length=255, null=True)),
-                ('transaction_code', models.CharField(max_length=255, null=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('month', models.CharField(choices=[('January', 'January'), ('February', 'February'), ('March', 'March'), ('April', 'April'), ('May', 'May'), ('June', 'June'), ('July', 'July'), ('August', 'August'), ('September', 'September'), ('October', 'October'), ('November', 'November'), ('December', 'December')], default='September', max_length=255)),
-                ('year', models.IntegerField(default=2025)),
-                ('payment_date', models.DateField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("card_number", models.CharField(max_length=255, null=True)),
+                ("transaction_code", models.CharField(max_length=255, null=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "month",
+                    models.CharField(
+                        choices=[
+                            ("January", "January"),
+                            ("February", "February"),
+                            ("March", "March"),
+                            ("April", "April"),
+                            ("May", "May"),
+                            ("June", "June"),
+                            ("July", "July"),
+                            ("August", "August"),
+                            ("September", "September"),
+                            ("October", "October"),
+                            ("November", "November"),
+                            ("December", "December"),
+                        ],
+                        default="September",
+                        max_length=255,
+                    ),
+                ),
+                ("year", models.IntegerField(default=2025)),
+                ("payment_date", models.DateField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='RentPayment',
+            name="RentPayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('transaction_code', models.CharField(max_length=255, null=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('month', models.CharField(choices=[('January', 'January'), ('February', 'February'), ('March', 'March'), ('April', 'April'), ('May', 'May'), ('June', 'June'), ('July', 'July'), ('August', 'August'), ('September', 'September'), ('October', 'October'), ('November', 'November'), ('December', 'December')], default='September', max_length=255)),
-                ('year', models.IntegerField(default=2025)),
-                ('payment_date', models.DateField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("transaction_code", models.CharField(max_length=255, null=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "month",
+                    models.CharField(
+                        choices=[
+                            ("January", "January"),
+                            ("February", "February"),
+                            ("March", "March"),
+                            ("April", "April"),
+                            ("May", "May"),
+                            ("June", "June"),
+                            ("July", "July"),
+                            ("August", "August"),
+                            ("September", "September"),
+                            ("October", "October"),
+                            ("November", "November"),
+                            ("December", "December"),
+                        ],
+                        default="September",
+                        max_length=255,
+                    ),
+                ),
+                ("year", models.IntegerField(default=2025)),
+                ("payment_date", models.DateField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

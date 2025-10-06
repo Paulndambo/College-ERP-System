@@ -8,49 +8,95 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0002_initial'),
-        ('schools', '0001_initial'),
-        ('students', '0003_alter_mealcard_month'),
+        ("core", "0002_initial"),
+        ("schools", "0001_initial"),
+        ("students", "0003_alter_mealcard_month"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='semesterreporting',
-            name='cohort',
+            model_name="semesterreporting",
+            name="cohort",
         ),
         migrations.RemoveField(
-            model_name='semesterreporting',
-            name='reported',
+            model_name="semesterreporting",
+            name="reported",
         ),
         migrations.AddField(
-            model_name='semesterreporting',
-            name='done_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_semester_reports', to=settings.AUTH_USER_MODEL),
+            model_name="semesterreporting",
+            name="done_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="approved_semester_reports",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='semesterreporting',
-            name='semester',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='semester_reports', to='schools.semester'),
+            model_name="semesterreporting",
+            name="semester",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="semester_reports",
+                to="schools.semester",
+            ),
         ),
         migrations.AlterField(
-            model_name='semesterreporting',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='semester_reportings', to='students.student'),
+            model_name="semesterreporting",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="semester_reportings",
+                to="students.student",
+            ),
         ),
         migrations.CreateModel(
-            name='Promotion',
+            name="Promotion",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('promoted_on', models.DateField(auto_now_add=True)),
-                ('done_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_promotions', to=settings.AUTH_USER_MODEL)),
-                ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='promotions', to='students.student')),
-                ('study_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='promotions', to='core.studyyear')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("promoted_on", models.DateField(auto_now_add=True)),
+                (
+                    "done_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="approved_promotions",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="promotions",
+                        to="students.student",
+                    ),
+                ),
+                (
+                    "study_year",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="promotions",
+                        to="core.studyyear",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

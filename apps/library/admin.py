@@ -22,8 +22,6 @@ class FineAdmin(admin.ModelAdmin):
         "member_name",
         "book_title",
         "is_overdue",
-      
-        
     )
     list_filter = ("status",)
 

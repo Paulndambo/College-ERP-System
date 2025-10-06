@@ -1,9 +1,27 @@
-from .models import StudentFeeInvoice, StudentFeeLedger, StudentFeePayment
+from .models import StudentFeeInvoice, StudentFeeLedger, StudentFeePayment, StudentFeeStatement
 import django_filters
 from django.db.models import Q
 from decimal import Decimal
 
 
+
+class StudentFeeStatementFilter(django_filters.FilterSet):
+    semester = django_filters.NumberFilter(field_name="semester_id")
+    cohort = django_filters.NumberFilter(
+        field_name="student__cohort_id"
+    )  # 
+    search = django_filters.CharFilter(method="filter_by_search")
+
+    class Meta:
+        model = StudentFeeStatement
+        fields = ["semester", "cohort", "search", ]
+
+    def filter_by_search(self, queryset, name, value):
+        return queryset.filter(
+            Q(student__registration_number__icontains=value)
+            | Q(student__user__first_name__icontains=value)
+            | Q(student__user__last_name__icontains=value)
+        )
 class StudentFeeInvoiceFilter(django_filters.FilterSet):
     """
     Filter student fee invoices

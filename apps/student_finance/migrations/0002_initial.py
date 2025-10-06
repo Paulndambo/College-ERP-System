@@ -10,56 +10,87 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('schools', '0001_initial'),
-        ('student_finance', '0001_initial'),
-        ('students', '0001_initial'),
+        ("schools", "0001_initial"),
+        ("student_finance", "0001_initial"),
+        ("students", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='studentfeeinvoice',
-            name='created_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="studentfeeinvoice",
+            name="created_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeeinvoice',
-            name='invoice_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='student_finance.invoicetype'),
+            model_name="studentfeeinvoice",
+            name="invoice_type",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="student_finance.invoicetype",
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeeinvoice',
-            name='semester',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.semester'),
+            model_name="studentfeeinvoice",
+            name="semester",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="schools.semester",
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeeinvoice',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='students.student'),
+            model_name="studentfeeinvoice",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="students.student"
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeeledger',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='students.student'),
+            model_name="studentfeeledger",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="students.student"
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeepayment',
-            name='created_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="studentfeepayment",
+            name="created_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeepayment',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='students.student'),
+            model_name="studentfeepayment",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="students.student"
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeestatement',
-            name='semester',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.semester'),
+            model_name="studentfeestatement",
+            name="semester",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="schools.semester",
+            ),
         ),
         migrations.AddField(
-            model_name='studentfeestatement',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='students.student'),
+            model_name="studentfeestatement",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="students.student"
+            ),
         ),
     ]

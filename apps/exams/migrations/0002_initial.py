@@ -10,32 +10,51 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('core', '0002_initial'),
-        ('exams', '0001_initial'),
-        ('schools', '0001_initial'),
-        ('students', '0001_initial'),
+        ("core", "0002_initial"),
+        ("exams", "0001_initial"),
+        ("schools", "0001_initial"),
+        ("students", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='examdata',
-            name='recorded_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="examdata",
+            name="recorded_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='examdata',
-            name='semester',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='semestermarks', to='schools.semester'),
+            model_name="examdata",
+            name="semester",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="semestermarks",
+                to="schools.semester",
+            ),
         ),
         migrations.AddField(
-            model_name='examdata',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='studentmarks', to='students.student'),
+            model_name="examdata",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="studentmarks",
+                to="students.student",
+            ),
         ),
         migrations.AddField(
-            model_name='examdata',
-            name='study_year',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='yearmarks', to='core.studyyear'),
+            model_name="examdata",
+            name="study_year",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="yearmarks",
+                to="core.studyyear",
+            ),
         ),
     ]

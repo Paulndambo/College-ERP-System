@@ -10,103 +10,170 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('core', '0002_initial'),
-        ('finance', '0001_initial'),
-        ('library', '0001_initial'),
-        ('schools', '0001_initial'),
-        ('students', '0001_initial'),
+        ("core", "0002_initial"),
+        ("finance", "0001_initial"),
+        ("library", "0001_initial"),
+        ("schools", "0001_initial"),
+        ("students", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='budget',
-            name='approved_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='budgetapprovers', to=settings.AUTH_USER_MODEL),
+            model_name="budget",
+            name="approved_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="budgetapprovers",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='budget',
-            name='department',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.department'),
+            model_name="budget",
+            name="department",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="schools.department",
+            ),
         ),
         migrations.AddField(
-            model_name='budget',
-            name='school',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='schools.school'),
+            model_name="budget",
+            name="school",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="schools.school",
+            ),
         ),
         migrations.AddField(
-            model_name='budget',
-            name='submitted_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='budgetsubmitters', to=settings.AUTH_USER_MODEL),
+            model_name="budget",
+            name="submitted_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="budgetsubmitters",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='budgetdocument',
-            name='budget',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='finance.budget'),
+            model_name="budgetdocument",
+            name="budget",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="finance.budget"
+            ),
         ),
         migrations.AddField(
-            model_name='budgetitem',
-            name='budget',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='finance.budget'),
+            model_name="budgetitem",
+            name="budget",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="finance.budget"
+            ),
         ),
         migrations.AddField(
-            model_name='feepayment',
-            name='recorded_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="feepayment",
+            name="recorded_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='feepayment',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='students.student'),
+            model_name="feepayment",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="students.student"
+            ),
         ),
         migrations.AddField(
-            model_name='feestructure',
-            name='programme',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.programme'),
+            model_name="feestructure",
+            name="programme",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="schools.programme"
+            ),
         ),
         migrations.AddField(
-            model_name='feestructure',
-            name='semester',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.semester'),
+            model_name="feestructure",
+            name="semester",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="schools.semester",
+            ),
         ),
         migrations.AddField(
-            model_name='feestructure',
-            name='year_of_study',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.studyyear'),
+            model_name="feestructure",
+            name="year_of_study",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="core.studyyear",
+            ),
         ),
         migrations.AddField(
-            model_name='feestructureitem',
-            name='fee_structure',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='feeitems', to='finance.feestructure'),
+            model_name="feestructureitem",
+            name="fee_structure",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="feeitems",
+                to="finance.feestructure",
+            ),
         ),
         migrations.AddField(
-            model_name='libraryfinepayment',
-            name='fine',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='finepayment', to='library.fine'),
+            model_name="libraryfinepayment",
+            name="fine",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="finepayment",
+                to="library.fine",
+            ),
         ),
         migrations.AddField(
-            model_name='libraryfinepayment',
-            name='member',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='library.member'),
+            model_name="libraryfinepayment",
+            name="member",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="library.member"
+            ),
         ),
         migrations.AddField(
-            model_name='libraryfinepayment',
-            name='recorded_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="libraryfinepayment",
+            name="recorded_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='payment',
-            name='payer',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='payers', to=settings.AUTH_USER_MODEL),
+            model_name="payment",
+            name="payer",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="payers",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='payment',
-            name='receiver',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='receivers', to=settings.AUTH_USER_MODEL),
+            model_name="payment",
+            name="receiver",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="receivers",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='payment',
-            name='recorded_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="payment",
+            name="recorded_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

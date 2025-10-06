@@ -7,123 +7,269 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Budget',
+            name="Budget",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('amount_requested', models.DecimalField(decimal_places=2, default=0, max_digits=100)),
-                ('amount_approved', models.DecimalField(decimal_places=2, default=0, max_digits=100)),
-                ('status', models.CharField(choices=[('Under Review', 'Under Review'), ('Approved', 'Approved'), ('Declined', 'Declined')], default='Under Review', max_length=255)),
-                ('description', models.TextField(null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                (
+                    "amount_requested",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=100),
+                ),
+                (
+                    "amount_approved",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=100),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Under Review", "Under Review"),
+                            ("Approved", "Approved"),
+                            ("Declined", "Declined"),
+                        ],
+                        default="Under Review",
+                        max_length=255,
+                    ),
+                ),
+                ("description", models.TextField(null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='BudgetDocument',
+            name="BudgetDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('document_name', models.CharField(max_length=255)),
-                ('document_file', models.FileField(upload_to='budget_documents/')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("document_name", models.CharField(max_length=255)),
+                ("document_file", models.FileField(upload_to="budget_documents/")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='BudgetItem',
+            name="BudgetItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField(null=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField(null=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=100)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='FeePayment',
+            name="FeePayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('payment_date', models.DateField()),
-                ('payment_method', models.CharField(choices=[('Cash', 'Cash'), ('Bank Transfer', 'Bank Transfer'), ('Mobile Money', 'Mobile Money'), ('Cheque', 'Cheque')], max_length=255)),
-                ('payment_reference', models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "amount",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                ("payment_date", models.DateField()),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[
+                            ("Cash", "Cash"),
+                            ("Bank Transfer", "Bank Transfer"),
+                            ("Mobile Money", "Mobile Money"),
+                            ("Cheque", "Cheque"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "payment_reference",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
             ],
             options={
-                'ordering': ['-created_on'],
+                "ordering": ["-created_on"],
             },
         ),
         migrations.CreateModel(
-            name='FeeStructure',
+            name="FeeStructure",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='FeeStructureItem',
+            name="FeeStructureItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('description', models.CharField(max_length=255)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("description", models.CharField(max_length=255)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='LibraryFinePayment',
+            name="LibraryFinePayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('payment_date', models.DateField(null=True)),
-                ('payment_method', models.CharField(choices=[('Cash', 'Cash'), ('Bank Transfer', 'Bank Transfer'), ('Mobile Money', 'Mobile Money'), ('Cheque', 'Cheque')], max_length=255, null=True)),
-                ('payment_reference', models.CharField(blank=True, max_length=255, null=True)),
-                ('paid', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "amount",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                ("payment_date", models.DateField(null=True)),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[
+                            ("Cash", "Cash"),
+                            ("Bank Transfer", "Bank Transfer"),
+                            ("Mobile Money", "Mobile Money"),
+                            ("Cheque", "Cheque"),
+                        ],
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                (
+                    "payment_reference",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("paid", models.BooleanField(default=False)),
             ],
             options={
-                'ordering': ['-created_on'],
+                "ordering": ["-created_on"],
             },
         ),
         migrations.CreateModel(
-            name='Payment',
+            name="Payment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('amount', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('payment_type', models.CharField(choices=[('Fees Payment', 'Fees Payment'), ('Meal Card Payment', 'Meal Card Payment'), ('Library Fine Payment', 'Library Fine Payment'), ('Hostel Payment', 'Hostel Payment')], max_length=255)),
-                ('direction', models.CharField(choices=[('Income', 'Income'), ('Expense', 'Expense')], max_length=255)),
-                ('payment_method', models.CharField(choices=[('Cash', 'Cash'), ('Bank Transfer', 'Bank Transfer'), ('Mobile Money', 'Mobile Money'), ('Cheque', 'Cheque')], max_length=255)),
-                ('description', models.CharField(max_length=500, null=True)),
-                ('payment_reference', models.CharField(max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "amount",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                (
+                    "payment_type",
+                    models.CharField(
+                        choices=[
+                            ("Fees Payment", "Fees Payment"),
+                            ("Meal Card Payment", "Meal Card Payment"),
+                            ("Library Fine Payment", "Library Fine Payment"),
+                            ("Hostel Payment", "Hostel Payment"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "direction",
+                    models.CharField(
+                        choices=[("Income", "Income"), ("Expense", "Expense")],
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[
+                            ("Cash", "Cash"),
+                            ("Bank Transfer", "Bank Transfer"),
+                            ("Mobile Money", "Mobile Money"),
+                            ("Cheque", "Cheque"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("description", models.CharField(max_length=500, null=True)),
+                ("payment_reference", models.CharField(max_length=255, null=True)),
             ],
             options={
-                'ordering': ['-created_on'],
+                "ordering": ["-created_on"],
             },
         ),
     ]

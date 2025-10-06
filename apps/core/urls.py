@@ -34,7 +34,7 @@ urlpatterns = [
         UpdateRolePermissionsView.as_view(),
         name="role-permissions-update",
     ),
-     path("permissions/", LoggedInPermissionsView.as_view(), name="user-permissions"),
+    path("permissions/", LoggedInPermissionsView.as_view(), name="user-permissions"),
     path("campus/create/", CampusCreateView.as_view(), name="campus-create"),
     path("campus/list/", CampusListView.as_view(), name="campus-list"),
     # path("user-roles/", UserRoleListView.as_view(), name="user-role-list"),
@@ -50,8 +50,14 @@ urlpatterns = [
         StudyYearUpdateDeleteView.as_view(),
         name="studyyear-update-delete",
     ),
-    path("academic-years/create/", CreateAcademicYearView.as_view(), name="academic-year-create"),
-    path("academic-years/list/", AcademicYearsListView.as_view(), name="academic-years-list"),
+    path(
+        "academic-years/create/",
+        CreateAcademicYearView.as_view(),
+        name="academic-year-create",
+    ),
+    path(
+        "academic-years/", AcademicYearsListView.as_view(), name="academic-years-list"
+    ),
     path(
         "academic-years/<int:pk>/",
         AcademicYearDetailView.as_view(),

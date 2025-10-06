@@ -30,13 +30,15 @@ class UserLoginAPIView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     permission_classes = [AllowAny]
 
+
 class CurrentUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserDetailedSerializer(request.user)
         return Response(serializer.data)
-    
+
+
 class UserRoleCreateAPIView(generics.CreateAPIView):
     serializer_class = UserRoleSerializer
     permission_classes = [IsAuthenticated]

@@ -9,8 +9,10 @@ from apps.student_finance.filters import (
     StudentFeeInvoiceFilter,
     StudentFeeLedgerFilter,
     StudentFeePaymentFilter,
+    StudentFeeStatementFilter,
 )
-from apps.student_finance.mixins import StudentInvoicingMixin
+from django.db.models import OuterRef, Subquery
+
 from apps.student_finance.models import (
     InvoiceType,
     StudentFeeInvoice,
@@ -21,6 +23,7 @@ from apps.student_finance.models import (
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import APIView
 from apps.student_finance.serializers import (
+    AllFeeStatementListSerializer,
     CreateAndUpdateInvoiceTypeSerializer,
     FeeLedgeListSerializer,
     InvoiceTypeListSerializer,
@@ -88,7 +91,27 @@ class StudentFeeStatementListView(generics.ListAPIView):
         return StudentFeeStatement.objects.filter(
             semester_id=semester_id, student_id=student_id
         )
+class FeeStatementsView(generics.ListAPIView):
+    serializer_class = AllFeeStatementListSerializer
+    queryset = StudentFeeStatement.objects.all().order_by("-created_on")
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StudentFeeStatementFilter
+    # For Postgres support
+    # def get_queryset(self):
+    #     return StudentFeeStatement.objects.order_by(
+    #         "student_id", "-created_on"
+    #     ).distinct("student_id")
 
+    
+    def get_queryset(self):
+        # Subquery to get latest statement per student
+        latest_statement_subquery = StudentFeeStatement.objects.filter(
+            student_id=OuterRef('student_id')
+        ).order_by('-created_on').values('pk')[:1]
+
+        return StudentFeeStatement.objects.filter(
+            pk__in=Subquery(latest_statement_subquery)
+        ).order_by('-created_on')
 
 class StudentFeeLedgerListView(generics.ListAPIView):
     queryset = StudentFeeLedger.objects.all().order_by("-created_on")
@@ -160,46 +183,6 @@ class StudentFeePaymentListView(generics.ListAPIView):
         except Exception as exc:
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-class StudentFeePaymentView(APIView):
-    def post(self, request):
-        serializer = StudentFeePaymentSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        data = serializer.validated_data
-        print("data", data)
-        try:
-            student = Student.objects.get(id=data["student"])
-        except Student.DoesNotExist:
-            return Response(
-                {"error": "Student not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        semester = None
-        if "semester" in data:
-            semester = Semester.objects.filter(id=data["semester"]).first()
-
-        success = StudentInvoicingMixin(
-            student=student,
-            transaction_type="Student Payment",
-            amount=data["amount"],
-            payment_method=data["payment_method"],
-            semester=semester,
-            user=self.request.user,
-        ).run()
-
-        if success:
-            return Response(
-                {"message": "Payment processed successfully"},
-                status=status.HTTP_201_CREATED,
-            )
-        else:
-            return Response(
-                {"error": "Payment failed"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -285,6 +268,7 @@ class TotalCollectedFeesView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
 class CreateInvoiceTypeView(generics.CreateAPIView):
     queryset = InvoiceType.objects.all()
     serializer_class = CreateAndUpdateInvoiceTypeSerializer
@@ -294,7 +278,10 @@ class CreateInvoiceTypeView(generics.CreateAPIView):
             name = request.data.get("name")
             if InvoiceType.objects.filter(name__iexact=name).exists():
                 return Response(
-                    {"success": False, "error": "InvoiceType with this name already exists."},
+                    {
+                        "success": False,
+                        "error": "InvoiceType with this name already exists.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             return super().create(request, *args, **kwargs)
@@ -340,9 +327,17 @@ class InvoiceTypeDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             instance = self.get_object()
             name = request.data.get("name")
-            if name and InvoiceType.objects.exclude(id=instance.id).filter(name__iexact=name).exists():
+            if (
+                name
+                and InvoiceType.objects.exclude(id=instance.id)
+                .filter(name__iexact=name)
+                .exists()
+            ):
                 return Response(
-                    {"success": False, "error": "Another InvoiceType with this name already exists."},
+                    {
+                        "success": False,
+                        "error": "Another InvoiceType with this name already exists.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             return super().update(request, *args, **kwargs)

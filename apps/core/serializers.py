@@ -2,18 +2,15 @@ from rest_framework import serializers
 
 from apps.inventory.models import User
 from apps.users.serializers import UserSerializer
-from .models import AcademicYear, Campus, RolePermission, StudyYear, UserRole,Module
+from .models import AcademicYear, Campus, RolePermission, StudyYear, UserRole, Module
 from django.contrib.admin.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
+
 
 class CreateAndUpdateRoleSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserRole
-        fields = [
-            "name"
-        ]
-
-
+        fields = ["name"]
 
 
 class RoleDetailWithPermissionsSerializer(serializers.ModelSerializer):
@@ -42,10 +39,11 @@ class RoleDetailWithPermissionsSerializer(serializers.ModelSerializer):
                     "can_approve": perm.can_approve if perm else False,
                     "can_export": perm.can_export if perm else False,
                     "can_print": perm.can_print if perm else False,
-                    
                 }
             )
         return data
+
+
 class CampusCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campus
@@ -78,8 +76,6 @@ class StudyYearListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
-
 class LogEntrySerializer(serializers.ModelSerializer):
     action_flag_display = serializers.SerializerMethodField()
     content_type = serializers.SlugRelatedField(read_only=True, slug_field="model")
@@ -101,10 +97,12 @@ class LogEntrySerializer(serializers.ModelSerializer):
     def get_action_flag_display(self, obj):
         return obj.get_action_flag_display()
 
+
 class ModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Module
         fields = ["id", "name", "code"]
+
 
 class RolePermissionSerializer(serializers.ModelSerializer):
     module = ModuleSerializer(read_only=True)
@@ -120,16 +118,16 @@ class RolePermissionSerializer(serializers.ModelSerializer):
             "can_delete",
             "can_approve",
             "can_export",
-            "can_print"
+            "can_print",
         ]
 
 
 class UserRoleListSerializer(serializers.ModelSerializer):
-    
 
     class Meta:
         model = UserRole
         fields = "__all__"
+
 
 class RolePermissionSerializer(serializers.ModelSerializer):
     module = ModuleSerializer(read_only=True)
@@ -147,11 +145,9 @@ class RolePermissionSerializer(serializers.ModelSerializer):
             "can_export",
             "can_print",
             "can_view_all",
-            
         ]
 
 
-   
 class UserRolePermissionListSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
 
@@ -162,6 +158,7 @@ class UserRolePermissionListSerializer(serializers.ModelSerializer):
     def get_permissions(self, obj):
         role_permissions = RolePermission.objects.filter(role=obj)
         return RolePermissionSerializer(role_permissions, many=True).data
+
 
 class LoggedInPermisionsSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
@@ -182,13 +179,8 @@ class LoggedInPermisionsSerializer(serializers.ModelSerializer):
         return UserRolePermissionListSerializer(obj.role).data if obj.role else None
 
 
-   
-   
-
 class RoleSerializer(serializers.ModelSerializer):
-    modules = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True
-    )
+    modules = serializers.ListField(child=serializers.IntegerField(), write_only=True)
     permissions = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -227,24 +219,24 @@ class RoleSerializer(serializers.ModelSerializer):
         modules_data = validated_data.pop("modules", [])
         instance.name = validated_data.get("name", instance.name)
         instance.save()
-        
+
         instance.rolepermission_set.all().delete()  # clear old perms
         for module_id in modules_data:
             module = Module.objects.get(id=module_id)
             RolePermission.objects.create(
                 role=instance,
                 module=module,
-                can_view =False,
-                can_create =False,
-                can_edit =False,
-                can_delete =False,
-                can_approve =False,
-                can_export =False,
-                can_print =False,
+                can_view=False,
+                can_create=False,
+                can_edit=False,
+                can_delete=False,
+                can_approve=False,
+                can_export=False,
+                can_print=False,
             )
         return instance
-    
-    
+
+
 class AcademicYearListSerializer(serializers.ModelSerializer):
     class Meta:
         model = AcademicYear
@@ -252,6 +244,9 @@ class AcademicYearListSerializer(serializers.ModelSerializer):
 
 
 class CreateAndUpdateAcademicYearSerializer(serializers.ModelSerializer):
+    start_date = serializers.DateField(required=False, allow_null=True)
+    end_date = serializers.DateField(required=False, allow_null=True)
+
     class Meta:
         model = AcademicYear
         fields = ["name", "start_date", "end_date"]

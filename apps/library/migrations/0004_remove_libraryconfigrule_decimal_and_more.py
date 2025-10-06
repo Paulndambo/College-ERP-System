@@ -6,40 +6,50 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('library', '0003_libraryconfig_remove_fine_fine_per_day_and_more'),
+        ("library", "0003_libraryconfig_remove_fine_fine_per_day_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='libraryconfigrule',
-            name='decimal',
+            model_name="libraryconfigrule",
+            name="decimal",
         ),
         migrations.RemoveField(
-            model_name='libraryconfigrule',
-            name='integer',
+            model_name="libraryconfigrule",
+            name="integer",
         ),
         migrations.RemoveField(
-            model_name='libraryconfigrule',
-            name='text',
+            model_name="libraryconfigrule",
+            name="text",
         ),
         migrations.AddField(
-            model_name='libraryconfigrule',
-            name='borrow_days',
-            field=models.PositiveIntegerField(blank=True, help_text='Number of days allowed to borrow', null=True),
+            model_name="libraryconfigrule",
+            name="borrow_days",
+            field=models.PositiveIntegerField(
+                blank=True, help_text="Number of days allowed to borrow", null=True
+            ),
         ),
         migrations.AddField(
-            model_name='libraryconfigrule',
-            name='fine_per_day',
-            field=models.DecimalField(blank=True, decimal_places=2, help_text='Fine charged per day', max_digits=10, null=True),
+            model_name="libraryconfigrule",
+            name="fine_per_day",
+            field=models.DecimalField(
+                blank=True,
+                decimal_places=2,
+                help_text="Fine charged per day",
+                max_digits=10,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='libraryconfigrule',
-            name='max_renewals',
-            field=models.PositiveIntegerField(blank=True, help_text='Maximum times a book can be renewed', null=True),
+            model_name="libraryconfigrule",
+            name="max_renewals",
+            field=models.PositiveIntegerField(
+                blank=True, help_text="Maximum times a book can be renewed", null=True
+            ),
         ),
         migrations.AddField(
-            model_name='libraryconfigrule',
-            name='rule_notes',
-            field=models.TextField(blank=True, help_text='Optional notes', null=True),
+            model_name="libraryconfigrule",
+            name="rule_notes",
+            field=models.TextField(blank=True, help_text="Optional notes", null=True),
         ),
     ]

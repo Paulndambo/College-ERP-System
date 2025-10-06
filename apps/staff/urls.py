@@ -1,6 +1,10 @@
 from django.urls import path
 
-from apps.staff.leaves.views import CreateLeavePolicyView, LeavePoliciesListView, LeavePolicyDetailView
+from apps.staff.leaves.views import (
+    CreateLeavePolicyView,
+    LeavePoliciesListView,
+    LeavePolicyDetailView,
+)
 from .views import *
 
 urlpatterns = [
@@ -11,9 +15,9 @@ urlpatterns = [
         "positions/create/", StaffPositionsCreateView.as_view(), name="position-create"
     ),
     path(
-        "positions/<int:pk>/update/",
-        StaffPositionpdateView.as_view(),
-        name="position-update",
+        "positions/<int:pk>/",
+        StaffPositionDetailView.as_view(),
+        name="position-detail-update-delete",
     ),
     path("create/", CreateStaffView.as_view(), name="create-staff"),
     path("update/<int:pk>/", StaffUpdateView.as_view(), name="update-staff"),
@@ -23,7 +27,6 @@ urlpatterns = [
         StaffStatusToggleView.as_view(),
         name="staff-toggle-status",
     ),
-   
     path("details/<int:pk>/", StaffUpdateView.as_view(), name="staff-detail-update"),
     # path(
     #     "payroll/detail/<int:pk>/",

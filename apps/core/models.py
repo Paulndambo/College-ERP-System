@@ -51,6 +51,7 @@ class StudyYear(AbsoluteBaseModel):
     def __str__(self):
         return self.name
 
+
 # Permissions
 class Module(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
@@ -76,10 +77,11 @@ class RolePermission(AbsoluteBaseModel):
     def __str__(self):
         return f"{self.role.name} - {self.module.name}"
 
+
 class AcademicYear(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
-    start_date = models.DateField()
-    end_date = models.DateField()
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.name

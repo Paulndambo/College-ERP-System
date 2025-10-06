@@ -469,7 +469,6 @@ class BorrowTransactionUpdateSerializer(serializers.ModelSerializer):
 class BorrowTransactionListSerializer(serializers.ModelSerializer):
     """Serializer for listing borrow transactions with nested details"""
 
-   
     book = BookSimpleSerializer(read_only=True)
     member = MemberSimpleSerializer(read_only=True)
     issued_by = UserSerializer(read_only=True)
@@ -494,7 +493,6 @@ class BorrowTransactionListSerializer(serializers.ModelSerializer):
             "updated_on",
         ]
 
-   
 
 # ==================== FINE SERIALIZERS ====================
 
@@ -504,7 +502,7 @@ class FineCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Fine
-        fields = ["borrow_transaction","paid"]
+        fields = ["borrow_transaction", "paid"]
 
 
 class FineUpdateSerializer(serializers.ModelSerializer):

@@ -9,133 +9,361 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('admissions', '0001_initial'),
-        ('core', '0001_initial'),
+        ("admissions", "0001_initial"),
+        ("core", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Department',
+            name="Department",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('department_type', models.CharField(choices=[('Academic', 'Academic'), ('Not Academic', 'Not Academic')], default='Academic', max_length=15)),
-                ('office', models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "department_type",
+                    models.CharField(
+                        choices=[
+                            ("Academic", "Academic"),
+                            ("Not Academic", "Not Academic"),
+                        ],
+                        default="Academic",
+                        max_length=15,
+                    ),
+                ),
+                ("office", models.CharField(blank=True, max_length=255, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='School',
+            name="School",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('email', models.EmailField(max_length=254)),
-                ('phone', models.CharField(max_length=255)),
-                ('location', models.CharField(max_length=255)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("email", models.EmailField(max_length=254)),
+                ("phone", models.CharField(max_length=255)),
+                ("location", models.CharField(max_length=255)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Programme',
+            name="Programme",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('code', models.CharField(blank=True, max_length=255, null=True)),
-                ('level', models.CharField(choices=[('Artisan', 'Artisan'), ('Certificate', 'Certificate'), ('Diploma', 'Diploma'), ('Bachelor', 'Bachelor'), ('Masters', 'Masters'), ('PhD', 'PhD')], max_length=255)),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.department')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.school')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("code", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "level",
+                    models.CharField(
+                        choices=[
+                            ("Artisan", "Artisan"),
+                            ("Certificate", "Certificate"),
+                            ("Diploma", "Diploma"),
+                            ("Bachelor", "Bachelor"),
+                            ("Masters", "Masters"),
+                            ("PhD", "PhD"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "department",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="schools.department",
+                    ),
+                ),
+                (
+                    "school",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="schools.school"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('course_code', models.CharField(max_length=255)),
-                ('name', models.CharField(max_length=255)),
-                ('credit_hours', models.FloatField(default=2.0)),
-                ('course_type', models.CharField(choices=[('Core', 'Core'), ('Elective', 'Elective'), ('Optional', 'Optional')], default='Core', max_length=255)),
-                ('study_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='courses', to='core.studyyear')),
-                ('department', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.department')),
-                ('programme', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.programme')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.school')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("course_code", models.CharField(max_length=255)),
+                ("name", models.CharField(max_length=255)),
+                ("credit_hours", models.FloatField(default=2.0)),
+                (
+                    "course_type",
+                    models.CharField(
+                        choices=[
+                            ("Core", "Core"),
+                            ("Elective", "Elective"),
+                            ("Optional", "Optional"),
+                        ],
+                        default="Core",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "study_year",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="courses",
+                        to="core.studyyear",
+                    ),
+                ),
+                (
+                    "department",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="schools.department",
+                    ),
+                ),
+                (
+                    "programme",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="schools.programme",
+                    ),
+                ),
+                (
+                    "school",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="schools.school"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='department',
-            name='school',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='schools.school'),
+            model_name="department",
+            name="school",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="schools.school",
+            ),
         ),
         migrations.CreateModel(
-            name='Semester',
+            name="Semester",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(choices=[('Semester One', 'Semester One'), ('Semester Two', 'Semester Two'), ('Semester Three', 'Semester Three')], max_length=255, null=True)),
-                ('start_date', models.DateField(null=True)),
-                ('end_date', models.DateField(null=True)),
-                ('status', models.CharField(choices=[('Active', 'Active'), ('Closed', 'Closed')], max_length=255, null=True)),
-                ('academic_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='semesters', to='core.academicyear')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "name",
+                    models.CharField(
+                        choices=[
+                            ("Semester One", "Semester One"),
+                            ("Semester Two", "Semester Two"),
+                            ("Semester Three", "Semester Three"),
+                        ],
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                ("start_date", models.DateField(null=True)),
+                ("end_date", models.DateField(null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("Active", "Active"), ("Closed", "Closed")],
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                (
+                    "academic_year",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="semesters",
+                        to="core.academicyear",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ProgrammeCohort',
+            name="ProgrammeCohort",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('status', models.CharField(choices=[('Active', 'Active'), ('Graduated', 'Graduated')], default='Active', max_length=255)),
-                ('current_year', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cohorts', to='core.studyyear')),
-                ('intake', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='admissions.intake')),
-                ('programme', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.programme')),
-                ('current_semester', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.semester')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[("Active", "Active"), ("Graduated", "Graduated")],
+                        default="Active",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "current_year",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cohorts",
+                        to="core.studyyear",
+                    ),
+                ),
+                (
+                    "intake",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="admissions.intake",
+                    ),
+                ),
+                (
+                    "programme",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="schools.programme",
+                    ),
+                ),
+                (
+                    "current_semester",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="schools.semester",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='CourseSession',
+            name="CourseSession",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('start_time', models.DateTimeField(null=True)),
-                ('period', models.FloatField(default=2)),
-                ('status', models.CharField(choices=[('Future', 'Future'), ('Active', 'Active'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled'), ('Rescheduled', 'Rescheduled')], default='Active', max_length=255)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='coursesessions', to='schools.course')),
-                ('cohort', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='cohortsessions', to='schools.programmecohort')),
-                ('semester', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='semesterssessions', to='schools.semester')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("start_time", models.DateTimeField(null=True)),
+                ("period", models.FloatField(default=2)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Future", "Future"),
+                            ("Active", "Active"),
+                            ("Completed", "Completed"),
+                            ("Cancelled", "Cancelled"),
+                            ("Rescheduled", "Rescheduled"),
+                        ],
+                        default="Active",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="coursesessions",
+                        to="schools.course",
+                    ),
+                ),
+                (
+                    "cohort",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="cohortsessions",
+                        to="schools.programmecohort",
+                    ),
+                ),
+                (
+                    "semester",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="semesterssessions",
+                        to="schools.semester",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='course',
-            name='semester',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='courses', to='schools.semester'),
+            model_name="course",
+            name="semester",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="courses",
+                to="schools.semester",
+            ),
         ),
     ]

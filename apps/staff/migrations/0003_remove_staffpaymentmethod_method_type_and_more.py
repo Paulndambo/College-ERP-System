@@ -8,39 +8,56 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('staff', '0002_initial'),
+        ("staff", "0002_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='staffpaymentmethod',
-            name='method_type',
+            model_name="staffpaymentmethod",
+            name="method_type",
         ),
         migrations.AddField(
-            model_name='payslip',
-            name='payroll_run',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='payslips', to='staff.payrollrun'),
+            model_name="payslip",
+            name="payroll_run",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payslips",
+                to="staff.payrollrun",
+            ),
         ),
         migrations.AddField(
-            model_name='staffpaymentmethod',
-            name='created_on',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="staffpaymentmethod",
+            name="created_on",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='staffpaymentmethod',
-            name='method',
-            field=models.CharField(choices=[('bank', 'Bank Transfer'), ('mpesa', 'M-Pesa'), ('cash', 'Cash'), ('other', 'Other')], default=django.utils.timezone.now, max_length=20),
+            model_name="staffpaymentmethod",
+            name="method",
+            field=models.CharField(
+                choices=[
+                    ("bank", "Bank Transfer"),
+                    ("mpesa", "M-Pesa"),
+                    ("cash", "Cash"),
+                    ("other", "Other"),
+                ],
+                default=django.utils.timezone.now,
+                max_length=20,
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='staffpaymentmethod',
-            name='updated_on',
+            model_name="staffpaymentmethod",
+            name="updated_on",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AlterField(
-            model_name='staffpaymentmethod',
-            name='is_primary',
+            model_name="staffpaymentmethod",
+            name="is_primary",
             field=models.BooleanField(default=True),
         ),
     ]

@@ -3,7 +3,6 @@ from rest_framework import serializers
 from apps.staff.models import LeavePolicy
 
 
-
 class LeavePolicyListSerializer(serializers.ModelSerializer):
     class Meta:
         model = LeavePolicy
@@ -21,7 +20,6 @@ class CreateAndUpdateLeavePolicySerializer(serializers.ModelSerializer):
     class Meta:
         model = LeavePolicy
         fields = [
-          
             "name",
             "description",
             "default_days",
@@ -29,5 +27,5 @@ class CreateAndUpdateLeavePolicySerializer(serializers.ModelSerializer):
             "is_active",
         ]
         extra_kwargs = {
-            "requires_document_after": {"required":False},
+            "requires_document_after": {"required": False},
         }

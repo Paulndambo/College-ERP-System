@@ -22,14 +22,17 @@ STUDENT_FEE_STATEMENT_TYPES = (
     ("Invoice", "Invoice"),
     ("Payment", "Payment"),
 )
+
+
 class InvoiceType(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     is_fee_type = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
-    
+
     def __str__(self):
         return self.name
+
 
 class StudentFeeInvoice(AbsoluteBaseModel):
     reference = models.CharField(max_length=255, null=True)
@@ -87,7 +90,7 @@ class StudentFeePayment(AbsoluteBaseModel):
 
     def __str__(self):
         return self.student.registration_number
-    
+
     def save(self, *args, **kwargs):
         last_payment = StudentFeePayment.objects.filter(student=self.student).last()
         if last_payment and not self.reference:
@@ -114,9 +117,13 @@ class StudentFeeLedger(AbsoluteBaseModel):
 class StudentFeeStatement(AbsoluteBaseModel):
     PAYMENT_METHODS = StudentFeePayment._meta.get_field("payment_method").choices
     reference = models.CharField(max_length=255, null=True, blank=True)
-    payment_method = models.CharField(max_length=255, choices=PAYMENT_METHODS, null=True, blank=True)
+    payment_method = models.CharField(
+        max_length=255, choices=PAYMENT_METHODS, null=True, blank=True
+    )
     student = models.ForeignKey("students.Student", on_delete=models.CASCADE)
-    statement_type = models.CharField(max_length=255, choices=STUDENT_FEE_STATEMENT_TYPES)
+    statement_type = models.CharField(
+        max_length=255, choices=STUDENT_FEE_STATEMENT_TYPES
+    )
     # transaction_type = models.CharField(max_length=255, choices=STUDENT_FEES_TRANSACTION_TYPES, default="Standard Invoice")
     debit = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
     credit = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0"))
@@ -131,7 +138,7 @@ class StudentFeeStatement(AbsoluteBaseModel):
 
     def __str__(self):
         return self.student.registration_number
-    
+
     def save(self, *args, **kwargs):
         last_statement = StudentFeeStatement.objects.filter(student=self.student).last()
         if last_statement and not self.reference:

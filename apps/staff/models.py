@@ -59,30 +59,33 @@ class Staff(AbsoluteBaseModel):
     status = models.CharField(
         max_length=20, choices=STAFF_STATUS_CHOICES, default="Inactive"
     )
+
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+
+
 class StaffCourseAssignment(AbsoluteBaseModel):
     staff = models.ForeignKey(
-        'Staff',
+        "Staff",
         on_delete=models.CASCADE,
-        related_name='course_assignments'  # staff.course_assignments - all assignments
+        related_name="course_assignments",  # staff.course_assignments - all assignments
     )
     course = models.ForeignKey(
-        'schools.Course',
+        "schools.Course",
         on_delete=models.CASCADE,
-        related_name='staff_assignments'  # course.staff_assignments - all assignments
+        related_name="staff_assignments",  # course.staff_assignments - all assignments
     )
     assigned_date = models.DateField(auto_now_add=True)
     active = models.BooleanField(default=True)
 
-
     def __str__(self):
         return f"{self.staff} - {self.course}"
+
 
 class LeavePolicy(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    default_days = models.PositiveIntegerField()  
+    default_days = models.PositiveIntegerField()
     requires_document_after = models.PositiveIntegerField(
         default=0,
         help_text="Require medical certificate or proof if leave exceeds this many consecutive days",
@@ -99,11 +102,20 @@ class LeavePolicy(AbsoluteBaseModel):
     def __str__(self):
         return f"{self.name}"
 
+
 class StaffLeaveApplication(AbsoluteBaseModel):
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="leave_applications" ,null=True, blank=True)
+    staff = models.ForeignKey(
+        Staff,
+        on_delete=models.CASCADE,
+        related_name="leave_applications",
+        null=True,
+        blank=True,
+    )
     start_date = models.DateField()
     end_date = models.DateField()
-    leave_type = models.ForeignKey(LeavePolicy, on_delete=models.CASCADE, related_name="leave_applications")
+    leave_type = models.ForeignKey(
+        LeavePolicy, on_delete=models.CASCADE, related_name="leave_applications"
+    )
     reason = models.CharField(max_length=255)
 
     status = models.CharField(
@@ -135,11 +147,13 @@ class StaffLeave(AbsoluteBaseModel):
         return f"{self.application.staff.user.first_name} {self.application.staff.user.last_name}"
 
 
-
-
 class StaffLeaveEntitlement(AbsoluteBaseModel):
     staff = models.ForeignKey(
-        "Staff", on_delete=models.CASCADE, related_name="leave_balances",null=True, blank=True
+        "Staff",
+        on_delete=models.CASCADE,
+        related_name="leave_balances",
+        null=True,
+        blank=True,
     )
     leave_type = models.ForeignKey(
         LeavePolicy, on_delete=models.CASCADE, related_name="balances"
@@ -163,10 +177,12 @@ class OvertimeRecords(AbsoluteBaseModel):
     rate_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
     approved = models.BooleanField(default=False)
 
+
 class StaffPaymentMethod(AbsoluteBaseModel):
     """
     Stores staff's payment channels (bank, mobile money, etc.)
     """
+
     PAYMENT_METHOD_CHOICES = [
         ("bank", "Bank Transfer"),
         ("mpesa", "M-Pesa"),
@@ -213,13 +229,12 @@ class StaffDocuments(AbsoluteBaseModel):
         return f"{self.staff} - {self.document_type}"
 
 
-
-
 class Deduction(AbsoluteBaseModel):
     """
     High-level deduction types (NHIF, PAYE, SACCO loan, Union dues, etc.).
     Defines whether this deduction is typically percentage or fixed.
     """
+
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
 
@@ -245,6 +260,7 @@ class DeductionRule(AbsoluteBaseModel):
     - For percentage type: fill min_salary, max_salary, and percentage.
     - For fixed type: fill amount only.
     """
+
     deduction = models.ForeignKey(
         Deduction, on_delete=models.CASCADE, related_name="rules"
     )
@@ -257,14 +273,20 @@ class DeductionRule(AbsoluteBaseModel):
         max_digits=12, decimal_places=2, null=True, blank=True
     )
     percentage = models.DecimalField(
-        max_digits=5, decimal_places=2, null=True, blank=True,
-        help_text="For percentage-based deductions."
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="For percentage-based deductions.",
     )
 
     # For fixed deductions (like SACCO, union dues):
     amount = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True,
-        help_text="For fixed deductions."
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="For fixed deductions.",
     )
 
     is_active = models.BooleanField(default=True)
@@ -282,6 +304,7 @@ class StaffDeduction(AbsoluteBaseModel):
     Useful for SACCO loans, union dues or any deduction that applies to staff.
     All amounts/percentages come from DeductionRule.
     """
+
     staff = models.ForeignKey(
         Staff, on_delete=models.CASCADE, related_name="staff_deductions"
     )
@@ -297,7 +320,6 @@ class StaffDeduction(AbsoluteBaseModel):
         return f"{self.staff} - {self.deduction.name}"
 
 
-
 class Allowance(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
@@ -308,16 +330,15 @@ class Allowance(models.Model):
 
 
 class StaffAllowance(models.Model):
-    staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="allowances")
+    staff = models.ForeignKey(
+        Staff, on_delete=models.CASCADE, related_name="allowances"
+    )
     allowance = models.ForeignKey(Allowance, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     effective_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.staff} - {self.allowance}"
-    
-    
-
 
 
 class StaffStatutoryInfo(models.Model):
@@ -325,6 +346,7 @@ class StaffStatutoryInfo(models.Model):
     Stores all statutory IDs for a staff member
     (KRA, NSSF, NHIF, HELB, etc.)
     """
+
     staff = models.OneToOneField(
         Staff, on_delete=models.CASCADE, related_name="statutory_info"
     )
@@ -356,6 +378,8 @@ class EmploymentContract(AbsoluteBaseModel):
 
     def __str__(self):
         return f"Contract for {self.staff}"
+
+
 class PayrollRun(models.Model):
     period_start = models.DateField()
     period_end = models.DateField()
@@ -370,6 +394,7 @@ class PayrollRun(models.Model):
     def __str__(self):
         return f"Payroll Run {self.period_start} - {self.period_end}"
 
+
 class Payslip(AbsoluteBaseModel):
     PAYMENT_STATUS_CHOICES = [
         ("Pending", "Pending"),
@@ -379,12 +404,12 @@ class Payslip(AbsoluteBaseModel):
         ("Reversed", "Reversed"),
         ("Failed", "Failed"),
     ]
-    payroll_run = models.ForeignKey(  
+    payroll_run = models.ForeignKey(
         PayrollRun,
         on_delete=models.CASCADE,
         related_name="payslips",
         blank=True,
-        null=True
+        null=True,
     )
     staff = models.ForeignKey(Staff, on_delete=models.CASCADE, related_name="payslips")
     basic_salary = models.DecimalField(max_digits=12, decimal_places=2)
@@ -402,7 +427,10 @@ class Payslip(AbsoluteBaseModel):
     def __str__(self):
         return f"Payslip for {self.staff} {self.payroll_run}"
 
+
 class PayslipDeduction(models.Model):
-    payslip = models.ForeignKey('Payslip', on_delete=models.CASCADE, related_name='deductions')
+    payslip = models.ForeignKey(
+        "Payslip", on_delete=models.CASCADE, related_name="deductions"
+    )
     deduction = models.ForeignKey("Deduction", on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=12, decimal_places=2)

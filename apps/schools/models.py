@@ -34,6 +34,7 @@ COURSE_TYPES = (
     ("Optional", "Optional"),
 )
 
+
 class School(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     email = models.EmailField()
@@ -75,8 +76,10 @@ class Programme(AbsoluteBaseModel):
 
 
 class Semester(AbsoluteBaseModel):
-    name = models.CharField(max_length=255, choices=SEMESTER_TYPES, null=True)
-    academic_year = models.ForeignKey("core.AcademicYear", on_delete=models.CASCADE, related_name="semesters")
+    name = models.CharField(max_length=255, blank=True, null=True)
+    academic_year = models.ForeignKey(
+        "core.AcademicYear", on_delete=models.CASCADE, related_name="semesters"
+    )
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     status = models.CharField(
@@ -90,8 +93,20 @@ class Semester(AbsoluteBaseModel):
 class ProgrammeCohort(AbsoluteBaseModel):
     name = models.CharField(max_length=255)
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
-    current_year = models.ForeignKey("core.StudyYear", on_delete=models.CASCADE, related_name="cohorts")
-    current_semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
+    current_year = models.ForeignKey(
+        "core.StudyYear",
+        on_delete=models.CASCADE,
+        related_name="cohorts",
+        blank=True,
+        null=True,
+    )
+    current_semester = models.ForeignKey(
+        Semester,
+        on_delete=models.CASCADE,
+        related_name="semesters_cohorts",
+        blank=True,
+        null=True,
+    )
     intake = models.ForeignKey("admissions.Intake", on_delete=models.CASCADE, null=True)
     status = models.CharField(
         max_length=255,
@@ -105,7 +120,6 @@ class ProgrammeCohort(AbsoluteBaseModel):
     def students_count(self):
         return self.cohortstudents.all().count()
 
-    
 
 class Course(AbsoluteBaseModel):
     course_code = models.CharField(max_length=255)
@@ -113,10 +127,18 @@ class Course(AbsoluteBaseModel):
     school = models.ForeignKey(School, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     programme = models.ForeignKey(Programme, on_delete=models.CASCADE)
-    study_year = models.ForeignKey("core.StudyYear", on_delete=models.CASCADE, related_name="courses")
+    study_year = models.ForeignKey(
+        "core.StudyYear", on_delete=models.CASCADE, related_name="courses"
+    )
     credit_hours = models.FloatField(default=2.0)
-    semester = models.ForeignKey("Semester", on_delete=models.CASCADE, related_name="courses")
-    course_type = models.CharField(max_length=255, choices=COURSE_TYPES, default="Core")
+    semester = models.ForeignKey(
+        "Semester", on_delete=models.CASCADE, related_name="courses",
+        null=True,
+        blank=True,
+    )
+    course_type = models.CharField(max_length=255, 
+                                   choices=COURSE_TYPES,
+                                   default="Core")
 
     def __str__(self):
         return self.name
@@ -126,7 +148,9 @@ class CourseSession(AbsoluteBaseModel):
     cohort = models.ForeignKey(
         ProgrammeCohort, on_delete=models.CASCADE, related_name="cohortsessions"
     )
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="coursesessions")
+    course = models.ForeignKey(
+        Course, on_delete=models.CASCADE, related_name="coursesessions"
+    )
     start_time = models.DateTimeField(null=True)
     period = models.FloatField(default=2)
     status = models.CharField(
@@ -141,7 +165,11 @@ class CourseSession(AbsoluteBaseModel):
         default="Active",
     )
     semester = models.ForeignKey(
-        Semester, on_delete=models.CASCADE, related_name="semesterssessions", null=True, blank=True
+        Semester,
+        on_delete=models.CASCADE,
+        related_name="semesterssessions",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):

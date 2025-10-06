@@ -387,34 +387,34 @@ class StaffPaySlipListView(generics.ListAPIView):
 #     filterset_class = PayrollFilter
 #     pagination_class = None
 
-    # def get_queryset(self):
-    #     return StaffPayroll.objects.all().order_by("-created_on")
+# def get_queryset(self):
+#     return StaffPayroll.objects.all().order_by("-created_on")
 
-    # def get_paginated_response(self, data):
-    #     assert self.paginator is not None
-    #     return self.paginator.get_paginated_response(data)
+# def get_paginated_response(self, data):
+#     assert self.paginator is not None
+#     return self.paginator.get_paginated_response(data)
 
-    # def list(self, request, *args, **kwargs):
-    #     try:
-    #         payroll_list = self.get_queryset()
-    #         payroll_list = self.filter_queryset(payroll_list)
-    #         page = self.request.query_params.get("page", None)
-    #         if page:
-    #             self.pagination_class = PageNumberPagination
-    #             paginator = self.pagination_class()
-    #             paginated_payroll_list = paginator.paginate_queryset(
-    #                 payroll_list, request
-    #             )
-    #             serializer = self.get_serializer(paginated_payroll_list, many=True)
-    #             return paginator.get_paginated_response(serializer.data)
+# def list(self, request, *args, **kwargs):
+#     try:
+#         payroll_list = self.get_queryset()
+#         payroll_list = self.filter_queryset(payroll_list)
+#         page = self.request.query_params.get("page", None)
+#         if page:
+#             self.pagination_class = PageNumberPagination
+#             paginator = self.pagination_class()
+#             paginated_payroll_list = paginator.paginate_queryset(
+#                 payroll_list, request
+#             )
+#             serializer = self.get_serializer(paginated_payroll_list, many=True)
+#             return paginator.get_paginated_response(serializer.data)
 
-    #         serializer = self.get_serializer(payroll_list, many=True)
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
+#         serializer = self.get_serializer(payroll_list, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    #     except Exception as exc:
-    #         raise CustomAPIException(
-    #             message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-    #         )
+#     except Exception as exc:
+#         raise CustomAPIException(
+#             message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+#         )
 
 
 # class StaffPayrollDetailView(generics.RetrieveAPIView):
@@ -505,8 +505,6 @@ class StaffDocumentUpdateView(generics.RetrieveUpdateAPIView):
     lookup_field = "pk"
 
 
-
-
 class PositionListView(generics.ListAPIView):
     queryset = StaffPosition.objects.all()
     serializer_class = StaffPositionListSerializer
@@ -547,11 +545,66 @@ class StaffPositionsCreateView(generics.CreateAPIView):
     queryset = StaffPosition.objects.all()
     serializer_class = CreateStaffPositionSerializer
 
+    def create(self, request, *args, **kwargs):
+        try:
+            name = request.data.get("name")
+            if StaffPosition.objects.filter(name__iexact=name).exists():
+                return Response(
+                    {
+                        "success": False,
+                        "error": "A staff position with this name already exists.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-class StaffPositionpdateView(generics.RetrieveUpdateAPIView):
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as exc:
+            # logger.error(f"Error creating StaffPosition: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class StaffPositionDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = StaffPosition.objects.all()
     serializer_class = CreateStaffPositionSerializer
     lookup_field = "pk"
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            name = request.data.get("name", instance.name)
+
+            # Duplicate check excluding current record
+            if (
+                StaffPosition.objects.exclude(pk=instance.pk)
+                .filter(name__iexact=name)
+                .exists()
+            ):
+                return Response(
+                    {
+                        "success": False,
+                        "error": "Another staff position with this name already exists.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            # logger.error(f"Error updating StaffPosition: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class StaffLeaveApplicationListView(generics.ListAPIView):

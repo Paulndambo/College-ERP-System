@@ -4,7 +4,7 @@ from .models import (
     Staff,
     StaffLeave,
     StaffLeaveApplication,
-    StaffLeaveEntitlement
+    StaffLeaveEntitlement,
 )
 import django_filters
 

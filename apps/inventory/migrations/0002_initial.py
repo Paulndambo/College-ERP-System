@@ -10,41 +10,67 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('inventory', '0001_initial'),
-        ('procurement', '0001_initial'),
-        ('schools', '0001_initial'),
+        ("inventory", "0001_initial"),
+        ("procurement", "0001_initial"),
+        ("schools", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='stockissue',
-            name='issued_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="stockissue",
+            name="issued_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='stockissue',
-            name='issued_to',
-            field=models.ForeignKey(help_text='Department that received the stock', null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.department'),
+            model_name="stockissue",
+            name="issued_to",
+            field=models.ForeignKey(
+                help_text="Department that received the stock",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="schools.department",
+            ),
         ),
         migrations.AddField(
-            model_name='stockreceipt',
-            name='inventory_item',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.inventoryitem'),
+            model_name="stockreceipt",
+            name="inventory_item",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="inventory.inventoryitem",
+            ),
         ),
         migrations.AddField(
-            model_name='stockreceipt',
-            name='purchase_order',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='procurement.purchaseorder'),
+            model_name="stockreceipt",
+            name="purchase_order",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="procurement.purchaseorder",
+            ),
         ),
         migrations.AddField(
-            model_name='stockreceipt',
-            name='vendor',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='procurement.vendor'),
+            model_name="stockreceipt",
+            name="vendor",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="procurement.vendor",
+            ),
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='unit',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventory.unitofmeasure'),
+            model_name="inventoryitem",
+            name="unit",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="inventory.unitofmeasure",
+            ),
         ),
     ]

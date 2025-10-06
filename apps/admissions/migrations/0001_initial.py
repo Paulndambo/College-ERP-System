@@ -7,86 +7,184 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='ApplicationDocument',
+            name="ApplicationDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('document_name', models.CharField(max_length=255)),
-                ('document_type', models.CharField(choices=[('Transcript', 'Transcript'), ('Certificate', 'Certificate'), ('Identification', 'Identification')], max_length=255)),
-                ('document_file', models.FileField(upload_to='application_documents/')),
-                ('verified', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("document_name", models.CharField(max_length=255)),
+                (
+                    "document_type",
+                    models.CharField(
+                        choices=[
+                            ("Transcript", "Transcript"),
+                            ("Certificate", "Certificate"),
+                            ("Identification", "Identification"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("document_file", models.FileField(upload_to="application_documents/")),
+                ("verified", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='ApplicationEducationHistory',
+            name="ApplicationEducationHistory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('institution', models.CharField(max_length=255)),
-                ('level', models.CharField(choices=[('Primary School', 'Primary School'), ('Secondary School', 'Secondary School'), ('Undergraduate', 'Undergraduate'), ('Graduate', 'Graduate')], max_length=255)),
-                ('grade_or_gpa', models.CharField(max_length=255, null=True)),
-                ('year', models.CharField(max_length=255, null=True)),
-                ('major', models.CharField(blank=True, max_length=255, null=True)),
-                ('graduated', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("institution", models.CharField(max_length=255)),
+                (
+                    "level",
+                    models.CharField(
+                        choices=[
+                            ("Primary School", "Primary School"),
+                            ("Secondary School", "Secondary School"),
+                            ("Undergraduate", "Undergraduate"),
+                            ("Graduate", "Graduate"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                ("grade_or_gpa", models.CharField(max_length=255, null=True)),
+                ("year", models.CharField(max_length=255, null=True)),
+                ("major", models.CharField(blank=True, max_length=255, null=True)),
+                ("graduated", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Intake',
+            name="Intake",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField()),
-                ('closed', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField()),
+                ("closed", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentApplication',
+            name="StudentApplication",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('application_number', models.CharField(blank=True, max_length=255, null=True)),
-                ('first_name', models.CharField(max_length=255)),
-                ('last_name', models.CharField(max_length=255)),
-                ('email', models.EmailField(max_length=254)),
-                ('phone_number', models.CharField(max_length=20)),
-                ('id_number', models.CharField(blank=True, max_length=255, null=True)),
-                ('passport_number', models.CharField(blank=True, max_length=255, null=True)),
-                ('date_of_birth', models.DateField(null=True)),
-                ('gender', models.CharField(choices=[('Male', 'Male'), ('Female', 'Female')], max_length=255)),
-                ('guardian_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('guardian_email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('guardian_relationship', models.CharField(blank=True, max_length=255, null=True)),
-                ('guardian_phone_number', models.CharField(blank=True, max_length=255, null=True)),
-                ('address', models.CharField(blank=True, max_length=255, null=True)),
-                ('postal_code', models.CharField(blank=True, max_length=255, null=True)),
-                ('city', models.CharField(blank=True, max_length=255, null=True)),
-                ('country', models.CharField(blank=True, max_length=255, null=True)),
-                ('passport_photo', models.ImageField(blank=True, null=True, upload_to='passport_photos/')),
-                ('status', models.CharField(choices=[('Under Review', 'Under Review'), ('Declined', 'Declined'), ('Info Requested', 'Info Requested'), ('Accepted', 'Accepted'), ('Draft', 'Draft'), ('Enrolled', 'Enrolled'), ('Incomplete', 'Incomplete')], default='Incomplete', max_length=255)),
-                ('slug', models.SlugField(null=True, unique=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "application_number",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("first_name", models.CharField(max_length=255)),
+                ("last_name", models.CharField(max_length=255)),
+                ("email", models.EmailField(max_length=254)),
+                ("phone_number", models.CharField(max_length=20)),
+                ("id_number", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "passport_number",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("date_of_birth", models.DateField(null=True)),
+                (
+                    "gender",
+                    models.CharField(
+                        choices=[("Male", "Male"), ("Female", "Female")], max_length=255
+                    ),
+                ),
+                (
+                    "guardian_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "guardian_email",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                (
+                    "guardian_relationship",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "guardian_phone_number",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("address", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "postal_code",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("city", models.CharField(blank=True, max_length=255, null=True)),
+                ("country", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "passport_photo",
+                    models.ImageField(
+                        blank=True, null=True, upload_to="passport_photos/"
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Under Review", "Under Review"),
+                            ("Declined", "Declined"),
+                            ("Info Requested", "Info Requested"),
+                            ("Accepted", "Accepted"),
+                            ("Draft", "Draft"),
+                            ("Enrolled", "Enrolled"),
+                            ("Incomplete", "Incomplete"),
+                        ],
+                        default="Incomplete",
+                        max_length=255,
+                    ),
+                ),
+                ("slug", models.SlugField(null=True, unique=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

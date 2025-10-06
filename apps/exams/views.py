@@ -1,3 +1,4 @@
+from apps.core.models import StudyYear
 from apps.exams.filters import ExamDataFilterSet, TranscriptsFilter
 from apps.schools.models import Course, ProgrammeCohort, Semester
 from apps.students.models import Student
@@ -33,11 +34,35 @@ from rest_framework.permissions import IsAuthenticated
 
 
 class ExamDataCreateAPIView(generics.CreateAPIView):
-    # queryset = ExamData.objects.all()
     serializer_class = ExamDataCreateSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        data = serializer.validated_data  # already validated by serializer.is_valid()
+
+        student = data.get("student")
+        semester = data.get("semester")
+        course = data.get("course")
+        cohort = data.get("cohort")
+        study_year = data.get("study_year")
+
+        # Duplicate check
+        if ExamData.objects.filter(
+            student=student,
+            semester=semester,
+            course=course,
+            cohort=cohort,
+            study_year=study_year,
+        ).exists():
+            return Response(
+                {
+                    "success": False,
+                    "message": "Marks for this student in the specified unit, semester, cohort and year already exist.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Save if not duplicate
         serializer.save(recorded_by=self.request.user)
 
 
@@ -60,8 +85,17 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
         course_id = request.data.get("course")
         semester_id = request.data.get("semester")
         cohort_id = request.data.get("cohort")
+        study_year_id = request.data.get("study_year")
         print("cohort_id from request:", cohort_id)
-
+        try:
+            study_year = (
+                StudyYear.objects.get(id=int(study_year_id)) if study_year_id else None
+            )
+        except (ValueError, StudyYear.DoesNotExist):
+            return Response(
+                {"error": "Invalid study_year ID."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         file_extension = file_obj.name.split(".")[-1].lower()
 
         if file_extension not in ["csv", "xls", "xlsx"]:
@@ -99,7 +133,11 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
                     )
 
             result = self._process_data(
-                data, course_id=course_id, semester_id=semester_id, cohort_id=cohort_id
+                data,
+                course_id=course_id,
+                semester_id=semester_id,
+                cohort_id=cohort_id,
+                study_year_id=study_year.id if study_year else None,
             )
 
             if result["created"] == 0:
@@ -148,7 +186,18 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-    def _process_data(self, data, course_id, semester_id, cohort_id):
+    def _process_data(
+        self, data, course_id, semester_id, cohort_id, study_year_id=None
+    ):
+        study_year = None
+        if study_year_id:
+            try:
+                study_year = StudyYear.objects.get(id=int(study_year_id))
+            except StudyYear.DoesNotExist:
+                raise CustomAPIException(
+                    f"Invalid study year: {study_year_id}",
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
 
         try:
             course = Course.objects.get(id=int(course_id))
@@ -197,13 +246,18 @@ class BulkExamDataUploadAPIView(generics.CreateAPIView):
                     "cat_one": float(row.get("cat_one", 0)),
                     "cat_two": float(row.get("cat_two", 0)),
                     "exam_marks": float(row.get("exam_marks", 0)),
+                    "study_year": study_year.id if study_year else None,
                 }
 
                 if ExamData.objects.filter(
-                    student=student, semester=semester, course=course, cohort=cohort
+                    student=student,
+                    semester=semester,
+                    course=course,
+                    cohort=cohort,
+                    study_year=study_year,
                 ).exists():
                     raise ValueError(
-                        f"Marks for student {row['registration_number']} in this course and semester for given cohort/class already exist."
+                        f"Marks for student {row['registration_number']} already exist for this course/semester/cohort/year."
                     )
 
                 with transaction.atomic():

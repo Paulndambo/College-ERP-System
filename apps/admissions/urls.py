@@ -80,4 +80,9 @@ urlpatterns = [
         views.EnrollmentsByIntakeView.as_view(),
         name="enrollments-metrics",
     ),
+    path(
+        "applications-metrics/",
+        views.StudentApplicationMetricsView.as_view(),
+        name="applications-enrollments-metrics",
+    ),
 ]

@@ -37,12 +37,15 @@ class Intake(AbsoluteBaseModel):
     end_date = models.DateField()
     closed = models.BooleanField(default=False)
     academic_year = models.ForeignKey(
-        "core.AcademicYear", on_delete=models.SET_NULL, null=True, related_name="intakes"
+        "core.AcademicYear",
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="intakes",
     )
+
     def __str__(self):
         return self.name
 
-   
 
 class StudentApplication(AbsoluteBaseModel):
     application_number = models.CharField(max_length=255, null=True, blank=True)

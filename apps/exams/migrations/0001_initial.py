@@ -9,25 +9,58 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('schools', '0001_initial'),
+        ("schools", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ExamData',
+            name="ExamData",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('cat_one', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('cat_two', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('exam_marks', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('total_marks', models.DecimalField(decimal_places=2, default=0, max_digits=10)),
-                ('cohort', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cohortmarks', to='schools.programmecohort')),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.course')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "cat_one",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                (
+                    "cat_two",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                (
+                    "exam_marks",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                (
+                    "total_marks",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=10),
+                ),
+                (
+                    "cohort",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="cohortmarks",
+                        to="schools.programmecohort",
+                    ),
+                ),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="schools.course"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

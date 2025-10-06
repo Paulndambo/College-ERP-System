@@ -1,9 +1,16 @@
 from django.urls import path
 
 from apps.students.reporting.views import (
-    SemesterReportingAPIView,
-    SemisterReportingList,
+    GraduateSingleStudentView,
+    GraduateStudentsView,
+    PromoteSingleStudentView,
+    PromoteStudentsView,
+    PromotionsListAPIView,
+    ReportSemesterStudentsView,
+    ReportSingleSemesterStudentView,
+    SemesterReportingListAPIView,
 )
+
 
 from .views import (
     AssessmentList,
@@ -19,6 +26,7 @@ from .views import (
     StudentMealCardCreateView,
     StudentMealCardListView,
     StudentMealCardUpdateView,
+    StudentMetricsView,
     StudentProgrameCreateView,
     StudentProgrameListView,
     StudentProgrammeUpdateView,
@@ -31,20 +39,25 @@ from .views import (
 urlpatterns = [
     # Students
     path("create-student/", StudentRegistrationView.as_view(), name="create-student"),
-    path("reporting-list/", SemisterReportingList.as_view(), name="reporting-list"),
-    path(
-        "semester-reporting/<int:cohort_id>/",
-        SemesterReportingAPIView.as_view(),
-        name="cohort-semester-reporting",
-    ),
-    path(
-        "semester-reporting/",
-        SemesterReportingAPIView.as_view(),
-        name="student-semester-reporting",
-    ),
     path(
         "update-student/<int:pk>/", StudentUpdateView.as_view(), name="update-student"
     ),
+    path("semester-reporting/bulk/", ReportSemesterStudentsView.as_view()),
+    path("semester-reporting/single/", ReportSingleSemesterStudentView.as_view()),
+    path("semester-reporting/", SemesterReportingListAPIView.as_view()),
+    path("semester-reporting/promotions/", PromotionsListAPIView.as_view()),
+    path("semester-reporting/promote-bulk/", PromoteStudentsView.as_view()),
+    path(
+        "semester-reporting/graduate-bulk/",
+        GraduateStudentsView.as_view(),
+        name="graduate-students",
+    ),
+    path(
+        "semester-reporting/graduate-single/",
+        GraduateSingleStudentView.as_view(),
+        name="graduate-single-student",
+    ),
+    path("semester-reporting/promote-single/", PromoteSingleStudentView.as_view(), name="promote-single-student"),
     path(
         "update-student-account/<int:pk>/",
         StudentAccountUpdateView.as_view(),
@@ -107,6 +120,11 @@ urlpatterns = [
         "mealcards/update/<int:pk>/",
         StudentMealCardUpdateView.as_view(),
         name="student-mealcard-update",
+    ),
+    path(
+        "metrics/",
+        StudentMetricsView.as_view(),
+        name="student-metrics",
     ),
     # path(
     #     "semester-reporting/",

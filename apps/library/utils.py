@@ -12,19 +12,31 @@ class LibraryCalculations:
     @staticmethod
     def get_default_borrow_days(member):
         config_rules = member.library_config.rules.filter(rule_type="Borrow")
-        rule = next((r for r in config_rules if member.role.lower() in r.name.lower()), None)
+        rule = next(
+            (r for r in config_rules if member.role.lower() in r.name.lower()), None
+        )
         return rule.integer if rule and rule.integer else 14
 
     @staticmethod
     def get_max_renewals(member):
         config_rules = member.library_config.rules.filter(rule_type="Borrow")
-        rule = next((r for r in config_rules if "max renewals" in r.name.lower() and member.role.lower() in r.name.lower()), None)
+        rule = next(
+            (
+                r
+                for r in config_rules
+                if "max renewals" in r.name.lower()
+                and member.role.lower() in r.name.lower()
+            ),
+            None,
+        )
         return rule.integer if rule and rule.integer is not None else 2
 
     @staticmethod
     def get_fine_per_day(member):
         config_rules = member.library_config.rules.filter(rule_type="Fine")
-        rule = next((r for r in config_rules if member.role.lower() in r.name.lower()), None)
+        rule = next(
+            (r for r in config_rules if member.role.lower() in r.name.lower()), None
+        )
         return rule.decimal if rule and rule.decimal is not None else Decimal("0.50")
 
     @staticmethod
@@ -53,7 +65,6 @@ class LibraryCalculations:
         default_days = LibraryCalculations.get_default_borrow_days(member)
         return borrow_transaction.borrow_date + timedelta(days=default_days)
 
-  
     @staticmethod
     def renew_borrow_transaction(borrow_transaction: BorrowTransaction):
         if borrow_transaction.status != "Pending Return":
@@ -61,33 +72,29 @@ class LibraryCalculations:
 
         max_renewals = LibraryCalculations.get_max_renewals(borrow_transaction.member)
         if borrow_transaction.renewal_count >= max_renewals:
-            raise ValidationError("Maximum renewals reached for this borrow transaction.")
+            raise ValidationError(
+                "Maximum renewals reached for this borrow transaction."
+            )
 
-       
         borrow_transaction.renewal_count += 1
 
-        
-        default_days = LibraryCalculations.get_default_borrow_days(borrow_transaction.member)
+        default_days = LibraryCalculations.get_default_borrow_days(
+            borrow_transaction.member
+        )
         borrow_transaction.due_date += timedelta(days=default_days)
 
         borrow_transaction.save()
         return borrow_transaction
 
 
-
-
-
-
-
-
 def generate_copy_number(book, status="Pending Return"):
     """
     Generate the next available copy number for a given book.
-    
+
     Args:
         book: Book instance
         status: Filter borrowed copies by status (default: "Pending Return")
-    
+
     Returns:
         A string like 'ISBN-001' or 'B<book_id>-001', or None if all copies are borrowed.
     """

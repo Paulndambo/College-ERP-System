@@ -10,29 +10,40 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('library', '0001_initial'),
+        ("library", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='borrowtransaction',
-            name='issued_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="borrowtransaction",
+            name="issued_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='fine',
-            name='borrow_transaction',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='library.borrowtransaction'),
+            model_name="fine",
+            name="borrow_transaction",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="library.borrowtransaction",
+            ),
         ),
         migrations.AddField(
-            model_name='member',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="member",
+            name="user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='borrowtransaction',
-            name='member',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='library.member'),
+            model_name="borrowtransaction",
+            name="member",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="library.member"
+            ),
         ),
     ]

@@ -4,8 +4,8 @@ from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
-
-
+from django.db.models import Count
+from rest_framework.views import APIView
 from .filters import AssessmentFilter, StudentFilter
 from rest_framework.exceptions import ValidationError
 from django.views.generic import ListView
@@ -51,44 +51,73 @@ from apps.students.models import (
 from apps.users.models import User
 from apps.core.models import UserRole
 from apps.schools.models import Programme, ProgrammeCohort, Semester
+from django.db import transaction
 
 
 class StudentRegistrationView(generics.CreateAPIView):
     queryset = Student.objects.all()
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
+    permission_classes = [IsAuthenticated]
     serializer_class = StudentCreateSerializer
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         data = request.data
+
         first_name = data.get("first_name")
         last_name = data.get("last_name")
         email = data.get("email")
         gender = data.get("gender")
         phone_number = data.get("phone_number")
-        id_number = data.get("id_number", None)
-        passport_number = data.get("passport_number", None)
+        id_number = data.get("id_number")
+        passport_number = data.get("passport_number")
         address = data.get("address")
-        postal_code = data.get("postal_code", None)
+        postal_code = data.get("postal_code")
         city = data.get("city")
-        state = data.get("state", None)
-        country = data.get("country", None)
+        state = data.get("state")
+        country = data.get("country")
         date_of_birth = data.get("date_of_birth")
-        is_verified = (
-            True
-            if request.user.role.name in ALL_STAFF_ROLES
-            else data.get("is_verified", False)
-        )
+        role_id = data.get("role")
         registration_number = data.get("registration_number")
 
-        try:
-            role = UserRole.objects.get(name="Student")
-        except UserRole.DoesNotExist:
-            raise CustomAPIException(
-                message="UserRole 'Student' not found.",
-                status_code=status.HTTP_400_BAD_REQUEST,
+        # Check duplicate registration_number on Student
+        if Student.objects.filter(registration_number=registration_number).exists():
+            return Response(
+                {
+                    "success": False,
+                    "error": f"Student with registration number '{registration_number}' already exists",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Role check
+        try:
+            role = UserRole.objects.get(id=role_id)
+        except UserRole.DoesNotExist:
+            return Response(
+                {"success": False, "error": "Role not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Duplicate username/email on User
+        if User.objects.filter(username=registration_number).exists():
+            return Response(
+                {
+                    "success": False,
+                    "error": f"User with username '{registration_number}' already exists",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if email and User.objects.filter(email=email).exists():
+            return Response(
+                {
+                    "success": False,
+                    "error": f"User with email '{email}' already exists",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Create User
         try:
             user = User.objects.create(
                 username=registration_number,
@@ -105,23 +134,23 @@ class StudentRegistrationView(generics.CreateAPIView):
                 state=state,
                 country=country,
                 date_of_birth=date_of_birth,
-                is_verified=is_verified,
                 role=role,
             )
-
             user.set_password(registration_number)
             user.save()
         except Exception as e:
-            raise CustomAPIException(
-                message=f"Error creating user: {str(e)}",
-                status_code=status.HTTP_400_BAD_REQUEST,
+            return Response(
+                {"success": False, "error": f"Error creating user: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # Create Student linked to the user
         student_serializer = self.get_serializer(
             data={**data, "user": user.id, "status": "Active"}
         )
         student_serializer.is_valid(raise_exception=True)
         self.perform_create(student_serializer)
+
         return Response(student_serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -449,8 +478,7 @@ class BulkStudentUploadView(generics.CreateAPIView):
     API endpoint for staff members to upload multiple students via CSV or Excel file.
     """
 
-    permission_classes = [HasUserRole]
-    allowed_roles = ALL_STAFF_ROLES
+    permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
     serializer_class = StudentCreateSerializer
 
@@ -462,6 +490,7 @@ class BulkStudentUploadView(generics.CreateAPIView):
         programme = request.data.get("programme")
         cohort = request.data.get("cohort")
         campus = request.data.get("campus")
+        role_id = request.data.get("role")
         # print("programme", programme)
         try:
             programme = int(programme)
@@ -525,11 +554,12 @@ class BulkStudentUploadView(generics.CreateAPIView):
         try:
 
             try:
-                student_role = UserRole.objects.get(name="Student")
+                student_role = UserRole.objects.get(id=role_id)
+                print("student_role===========", student_role)
             except UserRole.DoesNotExist:
-                raise CustomAPIException(
-                    "UserRole 'Student' not found.",
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                return Response(
+                    {"success": False, "error": f"Role not found"},
+                    status=status.HTTP_404_NOT_FOUND,
                 )
 
             for index, row in df.iterrows():
@@ -646,3 +676,33 @@ class BulkStudentUploadView(generics.CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class StudentMetricsView(APIView):
+    """
+    Returns counts of students by status.
+    Applies optional filters: campus, cohort, programme, status, semester.
+    """
+
+    def get(self, request, *args, **kwargs):
+        # All students
+        qs = Student.objects.all()
+
+        # Apply filters
+        filtered_qs = StudentFilter(request.GET, queryset=qs).qs
+
+        # Count by status
+        counts = filtered_qs.values("status").annotate(count=Count("id"))
+
+        # Build dictionary with all statuses from the model
+        status_labels = [
+            choice[0] for choice in Student._meta.get_field("status").choices
+        ]
+        metrics = {status: 0 for status in status_labels}
+
+        for item in counts:
+            metrics[item["status"]] = item["count"]
+
+        metrics["total_students"] = filtered_qs.count()
+
+        return Response(metrics)
