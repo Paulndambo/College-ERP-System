@@ -1,3 +1,4 @@
+from apps.core.models import AcademicYear
 from apps.core.serializers import AcademicYearListSerializer, CampusListSerializer
 from apps.marketing.serializers import LeadListDetailSerializer
 from apps.schools.serializers import ProgrammeListSerializer
@@ -13,10 +14,17 @@ from rest_framework.exceptions import ValidationError
 
 class IntakeCreateSerializer(serializers.ModelSerializer):
     closed = serializers.BooleanField(default=False)
-
+    # academic_year = serializers.PrimaryKeyRelatedField(
+    #     queryset=AcademicYear.objects.all(), required=False,
+    #     allow_null=True
+    # )
     class Meta:
         model = Intake
-        fields = ["name", "start_date", "end_date", "closed"]
+        fields = ["name", 
+                  "start_date", 
+                #   "academic_year", 
+                  "end_date",
+                  "closed"]
 
 
 class IntakeListDetailSerializer(serializers.ModelSerializer):
