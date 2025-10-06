@@ -1,3 +1,4 @@
+from apps.core.models import StudyYear
 from apps.schools.models import Course, ProgrammeCohort, Semester
 from apps.schools.serializers import (
     CourseListSerializer,
@@ -19,6 +20,9 @@ class ExamDataCreateSerializer(serializers.ModelSerializer):
     course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
     student = serializers.PrimaryKeyRelatedField(queryset=Student.objects.all())
     semester = serializers.PrimaryKeyRelatedField(queryset=Semester.objects.all())
+    study_year = serializers.PrimaryKeyRelatedField(
+        queryset=StudyYear.objects.all(), required=True
+    )
 
     class Meta:
         model = ExamData
@@ -32,6 +36,7 @@ class ExamDataCreateSerializer(serializers.ModelSerializer):
             "exam_marks",
             "recorded_by",
             "total_marks",
+            "study_year",
         ]
         extra_kwargs = {
             "recorded_by": {
@@ -49,16 +54,18 @@ class ExamDataCreateSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, data):
-        student = data.get("student")
-        semester = data.get("semester")
-        course = data.get("course")
+        # student = data.get("student")
+        # semester = data.get("semester")
+        # course = data.get("course")
+        # cohort = data.get("cohort")
+        # study_year = data.get("study_year")
 
-        if ExamData.objects.filter(
-            student=student, semester=semester, course=course
-        ).exists():
-            raise ValidationError(
-                "Marks for this student in the specified Unit and semester already exist."
-            )
+        # if ExamData.objects.filter(
+        #     student=student, semester=semester, course=course, cohort=cohort, study_year=study_year
+        # ).exists():
+        #     raise ValidationError(
+        #         "Marks for this student in the specified unit, semester, cohort and year already exist."
+        #     )
 
         cat_marks = (data.get("cat_one", 0) + data.get("cat_two", 0)) / 2
         data["total_marks"] = cat_marks + data.get("exam_marks", 0)

@@ -67,7 +67,6 @@ INSTALLED_APPS = [
     "apps.accounting",
     "apps.procurement",
     "apps.inventory",
-
     "apps.studentsportal",
 ]
 
@@ -135,7 +134,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    "EXCEPTION_HANDLER": "apps.core.exceptions.custom_exception_handler",
+    # "EXCEPTION_HANDLER": "apps.core.exceptions.custom_exception_handler",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     # "DEFAULT_PAGINATION_CLASS": None,
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",

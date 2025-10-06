@@ -5,6 +5,7 @@ from datetime import timedelta, date
 from apps.core.models import AbsoluteBaseModel
 from apps.finance.models import LibraryFinePayment
 
+
 class LibraryConfig(AbsoluteBaseModel):
     name = models.CharField(max_length=100)  # e.g., "Staff Borrowing Rules"
     description = models.TextField(null=True, blank=True)
@@ -21,29 +22,31 @@ class LibraryConfigRule(AbsoluteBaseModel):
     ]
 
     library_config = models.ForeignKey(
-        LibraryConfig,
-        on_delete=models.CASCADE,
-        related_name="rules"
+        LibraryConfig, on_delete=models.CASCADE, related_name="rules"
     )
     rule_type = models.CharField(max_length=20, choices=RULE_TYPE_CHOICES)
-    name = models.CharField(max_length=100)  # e.g., "Default Borrow Days", "Max Renewals"
+    name = models.CharField(
+        max_length=100
+    )  # e.g., "Default Borrow Days", "Max Renewals"
 
     borrow_days = models.PositiveIntegerField(
-        null=True, blank=True,
-        help_text="Number of days allowed to borrow"
+        null=True, blank=True, help_text="Number of days allowed to borrow"
     )
     max_renewals = models.PositiveIntegerField(
-        null=True, blank=True,
-        help_text="Maximum times a book can be renewed"
+        null=True, blank=True, help_text="Maximum times a book can be renewed"
     )
     fine_per_day = models.DecimalField(
-        max_digits=10, decimal_places=2, null=True, blank=True,
-        help_text="Fine charged per day"
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Fine charged per day",
     )
     rule_notes = models.TextField(null=True, blank=True, help_text="Optional notes")
 
     def __str__(self):
         return f"{self.library_config.name} - {self.name}"
+
 
 class Book(AbsoluteBaseModel):
     CATEGORY_CHOICES = [
@@ -83,8 +86,6 @@ class Member(AbsoluteBaseModel):
         return "Active" if self.active else "Inactive"
 
 
-
-
 class BorrowTransaction(AbsoluteBaseModel):
     book = models.ForeignKey("Book", on_delete=models.CASCADE)
     copy_number = models.CharField(max_length=50, null=True, blank=True)
@@ -106,11 +107,10 @@ class BorrowTransaction(AbsoluteBaseModel):
 
     # Renewal tracking
     renewal_count = models.PositiveIntegerField(default=0)
-    max_renewals = models.PositiveIntegerField(null=True, blank=True)  
+    max_renewals = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.book.title} borrowed by {self.member.user.first_name}"
-
 
 
 class Fine(AbsoluteBaseModel):
@@ -124,9 +124,7 @@ class Fine(AbsoluteBaseModel):
         "BorrowTransaction", on_delete=models.CASCADE
     )
     calculated_fine = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="Unpaid"
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Unpaid")
 
     @property
     def member_name(self):
@@ -145,7 +143,9 @@ class Fine(AbsoluteBaseModel):
         borrow = self.borrow_transaction
         if borrow.return_date:
             return borrow.return_date > borrow.due_date
-        return False if borrow.due_date is None else borrow.due_date < borrow.borrow_date
+        return (
+            False if borrow.due_date is None else borrow.due_date < borrow.borrow_date
+        )
 
     def __str__(self):
         return f"Fine for {self.book_title}: ${self.calculated_fine} - {self.status}"

@@ -15,7 +15,7 @@ from .views import (
     CourseUpdateDeleteView,
     SemesterCreateView,
     SemesterListView,
-    SemesterUpdateDeleteView,
+    SemesterDetailView,
     ProgrammeCohortCreateView,
     ProgrammeCohortListView,
     ProgrammeCohortUpdateDeleteView,
@@ -59,8 +59,8 @@ urlpatterns = [
     path("semester/create/", SemesterCreateView.as_view(), name="semester-create"),
     path("semester/list/", SemesterListView.as_view(), name="semester-list"),
     path(
-        "semester/update-delete/<int:pk>/",
-        SemesterUpdateDeleteView.as_view(),
+        "semester/<int:pk>/",
+        SemesterDetailView.as_view(),
         name="semester-update-delete",
     ),
     path(

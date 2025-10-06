@@ -56,14 +56,10 @@ class StaffDocumentCreateSerializer(serializers.ModelSerializer):
         fields = ["staff", "document_type", "document_file", "notes"]
 
 
-
-
 class SingleStaffDocumentSerializer(serializers.Serializer):
     document_type = serializers.CharField()
     document_file = serializers.FileField()
     notes = serializers.CharField(required=False, allow_blank=True)
-
-
 
 
 class StaffDocumentListSerializer(StaffDocumentCreateSerializer):
@@ -92,12 +88,10 @@ class CreateStaffPositionSerializer(serializers.ModelSerializer):
         fields = ["name"]
 
 
-
 class StaffListDetailSerializer(serializers.ModelSerializer):
     department = DepartmentListSerializer()
     user = UserSerializer()
     position = StaffPositionListSerializer()
- 
 
     class Meta:
         model = Staff
@@ -108,7 +102,6 @@ class StaffListDetailSerializer(serializers.ModelSerializer):
             "department",
             "position",
             "status",
-         
             "created_on",
             "updated_on",
         ]
@@ -117,11 +110,11 @@ class StaffListDetailSerializer(serializers.ModelSerializer):
         }
 
 
-
 class StaffPaySlipSerializer(serializers.ModelSerializer):
     staff = StaffListDetailSerializer()
     outstanding_balance = serializers.SerializerMethodField()
     payment_status_label = serializers.SerializerMethodField()
+
     class Meta:
         model = Payslip
         fields = [
@@ -144,12 +137,15 @@ class StaffPaySlipSerializer(serializers.ModelSerializer):
             "outstanding_balance",
             "payment_status_label",
         ]
+
     def get_outstanding_balance(self, obj):
         if hasattr(obj, "payment_statement"):
             return obj.payment_statement.outstanding_balance
         return None
+
     def get_payment_status_label(self, obj):
         return obj.get_payment_status_display()
+
 
 class CreateStaffLeaveApplicationSerializer(serializers.ModelSerializer):
     staff = serializers.PrimaryKeyRelatedField(

@@ -9,74 +9,137 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='AccountType',
+            name="AccountType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('normal_balance', models.CharField(choices=[('debit', 'Debit'), ('credit', 'Credit')], max_length=6)),
-                ('is_archived', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=50, unique=True)),
+                (
+                    "normal_balance",
+                    models.CharField(
+                        choices=[("debit", "Debit"), ("credit", "Credit")], max_length=6
+                    ),
+                ),
+                ("is_archived", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             managers=[
-                ('active', django.db.models.manager.Manager()),
+                ("active", django.db.models.manager.Manager()),
             ],
         ),
         migrations.CreateModel(
-            name='JournalEntry',
+            name="JournalEntry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('date', models.DateField()),
-                ('description', models.TextField()),
-                ('reference', models.CharField(blank=True, max_length=100, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("date", models.DateField()),
+                ("description", models.TextField()),
+                ("reference", models.CharField(blank=True, max_length=100, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Transaction',
+            name="Transaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('is_debit', models.BooleanField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("is_debit", models.BooleanField()),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Account',
+            name="Account",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('account_code', models.CharField(max_length=10, unique=True)),
-                ('name', models.CharField(max_length=100)),
-                ('is_default', models.BooleanField(default=False)),
-                ('is_contra', models.BooleanField(default=False)),
-                ('is_archived', models.BooleanField(default=False)),
-                ('normal_balance', models.CharField(blank=True, choices=[('debit', 'Debit'), ('credit', 'Credit')], editable=False, max_length=6, null=True)),
-                ('cash_flow_section', models.CharField(blank=True, choices=[('Operating', 'Operating'), ('Investing', 'Investing'), ('Financing', 'Financing')], max_length=20, null=True)),
-                ('account_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='accounting.accounttype')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("account_code", models.CharField(max_length=10, unique=True)),
+                ("name", models.CharField(max_length=100)),
+                ("is_default", models.BooleanField(default=False)),
+                ("is_contra", models.BooleanField(default=False)),
+                ("is_archived", models.BooleanField(default=False)),
+                (
+                    "normal_balance",
+                    models.CharField(
+                        blank=True,
+                        choices=[("debit", "Debit"), ("credit", "Credit")],
+                        editable=False,
+                        max_length=6,
+                        null=True,
+                    ),
+                ),
+                (
+                    "cash_flow_section",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("Operating", "Operating"),
+                            ("Investing", "Investing"),
+                            ("Financing", "Financing"),
+                        ],
+                        max_length=20,
+                        null=True,
+                    ),
+                ),
+                (
+                    "account_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="accounting.accounttype",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             managers=[
-                ('active', django.db.models.manager.Manager()),
+                ("active", django.db.models.manager.Manager()),
             ],
         ),
     ]

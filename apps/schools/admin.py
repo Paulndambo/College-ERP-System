@@ -13,10 +13,20 @@ from apps.schools.models import (
 # Register your models here.
 
 admin.site.register(School)
+
+
 # admin.site.register(Department)
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "course_code", "semester", "study_year", "credit_hours", "created_on")
+    list_display = (
+        "id",
+        "name",
+        "course_code",
+        "semester",
+        "study_year",
+        "credit_hours",
+        "created_on",
+    )
 
 
 admin.site.register(Programme)

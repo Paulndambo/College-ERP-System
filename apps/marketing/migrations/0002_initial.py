@@ -10,55 +10,93 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('marketing', '0001_initial'),
-        ('schools', '0001_initial'),
+        ("marketing", "0001_initial"),
+        ("schools", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='interaction',
-            name='added_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="interaction",
+            name="added_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='lead',
-            name='assigned_to',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='agentleads', to=settings.AUTH_USER_MODEL),
+            model_name="lead",
+            name="assigned_to",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="agentleads",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='lead',
-            name='campaign',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='leads', to='marketing.campaign'),
+            model_name="lead",
+            name="campaign",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="leads",
+                to="marketing.campaign",
+            ),
         ),
         migrations.AddField(
-            model_name='lead',
-            name='programme',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='schools.programme'),
+            model_name="lead",
+            name="programme",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="schools.programme",
+            ),
         ),
         migrations.AddField(
-            model_name='interaction',
-            name='lead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='interactions', to='marketing.lead'),
+            model_name="interaction",
+            name="lead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="interactions",
+                to="marketing.lead",
+            ),
         ),
         migrations.AddField(
-            model_name='leadstage',
-            name='added_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="leadstage",
+            name="added_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='leadstage',
-            name='lead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stages', to='marketing.lead'),
+            model_name="leadstage",
+            name="lead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="stages",
+                to="marketing.lead",
+            ),
         ),
         migrations.AddField(
-            model_name='task',
-            name='lead',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tasks', to='marketing.lead'),
+            model_name="task",
+            name="lead",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tasks",
+                to="marketing.lead",
+            ),
         ),
         migrations.AddField(
-            model_name='task',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='agenttasks', to=settings.AUTH_USER_MODEL),
+            model_name="task",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="agenttasks",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

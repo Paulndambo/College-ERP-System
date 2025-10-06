@@ -10,9 +10,7 @@ from apps.accounting.models import Account
 from apps.student_finance.models import StudentFeeInvoice, StudentFeePayment
 
 
-
 logger = logging.getLogger(__name__)
-
 
 
 @receiver(post_save, sender=GoodsReceived)
@@ -47,7 +45,7 @@ def update_po_status(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=StudentFeePayment)
 def create_fee_payment_journal(sender, instance, created, **kwargs):
-    
+
     if not created:
         return
 
@@ -83,7 +81,9 @@ def create_fee_payment_journal(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=StudentFeeInvoice)
 def create_invoice_journal_entry(sender, instance, created, **kwargs):
-    logger.info(f"Creating journal entry for invoice {instance.id} - created: {created}")
+    logger.info(
+        f"Creating journal entry for invoice {instance.id} - created: {created}"
+    )
     if not created:
         return
 

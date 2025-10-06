@@ -23,6 +23,7 @@ class StudentCreateSerializer(serializers.ModelSerializer):
         queryset=Campus.objects.all(), required=False
     )
 
+    # role = serializers.IntegerField(write_only=True, required=True)
     class Meta:
         model = Student
         fields = [
@@ -37,18 +38,20 @@ class StudentCreateSerializer(serializers.ModelSerializer):
             "cohort",
             "hostel_room",
             "campus",
+            # "role",
         ]
         extra_kwargs = {
             "user": {"required": False},
             "cohort": {"required": False},
             "campus": {"required": False},
+            "hostel_room": {"required": False},
         }
 
 
 class MinimalStudentSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    programme_name = serializers.CharField(source="programme.name", read_only=True)
-    cohort_name = serializers.CharField(source="cohort.name", read_only=True)
+    programme = ProgrammeListSerializer()
+    cohort  = ProgrammeCohortListSerializer()
     hostel_room_number = serializers.CharField(
         source="hostel_room.room_number", read_only=True
     )
@@ -64,8 +67,8 @@ class MinimalStudentSerializer(serializers.ModelSerializer):
             "guardian_relationship",
             "guardian_email",
             "status",
-            "programme_name",
-            "cohort_name",
+            "cohort",
+            "programme",
             "hostel_room_number",
         ]
 

@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from apps.core.models import AcademicYear, StudyYear
+from apps.core.serializers import AcademicYearListSerializer, StudyYearListSerializer
+
 
 from .models import (
     School,
@@ -11,6 +14,12 @@ from .models import (
     CourseSession,
 )
 
+class SemesterListSerializer(serializers.ModelSerializer):
+    academic_year = AcademicYearListSerializer()
+
+    class Meta:
+        model = Semester
+        fields = ["id", "name", "academic_year", "start_date", "end_date", "status"]
 
 class SchoolCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,9 +67,41 @@ class ProgrammeListSerializer(serializers.ModelSerializer):
 
 
 class CourseCreateSerializer(serializers.ModelSerializer):
+    school = serializers.PrimaryKeyRelatedField(
+        queryset=School.objects.all(), required=True
+    )
+    department = serializers.PrimaryKeyRelatedField(
+        queryset=Department.objects.all(), required=True
+    )
+    programme = serializers.PrimaryKeyRelatedField(
+        queryset=Programme.objects.all(), required=True
+    )
+    study_year = serializers.PrimaryKeyRelatedField(
+        queryset=StudyYear.objects.all(), required=True
+    )
+    semester = serializers.PrimaryKeyRelatedField(
+        queryset=Semester.objects.all(), 
+        required=False,
+        allow_null=True
+    )
+
     class Meta:
         model = Course
-        fields = ["course_code", "name", "school", "department", "programme"]
+        fields = [
+            "course_code",
+            "name",
+            "school",
+            "department",
+            "programme",
+            "study_year",
+            "semester",
+            "course_type",
+        ]
+        extra_kwargs ={
+               "semester": {
+                "required": False
+            },
+        }
 
 
 class MinimalClassSerializer(serializers.ModelSerializer):
@@ -73,10 +114,19 @@ class CourseListSerializer(serializers.ModelSerializer):
     school = SchoolListSerializer()
     department = DepartmentListSerializer()
     programme = ProgrammeListSerializer()
-
+    study_year = StudyYearListSerializer()
+    semester = SemesterListSerializer()
     class Meta:
         model = Course
-        fields = ["id", "course_code", "name", "school", "department", "programme"]
+        fields = ["id", 
+                  "course_code",
+                  "name",
+                  "school",
+                  "department",
+                  "programme",
+                  "study_year",
+                  "semester",
+                  ]
 
 
 class ProgrammeListDetailSerializer(serializers.ModelSerializer):
@@ -94,15 +144,15 @@ class ProgrammeListDetailSerializer(serializers.ModelSerializer):
 
 
 class SemesterCreateSerializer(serializers.ModelSerializer):
+    academic_year = serializers.PrimaryKeyRelatedField(
+        queryset=AcademicYear.objects.all()
+    )
+
     class Meta:
         model = Semester
-        fields = ["name", "start_date", "end_date", "status"]
+        fields = ["name", "start_date", "end_date", "academic_year", "status"]
 
 
-class SemesterListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Semester
-        fields = ["id", "name", "academic_year", "start_date", "end_date", "status"]
 
 
 class ProgrammeCohortCreateSerializer(serializers.ModelSerializer):
@@ -122,7 +172,7 @@ class ProgrammeCohortListSerializer(serializers.ModelSerializer):
     programme = ProgrammeListSerializer()
     current_semester = SemesterListSerializer()
     intake = serializers.SerializerMethodField()
-
+    current_year = StudyYearListSerializer()
     class Meta:
         model = ProgrammeCohort
         fields = [

@@ -9,25 +9,39 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('accounting', '0001_initial'),
-        ('payroll', '0001_initial'),
-        ('staff', '0001_initial'),
+        ("accounting", "0001_initial"),
+        ("payroll", "0001_initial"),
+        ("staff", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='paymentstatement',
-            name='payslip',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='payment_statement', to='staff.payslip'),
+            model_name="paymentstatement",
+            name="payslip",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payment_statement",
+                to="staff.payslip",
+            ),
         ),
         migrations.AddField(
-            model_name='salarypayment',
-            name='journal_entry',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='salary_payments', to='accounting.journalentry'),
+            model_name="salarypayment",
+            name="journal_entry",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="salary_payments",
+                to="accounting.journalentry",
+            ),
         ),
         migrations.AddField(
-            model_name='salarypayment',
-            name='payslip',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='salary_payments', to='staff.payslip'),
+            model_name="salarypayment",
+            name="payslip",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="salary_payments",
+                to="staff.payslip",
+            ),
         ),
     ]

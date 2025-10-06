@@ -7,7 +7,16 @@ from apps.core.utils import ModelCountUtils
 from services.constants import ALL_STAFF_ROLES
 from services.permissions import HasUserRole
 from django.contrib.admin.models import LogEntry
-from .serializers import AcademicYearListSerializer, CreateAndUpdateAcademicYearSerializer, CreateAndUpdateRoleSerializer, LogEntrySerializer, LoggedInPermisionsSerializer, ModuleSerializer, RoleDetailWithPermissionsSerializer, RoleSerializer
+from .serializers import (
+    AcademicYearListSerializer,
+    CreateAndUpdateAcademicYearSerializer,
+    CreateAndUpdateRoleSerializer,
+    LogEntrySerializer,
+    LoggedInPermisionsSerializer,
+    ModuleSerializer,
+    RoleDetailWithPermissionsSerializer,
+    RoleSerializer,
+)
 from .models import AcademicYear, Campus, Module, RolePermission, StudyYear, UserRole
 from .serializers import (
     CampusCreateSerializer,
@@ -35,28 +44,28 @@ from rest_framework.permissions import IsAuthenticated
 #     def get_queryset(self):
 #         return UserRole.objects.all().order_by("-created_on")
 
-    # def get_paginated_response(self, data):
-    #     return super().get_paginated_response(data)
+# def get_paginated_response(self, data):
+#     return super().get_paginated_response(data)
 
-    # def list(self, request, *args, **kwargs):
-    #     try:
-    #         roles = self.get_queryset()
-    #         roles = self.filter_queryset(roles)
-    #         page = self.request.query_params.get("page", None)
-    #         if page:
-    #             self.pagination_class = PageNumberPagination
-    #             paginator = self.pagination_class()
-    #             paginated_roles = paginator.paginate_queryset(roles, request)
-    #             serializer = self.get_serializer(paginated_roles, many=True)
-    #             return paginator.get_paginated_response(serializer.data)
+# def list(self, request, *args, **kwargs):
+#     try:
+#         roles = self.get_queryset()
+#         roles = self.filter_queryset(roles)
+#         page = self.request.query_params.get("page", None)
+#         if page:
+#             self.pagination_class = PageNumberPagination
+#             paginator = self.pagination_class()
+#             paginated_roles = paginator.paginate_queryset(roles, request)
+#             serializer = self.get_serializer(paginated_roles, many=True)
+#             return paginator.get_paginated_response(serializer.data)
 
-    #         serializer = self.get_serializer(roles, many=True)
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
+#         serializer = self.get_serializer(roles, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    #     except Exception as exc:
-    #         raise CustomAPIException(
-    #             message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-    #         )
+#     except Exception as exc:
+#         raise CustomAPIException(
+#             message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+#         )
 
 
 class CampusCreateView(generics.CreateAPIView):
@@ -108,7 +117,6 @@ class CampusListView(generics.ListAPIView):
             raise CustomAPIException(
                 message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
 
 class CampusUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
@@ -238,12 +246,10 @@ class RecentActionsView(APIView):
         return Response(serializer.data)
 
 
-
-
-
 class RolesListAPIView(generics.ListAPIView):
     queryset = UserRole.objects.all()
     serializer_class = UserRoleListSerializer
+
     def get_paginated_response(self, data):
         return super().get_paginated_response(data)
 
@@ -263,7 +269,10 @@ class RolesListAPIView(generics.ListAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception as exc:
-            return Response({"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 class CreateRoleView(generics.CreateAPIView):
     """
@@ -335,7 +344,8 @@ class UpdateDeleteRoleView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         # Save the updated role
         serializer.save()
-        
+
+
 class RoleDetailPermissionsView(generics.RetrieveAPIView):
     """
     GET /api/roles/<pk>/permissions/
@@ -351,8 +361,8 @@ class RoleDetailPermissionsView(generics.RetrieveAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    
+
+
 class UpdateRolePermissionsView(generics.UpdateAPIView):
     """
     PATCH /api/roles/<pk>/permissions/
@@ -404,6 +414,7 @@ class UpdateRolePermissionsView(generics.UpdateAPIView):
         serializer = RoleDetailWithPermissionsSerializer(role)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class LoggedInPermissionsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -412,23 +423,56 @@ class LoggedInPermissionsView(APIView):
         return Response(serializer.data)
 
 
-
-
 class CreateAcademicYearView(generics.CreateAPIView):
     queryset = AcademicYear.objects.all()
     serializer_class = CreateAndUpdateAcademicYearSerializer
 
     def create(self, request, *args, **kwargs):
         try:
-            name = request.data.get("name")
+            data = request.data.copy()
+
+            if data.get("start_date") == "":
+                data["start_date"] = None
+            if data.get("end_date") == "":
+                data["end_date"] = None
+
+            name = data.get("name")
             if AcademicYear.objects.filter(name__iexact=name).exists():
                 return Response(
-                    {"success": False, "error": "AcademicYear with this name already exists."},
+                    {
+                        "success": False,
+                        "error": "AcademicYear with this name already exists.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            return super().create(request, *args, **kwargs)
+
+            # Optional: Validate end_date >= start_date if both present
+            start_date = data.get("start_date")
+            end_date = data.get("end_date")
+            if start_date and end_date:
+                from datetime import date
+
+                start = date.fromisoformat(start_date)
+                end = date.fromisoformat(end_date)
+                if end < start:
+                    return Response(
+                        {
+                            "success": False,
+                            "error": "End date must be after or equal to start date.",
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+            # Pass cleaned data to serializer
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            )
+
         except Exception as exc:
-            # logger.error(f"Error creating AcademicYear: {exc}")
             return Response(
                 {"success": False, "error": f"Internal server error: {exc}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -469,9 +513,17 @@ class AcademicYearDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             instance = self.get_object()
             name = request.data.get("name")
-            if name and AcademicYear.objects.exclude(id=instance.id).filter(name__iexact=name).exists():
+            if (
+                name
+                and AcademicYear.objects.exclude(id=instance.id)
+                .filter(name__iexact=name)
+                .exists()
+            ):
                 return Response(
-                    {"success": False, "error": "Another AcademicYear with this name already exists."},
+                    {
+                        "success": False,
+                        "error": "Another AcademicYear with this name already exists.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             return super().update(request, *args, **kwargs)

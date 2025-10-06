@@ -9,24 +9,32 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('payments', '0001_initial'),
-        ('students', '0001_initial'),
+        ("payments", "0001_initial"),
+        ("students", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mealcardpayment',
-            name='mealcard',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='students.mealcard'),
+            model_name="mealcardpayment",
+            name="mealcard",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="students.mealcard",
+            ),
         ),
         migrations.AddField(
-            model_name='mealcardpayment',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='students.student'),
+            model_name="mealcardpayment",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="students.student"
+            ),
         ),
         migrations.AddField(
-            model_name='rentpayment',
-            name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='students.student'),
+            model_name="rentpayment",
+            name="student",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="students.student"
+            ),
         ),
     ]

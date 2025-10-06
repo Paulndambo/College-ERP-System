@@ -7,41 +7,98 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='PaymentStatement',
+            name="PaymentStatement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('total_amount_due', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('total_amount_paid', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('outstanding_balance', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "total_amount_due",
+                    models.DecimalField(decimal_places=2, max_digits=12),
+                ),
+                (
+                    "total_amount_paid",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12),
+                ),
+                (
+                    "outstanding_balance",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='SalaryPayment',
+            name="SalaryPayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('payment_method', models.CharField(choices=[('Cash', 'Cash'), ('Bank', 'Bank Transfer'), ('Mpesa', 'Mpesa'), ('Cheque', 'Cheque')], default='bank', max_length=50)),
-                ('payment_reference', models.CharField(blank=True, help_text='Transaction ID, cheque number, etc.', max_length=100, null=True)),
-                ('payment_date', models.DateTimeField(auto_now_add=True)),
-                ('amount_paid', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('payment_status', models.CharField(choices=[('pending', 'Pending'), ('processing', 'Processing'), ('completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], default='completed', max_length=10)),
-                ('notes', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[
+                            ("Cash", "Cash"),
+                            ("Bank", "Bank Transfer"),
+                            ("Mpesa", "Mpesa"),
+                            ("Cheque", "Cheque"),
+                        ],
+                        default="bank",
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "payment_reference",
+                    models.CharField(
+                        blank=True,
+                        help_text="Transaction ID, cheque number, etc.",
+                        max_length=100,
+                        null=True,
+                    ),
+                ),
+                ("payment_date", models.DateTimeField(auto_now_add=True)),
+                ("amount_paid", models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "payment_status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("processing", "Processing"),
+                            ("completed", "Completed"),
+                            ("failed", "Failed"),
+                            ("cancelled", "Cancelled"),
+                        ],
+                        default="completed",
+                        max_length=10,
+                    ),
+                ),
+                ("notes", models.TextField(blank=True, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

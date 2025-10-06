@@ -55,9 +55,9 @@ def payment_ref_generator(prefix="LIB"):
     return f"{prefix}-{timestamp}-{random_suffix}"
 
 
-
-
-def generate_staff_number(department, staff_model, user_model, prefix_length=3, max_attempts=1000):
+def generate_staff_number(
+    department, staff_model, user_model, prefix_length=3, max_attempts=1000
+):
     """
     Generate a unique staff number: [DEPTPREFIX][zero-padded sequential number].
 
@@ -83,7 +83,7 @@ def generate_staff_number(department, staff_model, user_model, prefix_length=3, 
 
         if existing_staff:
             try:
-                last_number = int(existing_staff.staff_number[len(dept_prefix):])
+                last_number = int(existing_staff.staff_number[len(dept_prefix) :])
             except (ValueError, IndexError):
                 last_number = 0
         else:
@@ -94,8 +94,10 @@ def generate_staff_number(department, staff_model, user_model, prefix_length=3, 
             next_number = last_number + i
             proposed = f"{dept_prefix}{next_number:03d}"
 
-            if not staff_model.objects.filter(staff_number=proposed).exists() and \
-               not user_model.objects.filter(username=proposed).exists():
+            if (
+                not staff_model.objects.filter(staff_number=proposed).exists()
+                and not user_model.objects.filter(username=proposed).exists()
+            ):
                 return proposed
 
     raise ValueError(f"Unable to generate unique staff number for {department.name}")

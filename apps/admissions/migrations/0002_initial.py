@@ -9,30 +9,48 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('admissions', '0001_initial'),
-        ('core', '0001_initial'),
-        ('schools', '0001_initial'),
+        ("admissions", "0001_initial"),
+        ("core", "0001_initial"),
+        ("schools", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='intake',
-            name='academic_year',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='intakes', to='core.academicyear'),
+            model_name="intake",
+            name="academic_year",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="intakes",
+                to="core.academicyear",
+            ),
         ),
         migrations.AddField(
-            model_name='studentapplication',
-            name='campus',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.campus'),
+            model_name="studentapplication",
+            name="campus",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="core.campus",
+            ),
         ),
         migrations.AddField(
-            model_name='studentapplication',
-            name='first_choice_programme',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='first_choice_programme', to='schools.programme'),
+            model_name="studentapplication",
+            name="first_choice_programme",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="first_choice_programme",
+                to="schools.programme",
+            ),
         ),
         migrations.AddField(
-            model_name='studentapplication',
-            name='intake',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='admissions.intake'),
+            model_name="studentapplication",
+            name="intake",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="admissions.intake",
+            ),
         ),
     ]

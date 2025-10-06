@@ -8,268 +8,600 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Allowance',
+            name="Allowance",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('is_taxable', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("is_taxable", models.BooleanField(default=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Deduction',
+            name="Deduction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255, unique=True)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('deduction_type', models.CharField(choices=[('percentage', 'Percentage Based (with bands)'), ('fixed', 'Fixed Amount (SACCO, union dues, loans)')], default='percentage', max_length=20)),
-                ('is_mandatory', models.BooleanField(default=False)),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255, unique=True)),
+                ("description", models.TextField(blank=True, null=True)),
+                (
+                    "deduction_type",
+                    models.CharField(
+                        choices=[
+                            ("percentage", "Percentage Based (with bands)"),
+                            ("fixed", "Fixed Amount (SACCO, union dues, loans)"),
+                        ],
+                        default="percentage",
+                        max_length=20,
+                    ),
+                ),
+                ("is_mandatory", models.BooleanField(default=False)),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='EmploymentContract',
+            name="EmploymentContract",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('basic_salary', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('salary_currency', models.CharField(default='KES', max_length=10)),
-                ('payment_frequency', models.CharField(choices=[('Monthly', 'Monthly'), ('Bi-Monthly', 'Bi-Monthly'), ('Weekly', 'Weekly'), ('Quarterly', 'Quarterly')], default='Monthly', max_length=20)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("basic_salary", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("salary_currency", models.CharField(default="KES", max_length=10)),
+                (
+                    "payment_frequency",
+                    models.CharField(
+                        choices=[
+                            ("Monthly", "Monthly"),
+                            ("Bi-Monthly", "Bi-Monthly"),
+                            ("Weekly", "Weekly"),
+                            ("Quarterly", "Quarterly"),
+                        ],
+                        default="Monthly",
+                        max_length=20,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='LeavePolicy',
+            name="LeavePolicy",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('default_days', models.PositiveIntegerField()),
-                ('requires_document_after', models.PositiveIntegerField(default=0, help_text='Require medical certificate or proof if leave exceeds this many consecutive days')),
-                ('is_active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("default_days", models.PositiveIntegerField()),
+                (
+                    "requires_document_after",
+                    models.PositiveIntegerField(
+                        default=0,
+                        help_text="Require medical certificate or proof if leave exceeds this many consecutive days",
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='OvertimeRecords',
+            name="OvertimeRecords",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('date', models.DateField()),
-                ('hours', models.DecimalField(decimal_places=2, max_digits=5)),
-                ('rate_per_hour', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('approved', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("date", models.DateField()),
+                ("hours", models.DecimalField(decimal_places=2, max_digits=5)),
+                ("rate_per_hour", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("approved", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='PayrollRun',
+            name="PayrollRun",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('period_start', models.DateField()),
-                ('period_end', models.DateField()),
-                ('status', models.CharField(choices=[('Draft', 'Draft'), ('Processing', 'Processing'), ('Completed', 'Completed'), ('Reversed', 'Reversed')], default='Draft', max_length=20)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("period_start", models.DateField()),
+                ("period_end", models.DateField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Draft", "Draft"),
+                            ("Processing", "Processing"),
+                            ("Completed", "Completed"),
+                            ("Reversed", "Reversed"),
+                        ],
+                        default="Draft",
+                        max_length=20,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Payslip',
+            name="Payslip",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('basic_salary', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('total_allowances', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('total_overtime', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('total_deductions', models.DecimalField(decimal_places=2, default=0, max_digits=12)),
-                ('net_pay', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('generated_at', models.DateTimeField(auto_now_add=True)),
-                ('payment_status', models.CharField(choices=[('Pending', 'Pending'), ('Processing', 'Processing'), ('Partially Paid', 'Partially Paid'), ('Processed', 'Processed'), ('Reversed', 'Reversed'), ('Failed', 'Failed')], default='Pending', max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("basic_salary", models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "total_allowances",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12),
+                ),
+                (
+                    "total_overtime",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12),
+                ),
+                (
+                    "total_deductions",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=12),
+                ),
+                ("net_pay", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("generated_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "payment_status",
+                    models.CharField(
+                        choices=[
+                            ("Pending", "Pending"),
+                            ("Processing", "Processing"),
+                            ("Partially Paid", "Partially Paid"),
+                            ("Processed", "Processed"),
+                            ("Reversed", "Reversed"),
+                            ("Failed", "Failed"),
+                        ],
+                        default="Pending",
+                        max_length=50,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='PayslipDeduction',
+            name="PayslipDeduction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
             ],
         ),
         migrations.CreateModel(
-            name='Staff',
+            name="Staff",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('staff_number', models.CharField(max_length=255, unique=True)),
-                ('status', models.CharField(choices=[('Active', 'Active'), ('Inactive', 'Inactive'), ('Terminated', 'Terminated'), ('On Probation', 'On Probation')], default='Inactive', max_length=20)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("staff_number", models.CharField(max_length=255, unique=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Active", "Active"),
+                            ("Inactive", "Inactive"),
+                            ("Terminated", "Terminated"),
+                            ("On Probation", "On Probation"),
+                        ],
+                        default="Inactive",
+                        max_length=20,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffAllowance',
+            name="StaffAllowance",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('effective_date', models.DateField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("effective_date", models.DateField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='StaffCourseAssignment',
+            name="StaffCourseAssignment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('assigned_date', models.DateField(auto_now_add=True)),
-                ('active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("assigned_date", models.DateField(auto_now_add=True)),
+                ("active", models.BooleanField(default=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffDeduction',
+            name="StaffDeduction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('start_date', models.DateField(blank=True, null=True)),
-                ('end_date', models.DateField(blank=True, null=True)),
-                ('active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("start_date", models.DateField(blank=True, null=True)),
+                ("end_date", models.DateField(blank=True, null=True)),
+                ("active", models.BooleanField(default=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffDocuments',
+            name="StaffDocuments",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('document_type', models.CharField(choices=[('ID', 'National ID'), ('KRA_PIN', 'KRA PIN Certificate'), ('NHIF', 'NHIF Card'), ('NSSF', 'NSSF Card'), ('CV', 'Curriculum Vitae'), ('Offer Letter', 'Offer Letter'), ('Career Certifications', 'Career Certifications'), ('Other', 'Other')], max_length=100)),
-                ('document_file', models.FileField(upload_to='staff_documents/')),
-                ('notes', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "document_type",
+                    models.CharField(
+                        choices=[
+                            ("ID", "National ID"),
+                            ("KRA_PIN", "KRA PIN Certificate"),
+                            ("NHIF", "NHIF Card"),
+                            ("NSSF", "NSSF Card"),
+                            ("CV", "Curriculum Vitae"),
+                            ("Offer Letter", "Offer Letter"),
+                            ("Career Certifications", "Career Certifications"),
+                            ("Other", "Other"),
+                        ],
+                        max_length=100,
+                    ),
+                ),
+                ("document_file", models.FileField(upload_to="staff_documents/")),
+                ("notes", models.TextField(blank=True, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffLeave',
+            name="StaffLeave",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('Active', 'Active'), ('Completed', 'Completed'), ('Cancelled', 'Cancelled')], default='Active', max_length=255)),
-                ('reason_cancelled', models.CharField(max_length=500, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Active", "Active"),
+                            ("Completed", "Completed"),
+                            ("Cancelled", "Cancelled"),
+                        ],
+                        default="Active",
+                        max_length=255,
+                    ),
+                ),
+                ("reason_cancelled", models.CharField(max_length=500, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffLeaveApplication',
+            name="StaffLeaveApplication",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField()),
-                ('reason', models.CharField(max_length=255)),
-                ('status', models.CharField(choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Declined', 'Declined')], default='Pending', max_length=255)),
-                ('reason_declined', models.CharField(blank=True, max_length=500, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField()),
+                ("reason", models.CharField(max_length=255)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Pending", "Pending"),
+                            ("Approved", "Approved"),
+                            ("Declined", "Declined"),
+                        ],
+                        default="Pending",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "reason_declined",
+                    models.CharField(blank=True, max_length=500, null=True),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffLeaveEntitlement',
+            name="StaffLeaveEntitlement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('year', models.PositiveIntegerField()),
-                ('allocated_days', models.PositiveIntegerField()),
-                ('used_days', models.DecimalField(decimal_places=2, default=0, max_digits=5)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("year", models.PositiveIntegerField()),
+                ("allocated_days", models.PositiveIntegerField()),
+                (
+                    "used_days",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=5),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffPaymentMethod',
+            name="StaffPaymentMethod",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('method_type', models.CharField(choices=[('BANK', 'Bank'), ('MPESA', 'M-Pesa'), ('CHEQUE', 'Cheque'), ('CASH', 'Cash')], max_length=20)),
-                ('bank_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('bank_account_number', models.CharField(blank=True, max_length=255, null=True)),
-                ('mpesa_number', models.CharField(blank=True, max_length=20, null=True)),
-                ('is_primary', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "method_type",
+                    models.CharField(
+                        choices=[
+                            ("BANK", "Bank"),
+                            ("MPESA", "M-Pesa"),
+                            ("CHEQUE", "Cheque"),
+                            ("CASH", "Cash"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("bank_name", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "bank_account_number",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "mpesa_number",
+                    models.CharField(blank=True, max_length=20, null=True),
+                ),
+                ("is_primary", models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
-            name='StaffPosition',
+            name="StaffPosition",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StaffStatutoryInfo',
+            name="StaffStatutoryInfo",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('kra_pin', models.CharField(blank=True, max_length=20, null=True)),
-                ('nssf_number', models.CharField(blank=True, max_length=20, null=True)),
-                ('nhif_number', models.CharField(blank=True, max_length=20, null=True)),
-                ('helb_number', models.CharField(blank=True, max_length=20, null=True)),
-                ('other_identifier', models.CharField(blank=True, max_length=50, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("kra_pin", models.CharField(blank=True, max_length=20, null=True)),
+                ("nssf_number", models.CharField(blank=True, max_length=20, null=True)),
+                ("nhif_number", models.CharField(blank=True, max_length=20, null=True)),
+                ("helb_number", models.CharField(blank=True, max_length=20, null=True)),
+                (
+                    "other_identifier",
+                    models.CharField(blank=True, max_length=50, null=True),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='DeductionRule',
+            name="DeductionRule",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('min_salary', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True)),
-                ('max_salary', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True)),
-                ('percentage', models.DecimalField(blank=True, decimal_places=2, help_text='For percentage-based deductions.', max_digits=5, null=True)),
-                ('amount', models.DecimalField(blank=True, decimal_places=2, help_text='For fixed deductions.', max_digits=12, null=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('deduction', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rules', to='staff.deduction')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "min_salary",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=12, null=True
+                    ),
+                ),
+                (
+                    "max_salary",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=12, null=True
+                    ),
+                ),
+                (
+                    "percentage",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        help_text="For percentage-based deductions.",
+                        max_digits=5,
+                        null=True,
+                    ),
+                ),
+                (
+                    "amount",
+                    models.DecimalField(
+                        blank=True,
+                        decimal_places=2,
+                        help_text="For fixed deductions.",
+                        max_digits=12,
+                        null=True,
+                    ),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "deduction",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="rules",
+                        to="staff.deduction",
+                    ),
+                ),
             ],
             options={
-                'ordering': ['min_salary'],
+                "ordering": ["min_salary"],
             },
         ),
     ]

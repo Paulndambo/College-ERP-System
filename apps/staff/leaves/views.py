@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 # ----------------- LEAVE POLICY -----------------
 
+
 class CreateLeavePolicyView(generics.CreateAPIView):
     queryset = LeavePolicy.objects.all()
     serializer_class = CreateAndUpdateLeavePolicySerializer
@@ -21,7 +22,10 @@ class CreateLeavePolicyView(generics.CreateAPIView):
             name = request.data.get("name")
             if LeavePolicy.objects.filter(name__iexact=name).exists():
                 return Response(
-                    {"success": False, "error": "LeavePolicy with this name already exists."},
+                    {
+                        "success": False,
+                        "error": "LeavePolicy with this name already exists.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             # automatically set created_by if needed
@@ -71,9 +75,17 @@ class LeavePolicyDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             instance = self.get_object()
             name = request.data.get("name")
-            if name and LeavePolicy.objects.exclude(id=instance.id).filter(name__iexact=name).exists():
+            if (
+                name
+                and LeavePolicy.objects.exclude(id=instance.id)
+                .filter(name__iexact=name)
+                .exists()
+            ):
                 return Response(
-                    {"success": False, "error": "Another LeavePolicy with this name already exists."},
+                    {
+                        "success": False,
+                        "error": "Another LeavePolicy with this name already exists.",
+                    },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -91,7 +103,10 @@ class LeavePolicyDetailView(generics.RetrieveUpdateDestroyAPIView):
         try:
             instance = self.get_object()
             instance.delete()
-            return Response({"success": True, "message": "LeavePolicy deleted successfully."}, status=status.HTTP_200_OK)
+            return Response(
+                {"success": True, "message": "LeavePolicy deleted successfully."},
+                status=status.HTTP_200_OK,
+            )
         except Exception as exc:
             logger.error(f"Error deleting LeavePolicy: {exc}")
             return Response(

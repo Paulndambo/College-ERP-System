@@ -84,6 +84,25 @@ class StudentFeeStatementListSerializer(serializers.ModelSerializer):
             "debit",
             "semester",
             "statement_type",
+            "reference",
+            "payment_method",
+            "student",
+        ]
+class AllFeeStatementListSerializer(serializers.ModelSerializer):
+    student = MinimalStudentSerializer()
+    semester = SemesterListSerializer()
+
+    class Meta:
+        model = StudentFeeStatement
+        fields = [
+            "id",
+            "balance",
+            "credit",
+            "debit",
+            "semester",
+            "statement_type",
+            "reference",
+            "payment_method",
             "student",
         ]
 
@@ -117,16 +136,14 @@ class StudentFeePaymentSerializer(serializers.Serializer):
     payment_method = serializers.ChoiceField(choices=["Mpesa", "Cash", "Bank Transfer"])
     semester = serializers.IntegerField(required=False)
 
+
 class InvoiceTypeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvoiceType
-        fields = ["id", "name", "description", "is_fee_type", "is_active"]
+        fields = "__all__"
 
 
 class CreateAndUpdateInvoiceTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = InvoiceType
-        fields = [ "name", 
-                  "description",
-                #   "is_fee_type", 
-                  "is_active"]
+        fields = ["name", "description", "is_fee_type", "is_active"]

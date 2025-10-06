@@ -7,10 +7,17 @@ from rest_framework import status, generics
 
 
 from apps.students.models import (
-    Student, StudentAttendance, StudentDocument, MealCard, SemesterReporting
+    Student,
+    StudentAttendance,
+    StudentDocument,
+    MealCard,
+    SemesterReporting,
 )
 from apps.studentsportal.students.serializers import (
-    MealCardSerializer, StudentAttendanceSerializer, SemesterReportingSerializer, ExamDataSerializer
+    MealCardSerializer,
+    StudentAttendanceSerializer,
+    SemesterReportingSerializer,
+    ExamDataSerializer,
 )
 from apps.exams.models import ExamData
 
@@ -28,7 +35,7 @@ class MealCardAPIView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class StudentAttendanceAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -42,7 +49,7 @@ class StudentAttendanceAPIView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class SemesterReportingAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -56,7 +63,7 @@ class SemesterReportingAPIView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class ExamDataAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]

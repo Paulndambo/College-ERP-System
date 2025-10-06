@@ -10,72 +10,148 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Book',
+            name="Book",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('title', models.CharField(max_length=200)),
-                ('author', models.CharField(max_length=100)),
-                ('category', models.CharField(choices=[('Book', 'Book'), ('Journal', 'Journal'), ('Digital', 'Digital')], max_length=50)),
-                ('isbn', models.CharField(blank=True, max_length=13, null=True, unique=True)),
-                ('publication_date', models.DateField(blank=True, null=True)),
-                ('copies_available', models.PositiveIntegerField(default=1)),
-                ('total_copies', models.PositiveIntegerField(default=1)),
-                ('unit_price', models.DecimalField(decimal_places=2, default=0, max_digits=100)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("title", models.CharField(max_length=200)),
+                ("author", models.CharField(max_length=100)),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("Book", "Book"),
+                            ("Journal", "Journal"),
+                            ("Digital", "Digital"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "isbn",
+                    models.CharField(blank=True, max_length=13, null=True, unique=True),
+                ),
+                ("publication_date", models.DateField(blank=True, null=True)),
+                ("copies_available", models.PositiveIntegerField(default=1)),
+                ("total_copies", models.PositiveIntegerField(default=1)),
+                (
+                    "unit_price",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=100),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Fine',
+            name="Fine",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('fine_per_day', models.DecimalField(decimal_places=2, default=0.5, max_digits=5)),
-                ('calculated_fine', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
-                ('paid', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "fine_per_day",
+                    models.DecimalField(decimal_places=2, default=0.5, max_digits=5),
+                ),
+                (
+                    "calculated_fine",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=7),
+                ),
+                ("paid", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Member',
+            name="Member",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('role', models.CharField(choices=[('Student', 'Student'), ('Staff', 'Staff')], max_length=50)),
-                ('date_joined', models.DateField(default=django.utils.timezone.now)),
-                ('active', models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[("Student", "Student"), ("Staff", "Staff")],
+                        max_length=50,
+                    ),
+                ),
+                ("date_joined", models.DateField(default=django.utils.timezone.now)),
+                ("active", models.BooleanField(default=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='BorrowTransaction',
+            name="BorrowTransaction",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('copy_number', models.CharField(blank=True, max_length=50, null=True)),
-                ('borrow_date', models.DateField(default=datetime.date.today)),
-                ('due_date', models.DateField(null=True)),
-                ('return_date', models.DateField(blank=True, null=True)),
-                ('status', models.CharField(choices=[('Returned', 'Returned'), ('Pending Return', 'Pending Return'), ('Lost', 'Lost')], default='Pending Return', max_length=255, null=True)),
-                ('book', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='library.book')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("copy_number", models.CharField(blank=True, max_length=50, null=True)),
+                ("borrow_date", models.DateField(default=datetime.date.today)),
+                ("due_date", models.DateField(null=True)),
+                ("return_date", models.DateField(blank=True, null=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Returned", "Returned"),
+                            ("Pending Return", "Pending Return"),
+                            ("Lost", "Lost"),
+                        ],
+                        default="Pending Return",
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                (
+                    "book",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="library.book"
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

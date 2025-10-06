@@ -46,15 +46,28 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "role", "is_verified"]
 
+
 class UserDetailedSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "first_name", "last_name", "phone_number", "role"]
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "role",
+        ]
+
     def get_role(self, obj):
-        from apps.core.serializers import UserRoleListSerializer  
+        from apps.core.serializers import UserRoleListSerializer
+
         return UserRoleListSerializer(obj.role).data if obj.role else None
+
+
 class AdminUserSerializer(serializers.ModelSerializer):
     role = UserRoleSerializer()
 
@@ -216,11 +229,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Get role with permissions
         role_data = None
         if user.role:
-            permissions = RolePermission.objects.filter(role=user.role).select_related("module")
+            permissions = RolePermission.objects.filter(role=user.role).select_related(
+                "module"
+            )
             role_data = {
                 "id": user.role.id,
                 "name": user.role.name,
-                "permissions": RolePermissionSerializer(permissions, many=True).data
+                "permissions": RolePermissionSerializer(permissions, many=True).data,
             }
 
         token["user"] = {
@@ -237,13 +252,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
         from apps.core.serializers import RolePermissionSerializer
+
         role_data = None
         if self.user.role:
-            permissions = RolePermission.objects.filter(role=self.user.role).select_related("module")
+            permissions = RolePermission.objects.filter(
+                role=self.user.role
+            ).select_related("module")
             role_data = {
                 "id": self.user.role.id,
                 "name": self.user.role.name,
-                "permissions": RolePermissionSerializer(permissions, many=True).data
+                "permissions": RolePermissionSerializer(permissions, many=True).data,
             }
 
         data["user"] = {
@@ -253,10 +271,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
             "phone_number": self.user.phone_number,
-            "role": role_data
+            "role": role_data,
         }
 
         return data
+
+
 # class ForgotPasswordSerializer(serializers.Serializer):
 #     email = serializers.EmailField()
 

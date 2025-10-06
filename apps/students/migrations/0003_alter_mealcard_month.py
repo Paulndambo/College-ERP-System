@@ -6,13 +6,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('students', '0002_initial'),
+        ("students", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='mealcard',
-            name='month',
-            field=models.CharField(choices=[('January', 'January'), ('February', 'February'), ('March', 'March'), ('April', 'April'), ('May', 'May'), ('June', 'June'), ('July', 'July'), ('August', 'August'), ('September', 'September'), ('October', 'October'), ('November', 'November'), ('December', 'December')], default='October', max_length=255),
+            model_name="mealcard",
+            name="month",
+            field=models.CharField(
+                choices=[
+                    ("January", "January"),
+                    ("February", "February"),
+                    ("March", "March"),
+                    ("April", "April"),
+                    ("May", "May"),
+                    ("June", "June"),
+                    ("July", "July"),
+                    ("August", "August"),
+                    ("September", "September"),
+                    ("October", "October"),
+                    ("November", "November"),
+                    ("December", "December"),
+                ],
+                default="October",
+                max_length=255,
+            ),
         ),
     ]

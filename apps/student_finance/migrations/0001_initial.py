@@ -8,84 +8,203 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='InvoiceType',
+            name="InvoiceType",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('is_fee_type', models.BooleanField(default=False)),
-                ('is_active', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("is_fee_type", models.BooleanField(default=False)),
+                ("is_active", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentFeeInvoice',
+            name="StudentFeeInvoice",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('reference', models.CharField(max_length=255, null=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('amount_paid', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=10)),
-                ('status', models.CharField(choices=[('Pending', 'Pending'), ('Paid', 'Paid'), ('Partially Paid', 'Partially Paid')], default='Pending', max_length=255)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("reference", models.CharField(max_length=255, null=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "amount_paid",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=10
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("Pending", "Pending"),
+                            ("Paid", "Paid"),
+                            ("Partially Paid", "Partially Paid"),
+                        ],
+                        default="Pending",
+                        max_length=255,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentFeeLedger',
+            name="StudentFeeLedger",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('transaction_type', models.CharField(choices=[('Standard Invoice', 'Standard Invoice'), ('Student Payment', 'Student Payment'), ('Trip Invoice', 'Trip Invoice'), ('Graduation Invoice', 'Graduation Invoice')], max_length=255)),
-                ('debit', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=10)),
-                ('credit', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "transaction_type",
+                    models.CharField(
+                        choices=[
+                            ("Standard Invoice", "Standard Invoice"),
+                            ("Student Payment", "Student Payment"),
+                            ("Trip Invoice", "Trip Invoice"),
+                            ("Graduation Invoice", "Graduation Invoice"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "debit",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=10
+                    ),
+                ),
+                (
+                    "credit",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=10
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentFeePayment',
+            name="StudentFeePayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('reference', models.CharField(blank=True, max_length=255, null=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=10)),
-                ('payment_date', models.DateField()),
-                ('payment_method', models.CharField(choices=[('Mpesa', 'Mpesa'), ('Bank Transfer', 'Bank Transfer'), ('Cash', 'Cash')], max_length=255)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("reference", models.CharField(blank=True, max_length=255, null=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=10)),
+                ("payment_date", models.DateField()),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[
+                            ("Mpesa", "Mpesa"),
+                            ("Bank Transfer", "Bank Transfer"),
+                            ("Cash", "Cash"),
+                        ],
+                        max_length=255,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='StudentFeeStatement',
+            name="StudentFeeStatement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('reference', models.CharField(blank=True, max_length=255, null=True)),
-                ('payment_method', models.CharField(blank=True, choices=[('Mpesa', 'Mpesa'), ('Bank Transfer', 'Bank Transfer'), ('Cash', 'Cash')], max_length=255, null=True)),
-                ('statement_type', models.CharField(choices=[('Invoice', 'Invoice'), ('Payment', 'Payment')], max_length=255)),
-                ('debit', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=10)),
-                ('credit', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=10)),
-                ('balance', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=10)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("reference", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "payment_method",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("Mpesa", "Mpesa"),
+                            ("Bank Transfer", "Bank Transfer"),
+                            ("Cash", "Cash"),
+                        ],
+                        max_length=255,
+                        null=True,
+                    ),
+                ),
+                (
+                    "statement_type",
+                    models.CharField(
+                        choices=[("Invoice", "Invoice"), ("Payment", "Payment")],
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "debit",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=10
+                    ),
+                ),
+                (
+                    "credit",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=10
+                    ),
+                ),
+                (
+                    "balance",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=10
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

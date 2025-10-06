@@ -41,13 +41,12 @@ class SemesterReportingAdmin(admin.ModelAdmin):
     list_display = [
         "id",
         "student",
-
         "semester",
         # "academic_year",
         "created_on",
         "updated_on",
     ]
-    list_filter = [ "semester"]
+    list_filter = ["semester"]
     search_fields = [
         "student__user__first_name",
         "student__user__last_name",

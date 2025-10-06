@@ -8,199 +8,593 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='ApplicationDocument',
+            name="ApplicationDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('document_name', models.CharField(max_length=255)),
-                ('document_type', models.CharField(choices=[('certificate_of_incorporation', 'Certificate of Incorporation'), ('proposal_document', 'Proposal Document'), ('business_registration', 'Business Registration'), ('tax_compliance', 'Tax Compliance Certificate'), ('audited_financials', 'Audited Financial Statements'), ('bank_statements', 'Bank Statements'), ('tax_clearance', 'Tax Clearance Certificate'), ('professional_license', 'Professional License'), ('insurance_certificate', 'Insurance Certificate'), ('company_profile', 'Company Profile'), ('technical_proposal', 'Technical Proposal'), ('financial_proposal', 'Financial Proposal'), ('performance_bond', 'Performance Bond'), ('bid_security', 'Bid Security'), ('experience_certificates', 'Experience Certificates'), ('quality_certificates', 'Quality Certificates'), ('other', 'Other')], max_length=50)),
-                ('file', models.FileField(upload_to='application_documents/')),
-                ('description', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("document_name", models.CharField(max_length=255)),
+                (
+                    "document_type",
+                    models.CharField(
+                        choices=[
+                            (
+                                "certificate_of_incorporation",
+                                "Certificate of Incorporation",
+                            ),
+                            ("proposal_document", "Proposal Document"),
+                            ("business_registration", "Business Registration"),
+                            ("tax_compliance", "Tax Compliance Certificate"),
+                            ("audited_financials", "Audited Financial Statements"),
+                            ("bank_statements", "Bank Statements"),
+                            ("tax_clearance", "Tax Clearance Certificate"),
+                            ("professional_license", "Professional License"),
+                            ("insurance_certificate", "Insurance Certificate"),
+                            ("company_profile", "Company Profile"),
+                            ("technical_proposal", "Technical Proposal"),
+                            ("financial_proposal", "Financial Proposal"),
+                            ("performance_bond", "Performance Bond"),
+                            ("bid_security", "Bid Security"),
+                            ("experience_certificates", "Experience Certificates"),
+                            ("quality_certificates", "Quality Certificates"),
+                            ("other", "Other"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("file", models.FileField(upload_to="application_documents/")),
+                ("description", models.TextField(blank=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='GoodsReceived',
+            name="GoodsReceived",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('remarks', models.TextField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("remarks", models.TextField(blank=True, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='PurchaseItem',
+            name="PurchaseItem",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('description', models.CharField(blank=True, max_length=255, null=True)),
-                ('quantity', models.IntegerField()),
-                ('name', models.CharField(help_text="Short name of the item e.g., 'Office Desk'", max_length=100)),
-                ('unit_price', models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "description",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("quantity", models.IntegerField()),
+                (
+                    "name",
+                    models.CharField(
+                        help_text="Short name of the item e.g., 'Office Desk'",
+                        max_length=100,
+                    ),
+                ),
+                ("unit_price", models.DecimalField(decimal_places=2, max_digits=12)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='PurchaseItemReceipt',
+            name="PurchaseItemReceipt",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity_received', models.PositiveIntegerField()),
-                ('received_on', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity_received", models.PositiveIntegerField()),
+                ("received_on", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='PurchaseOrder',
+            name="PurchaseOrder",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('order_no', models.CharField(blank=True, max_length=20, null=True, unique=True)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('approved', 'Approved'), ('received', 'Received')], default='pending', max_length=20)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "order_no",
+                    models.CharField(blank=True, max_length=20, null=True, unique=True),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("approved", "Approved"),
+                            ("received", "Received"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Tender',
+            name="Tender",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('tender_document', models.FileField(blank=True, help_text='Upload tender details and terms document', null=True, upload_to='tender_docs/')),
-                ('title', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('deadline', models.DateField()),
-                ('start_date', models.DateField(blank=True, help_text='Expected start date of the tender execution', null=True)),
-                ('end_date', models.DateField(blank=True, help_text='Expected end date of the tender execution', null=True)),
-                ('status', models.CharField(choices=[('open', 'Open'), ('awarded', 'Awarded'), ('cancelled', 'Cancelled')], default='open', max_length=20)),
-                ('projected_amount', models.DecimalField(decimal_places=2, default=0.0, help_text='The projected cost for the tender', max_digits=12)),
-                ('actual_amount', models.DecimalField(decimal_places=2, default=0.0, help_text='The actual awarded amount for the tender', max_digits=12)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "tender_document",
+                    models.FileField(
+                        blank=True,
+                        help_text="Upload tender details and terms document",
+                        null=True,
+                        upload_to="tender_docs/",
+                    ),
+                ),
+                ("title", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                ("deadline", models.DateField()),
+                (
+                    "start_date",
+                    models.DateField(
+                        blank=True,
+                        help_text="Expected start date of the tender execution",
+                        null=True,
+                    ),
+                ),
+                (
+                    "end_date",
+                    models.DateField(
+                        blank=True,
+                        help_text="Expected end date of the tender execution",
+                        null=True,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("open", "Open"),
+                            ("awarded", "Awarded"),
+                            ("cancelled", "Cancelled"),
+                        ],
+                        default="open",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "projected_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="The projected cost for the tender",
+                        max_digits=12,
+                    ),
+                ),
+                (
+                    "actual_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="The actual awarded amount for the tender",
+                        max_digits=12,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='TenderApplication',
+            name="TenderApplication",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('vendor_no', models.CharField(blank=True, max_length=50, null=True)),
-                ('company_name', models.CharField(blank=True, max_length=255)),
-                ('email', models.EmailField(blank=True, max_length=254)),
-                ('phone', models.CharField(blank=True, max_length=20)),
-                ('address', models.TextField(blank=True)),
-                ('contact_person', models.CharField(blank=True, max_length=255, null=True)),
-                ('contact_person_phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('contact_person_email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('business_type', models.CharField(blank=True, choices=[('individual', 'Individual'), ('sole_proprietor', 'Sole Proprietor'), ('partnership', 'Partnership'), ('limited', 'Limited Company'), ('ngo', 'NGO'), ('government', 'Government'), ('other', 'Other')], help_text='Type of business applying', max_length=50, null=True)),
-                ('company_registration_number', models.CharField(blank=True, help_text='Business registration number', max_length=100)),
-                ('tax_pin', models.CharField(blank=True, help_text='KRA PIN or equivalent', max_length=100)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected'), ('incomplete', 'Incomplete')], default='incomplete', max_length=20)),
-                ('reviewed_on', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("vendor_no", models.CharField(blank=True, max_length=50, null=True)),
+                ("company_name", models.CharField(blank=True, max_length=255)),
+                ("email", models.EmailField(blank=True, max_length=254)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("address", models.TextField(blank=True)),
+                (
+                    "contact_person",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "contact_person_phone",
+                    models.CharField(blank=True, max_length=20, null=True),
+                ),
+                (
+                    "contact_person_email",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                (
+                    "business_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("individual", "Individual"),
+                            ("sole_proprietor", "Sole Proprietor"),
+                            ("partnership", "Partnership"),
+                            ("limited", "Limited Company"),
+                            ("ngo", "NGO"),
+                            ("government", "Government"),
+                            ("other", "Other"),
+                        ],
+                        help_text="Type of business applying",
+                        max_length=50,
+                        null=True,
+                    ),
+                ),
+                (
+                    "company_registration_number",
+                    models.CharField(
+                        blank=True,
+                        help_text="Business registration number",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "tax_pin",
+                    models.CharField(
+                        blank=True, help_text="KRA PIN or equivalent", max_length=100
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("approved", "Approved"),
+                            ("rejected", "Rejected"),
+                            ("incomplete", "Incomplete"),
+                        ],
+                        default="incomplete",
+                        max_length=20,
+                    ),
+                ),
+                ("reviewed_on", models.DateTimeField(blank=True, null=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='TenderAward',
+            name="TenderAward",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('status', models.CharField(choices=[('active', 'Active'), ('completed', 'Completed'), ('terminated', 'Terminated'), ('cancelled', 'Cancelled'), ('revoked', 'Revoked')], default='active', max_length=20)),
-                ('award_amount', models.DecimalField(decimal_places=2, default=0.0, help_text='The final agreed amount for the award', max_digits=12)),
-                ('amount_paid', models.DecimalField(decimal_places=2, default=0.0, help_text='Total amount paid to vendor for this award', max_digits=12)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Active"),
+                            ("completed", "Completed"),
+                            ("terminated", "Terminated"),
+                            ("cancelled", "Cancelled"),
+                            ("revoked", "Revoked"),
+                        ],
+                        default="active",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "award_amount",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="The final agreed amount for the award",
+                        max_digits=12,
+                    ),
+                ),
+                (
+                    "amount_paid",
+                    models.DecimalField(
+                        decimal_places=2,
+                        default=0.0,
+                        help_text="Total amount paid to vendor for this award",
+                        max_digits=12,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Vendor',
+            name="Vendor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('vendor_no', models.CharField(blank=True, max_length=20, null=True, unique=True)),
-                ('name', models.CharField(max_length=255)),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('phone', models.CharField(blank=True, max_length=20)),
-                ('address', models.TextField(blank=True)),
-                ('contact_person', models.CharField(blank=True, help_text='Name of the main contact at the company', max_length=255)),
-                ('contact_person_phone', models.CharField(blank=True, max_length=20)),
-                ('contact_person_email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('company_registration_number', models.CharField(blank=True, help_text='Company Registration Number or Business Number', max_length=100)),
-                ('tax_pin', models.CharField(blank=True, help_text='KRA PIN or equivalent', max_length=100)),
-                ('business_type', models.CharField(blank=True, choices=[('individual', 'Individual'), ('sole_proprietor', 'Sole Proprietor'), ('partnership', 'Partnership'), ('limited', 'Limited Company'), ('ngo', 'NGO'), ('government', 'Government'), ('other', 'Other')], help_text='Type of business', max_length=50, null=True)),
-                ('status', models.CharField(choices=[('active', 'Active'), ('inactive', 'Inactive'), ('blacklisted', 'Blacklisted')], default='active', max_length=20)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "vendor_no",
+                    models.CharField(blank=True, max_length=20, null=True, unique=True),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+                ("phone", models.CharField(blank=True, max_length=20)),
+                ("address", models.TextField(blank=True)),
+                (
+                    "contact_person",
+                    models.CharField(
+                        blank=True,
+                        help_text="Name of the main contact at the company",
+                        max_length=255,
+                    ),
+                ),
+                ("contact_person_phone", models.CharField(blank=True, max_length=20)),
+                (
+                    "contact_person_email",
+                    models.EmailField(blank=True, max_length=254, null=True),
+                ),
+                (
+                    "company_registration_number",
+                    models.CharField(
+                        blank=True,
+                        help_text="Company Registration Number or Business Number",
+                        max_length=100,
+                    ),
+                ),
+                (
+                    "tax_pin",
+                    models.CharField(
+                        blank=True, help_text="KRA PIN or equivalent", max_length=100
+                    ),
+                ),
+                (
+                    "business_type",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("individual", "Individual"),
+                            ("sole_proprietor", "Sole Proprietor"),
+                            ("partnership", "Partnership"),
+                            ("limited", "Limited Company"),
+                            ("ngo", "NGO"),
+                            ("government", "Government"),
+                            ("other", "Other"),
+                        ],
+                        help_text="Type of business",
+                        max_length=50,
+                        null=True,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("active", "Active"),
+                            ("inactive", "Inactive"),
+                            ("blacklisted", "Blacklisted"),
+                        ],
+                        default="active",
+                        max_length=20,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='VendorDocument',
+            name="VendorDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('document_name', models.CharField(max_length=255)),
-                ('document_type', models.CharField(choices=[('certificate_of_incorporation', 'Certificate of Incorporation'), ('proposal_document', 'Proposal Document'), ('business_registration', 'Business Registration'), ('tax_compliance', 'Tax Compliance Certificate'), ('audited_financials', 'Audited Financial Statements'), ('bank_statements', 'Bank Statements'), ('tax_clearance', 'Tax Clearance Certificate'), ('professional_license', 'Professional License'), ('insurance_certificate', 'Insurance Certificate'), ('company_profile', 'Company Profile'), ('technical_proposal', 'Technical Proposal'), ('financial_proposal', 'Financial Proposal'), ('performance_bond', 'Performance Bond'), ('bid_security', 'Bid Security'), ('experience_certificates', 'Experience Certificates'), ('quality_certificates', 'Quality Certificates'), ('other', 'Other')], max_length=50)),
-                ('document_file', models.FileField(upload_to='vendor_documents/')),
-                ('description', models.TextField(blank=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("document_name", models.CharField(max_length=255)),
+                (
+                    "document_type",
+                    models.CharField(
+                        choices=[
+                            (
+                                "certificate_of_incorporation",
+                                "Certificate of Incorporation",
+                            ),
+                            ("proposal_document", "Proposal Document"),
+                            ("business_registration", "Business Registration"),
+                            ("tax_compliance", "Tax Compliance Certificate"),
+                            ("audited_financials", "Audited Financial Statements"),
+                            ("bank_statements", "Bank Statements"),
+                            ("tax_clearance", "Tax Clearance Certificate"),
+                            ("professional_license", "Professional License"),
+                            ("insurance_certificate", "Insurance Certificate"),
+                            ("company_profile", "Company Profile"),
+                            ("technical_proposal", "Technical Proposal"),
+                            ("financial_proposal", "Financial Proposal"),
+                            ("performance_bond", "Performance Bond"),
+                            ("bid_security", "Bid Security"),
+                            ("experience_certificates", "Experience Certificates"),
+                            ("quality_certificates", "Quality Certificates"),
+                            ("other", "Other"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                ("document_file", models.FileField(upload_to="vendor_documents/")),
+                ("description", models.TextField(blank=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='VendorPayment',
+            name="VendorPayment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('description', models.TextField(blank=True, null=True)),
-                ('reference', models.CharField(max_length=50)),
-                ('payment_method', models.CharField(choices=[('Cash', 'Cash'), ('Bank', 'Bank Transfer'), ('Mpesa', 'Mpesa'), ('Cheque', 'Cheque')], max_length=50)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                ("description", models.TextField(blank=True, null=True)),
+                ("reference", models.CharField(max_length=50)),
+                (
+                    "payment_method",
+                    models.CharField(
+                        choices=[
+                            ("Cash", "Cash"),
+                            ("Bank", "Bank Transfer"),
+                            ("Mpesa", "Mpesa"),
+                            ("Cheque", "Cheque"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='VendorPaymentStatement',
+            name="VendorPaymentStatement",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('updated_on', models.DateTimeField(auto_now=True)),
-                ('statement_type', models.CharField(choices=[('Award', 'Award'), ('Payment', 'Payment')], max_length=20)),
-                ('debit', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=12)),
-                ('credit', models.DecimalField(decimal_places=2, default=0.0, max_digits=12)),
-                ('balance', models.DecimalField(decimal_places=2, default=0.0, max_digits=12)),
-                ('description', models.CharField(max_length=255)),
-                ('payment_method', models.CharField(blank=True, choices=[('Cash', 'Cash'), ('Bank', 'Bank Transfer'), ('Mpesa', 'Mpesa'), ('Cheque', 'Cheque')], max_length=50, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("created_on", models.DateTimeField(auto_now_add=True)),
+                ("updated_on", models.DateTimeField(auto_now=True)),
+                (
+                    "statement_type",
+                    models.CharField(
+                        choices=[("Award", "Award"), ("Payment", "Payment")],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "debit",
+                    models.DecimalField(
+                        decimal_places=2, default=Decimal("0"), max_digits=12
+                    ),
+                ),
+                (
+                    "credit",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=12),
+                ),
+                (
+                    "balance",
+                    models.DecimalField(decimal_places=2, default=0.0, max_digits=12),
+                ),
+                ("description", models.CharField(max_length=255)),
+                (
+                    "payment_method",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("Cash", "Cash"),
+                            ("Bank", "Bank Transfer"),
+                            ("Mpesa", "Mpesa"),
+                            ("Cheque", "Cheque"),
+                        ],
+                        max_length=50,
+                        null=True,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
     ]

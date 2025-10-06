@@ -361,13 +361,85 @@ class SemesterCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         try:
             data = request.data
+            academic_year_id = data.get("academic_year")
+            name = data.get("name")
+
+            # Duplicate check (same name in same academic_year)
+            if Semester.objects.filter(
+                name__iexact=name, academic_year_id=academic_year_id
+            ).exists():
+                return Response(
+                    {
+                        "success": False,
+                        "error": "A semester with this name already exists in the selected Academic Year.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except Exception as exc:
-            raise CustomAPIException(
-                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            # logger.error(f"Error creating Semester: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
+class SemesterDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Semester.objects.all()
+    serializer_class = SemesterCreateSerializer
+    lookup_field = "pk"
+
+    def update(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            data = request.data
+            academic_year_id = data.get("academic_year", instance.academic_year_id)
+            name = data.get("name", instance.name)
+
+            # Duplicate check excluding current
+            if (
+                Semester.objects.exclude(pk=instance.pk)
+                .filter(name__iexact=name, academic_year_id=academic_year_id)
+                .exists()
+            ):
+                return Response(
+                    {
+                        "success": False,
+                        "error": "Another semester with this name already exists in the selected Academic Year.",
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            serializer = self.get_serializer(instance, data=data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as exc:
+            # logger.error(f"Error updating Semester: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            instance.delete()
+            return Response(
+                {"success": True, "message": "Semester deleted successfully."},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as exc:
+            # logger.error(f"Error deleting Semester: {exc}")
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
@@ -398,31 +470,9 @@ class SemesterListView(generics.ListAPIView):
             serializer = self.get_serializer(semesters, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as exc:
-            raise CustomAPIException(
-                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-class SemesterUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Semester.objects.all()
-    serializer_class = SemesterCreateSerializer
-    lookup_field = "pk"
-    http_method_names = ["patch", "delete"]
-
-    def patch(self, request, *args, **kwargs):
-        try:
-            return super().patch(request, *args, **kwargs)
-        except Exception as exc:
-            raise CustomAPIException(
-                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-    def delete(self, request, *args, **kwargs):
-        try:
-            return super().delete(request, *args, **kwargs)
-        except Exception as exc:
-            raise CustomAPIException(
-                message=str(exc), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            return Response(
+                {"success": False, "error": f"Internal server error: {exc}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 

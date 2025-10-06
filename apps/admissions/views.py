@@ -15,6 +15,7 @@ from services.constants import ALL_ROLES, ALL_STAFF_ROLES, ROLE_STUDENT
 from services.permissions import HasUserRole
 from django.db.models import Count, F
 from datetime import datetime
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from .models import (
@@ -436,6 +437,8 @@ class StudentEnrollmentView(generics.CreateAPIView):
         application_id = data.get("application")
         cohort_id = data.get("cohort")
         campus_id = data.get("campus")
+        role_id = data.get("role")
+        provided_reg_no = data.get("registration_number")
 
         try:
             application = StudentApplication.objects.get(id=application_id)
@@ -447,11 +450,11 @@ class StudentEnrollmentView(generics.CreateAPIView):
             )
 
             try:
-                role = UserRole.objects.get(name="Student")
+                role = UserRole.objects.get(id=role_id)
             except UserRole.DoesNotExist:
-                raise CustomAPIException(
-                    message="UserRole 'Student' not found.",
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                return Response(
+                    {"success": False, "error": f"Role not found"},
+                    status=status.HTTP_404_NOT_FOUND,
                 )
             try:
                 cohort = ProgrammeCohort.objects.get(id=cohort_id)
@@ -463,20 +466,25 @@ class StudentEnrollmentView(generics.CreateAPIView):
             try:
                 campus = Campus.objects.get(id=campus_id)
             except Campus.DoesNotExist:
-                raise CustomAPIException(
-                    message="Campus not found.",
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                return Response(
+                    {"success": False, "error": f"Campus not found"},
+                    status=status.HTTP_404_NOT_FOUND,
                 )
 
             # registration_number = application.application_number
-            programme = application.first_choice_programme
-            level = getattr(programme, "level", "Bachelor")
-            year = (
-                cohort.intake.start_date.year
-                if cohort.intake and cohort.intake.start_date
-                else datetime.now().year
-            )
-            registration_number = generate_registration_number(programme, level, year)
+            if provided_reg_no:
+                registration_number = provided_reg_no
+            else:
+                programme = application.first_choice_programme
+                level = getattr(programme, "level", "Bachelor")
+                year = (
+                    cohort.intake.start_date.year
+                    if cohort.intake and cohort.intake.start_date
+                    else datetime.now().year
+                )
+                registration_number = generate_registration_number(
+                    programme, level, year
+                )
 
             try:
                 with transaction.atomic():
@@ -595,3 +603,40 @@ class EnrollmentsByIntakeView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         return Response(queryset)
+
+
+class StudentApplicationMetricsView(APIView):
+    """
+    Returns counts of StudentApplications by status.
+    Filterable by intake_id, campus_id, etc. via query params.
+    Example:
+      /api/v1/applications/metrics/?intake=3
+    """
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = StudentApplicationFilter
+
+    def get(self, request, *args, **kwargs):
+        # start with all applications
+        qs = StudentApplication.objects.all()
+
+        # apply your existing filterset
+        filterset = self.filterset_class(request.GET, queryset=qs)
+        qs = filterset.qs
+
+        # compute counts
+        total = qs.count()
+
+        metrics = {
+            "total": total,
+            "enrolled": qs.filter(status="Enrolled").count(),
+            "accepted": qs.filter(status="Accepted").count(),
+            "draft_or_new": qs.filter(
+                status__in=["Draft", "New", "Incomplete"]
+            ).count(),
+            # add any other status-based metrics you want:
+            "rejected": qs.filter(status="Rejected").count(),
+            "pending": qs.filter(status="Pending").count(),
+        }
+
+        return Response(metrics, status=status.HTTP_200_OK)

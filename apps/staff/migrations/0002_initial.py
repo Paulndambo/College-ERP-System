@@ -10,125 +10,211 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('schools', '0001_initial'),
-        ('staff', '0001_initial'),
+        ("schools", "0001_initial"),
+        ("staff", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='leavepolicy',
-            name='created_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='leave_policies_created', to=settings.AUTH_USER_MODEL),
+            model_name="leavepolicy",
+            name="created_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="leave_policies_created",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='payslipdeduction',
-            name='deduction',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staff.deduction'),
+            model_name="payslipdeduction",
+            name="deduction",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="staff.deduction"
+            ),
         ),
         migrations.AddField(
-            model_name='payslipdeduction',
-            name='payslip',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='deductions', to='staff.payslip'),
+            model_name="payslipdeduction",
+            name="payslip",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="deductions",
+                to="staff.payslip",
+            ),
         ),
         migrations.AddField(
-            model_name='staff',
-            name='department',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='schools.department'),
+            model_name="staff",
+            name="department",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="schools.department"
+            ),
         ),
         migrations.AddField(
-            model_name='staff',
-            name='user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="staff",
+            name="user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='payslip',
-            name='staff',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payslips', to='staff.staff'),
+            model_name="payslip",
+            name="staff",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payslips",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='overtimerecords',
-            name='staff',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staff.staff'),
+            model_name="overtimerecords",
+            name="staff",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="staff.staff"
+            ),
         ),
         migrations.AddField(
-            model_name='employmentcontract',
-            name='staff',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='staff.staff'),
+            model_name="employmentcontract",
+            name="staff",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="staff.staff"
+            ),
         ),
         migrations.AddField(
-            model_name='staffallowance',
-            name='allowance',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staff.allowance'),
+            model_name="staffallowance",
+            name="allowance",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="staff.allowance"
+            ),
         ),
         migrations.AddField(
-            model_name='staffallowance',
-            name='staff',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='allowances', to='staff.staff'),
+            model_name="staffallowance",
+            name="staff",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="allowances",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='staffcourseassignment',
-            name='course',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='staff_assignments', to='schools.course'),
+            model_name="staffcourseassignment",
+            name="course",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="staff_assignments",
+                to="schools.course",
+            ),
         ),
         migrations.AddField(
-            model_name='staffcourseassignment',
-            name='staff',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course_assignments', to='staff.staff'),
+            model_name="staffcourseassignment",
+            name="staff",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="course_assignments",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='staffdeduction',
-            name='deduction',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='staff_deductions', to='staff.deduction'),
+            model_name="staffdeduction",
+            name="deduction",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="staff_deductions",
+                to="staff.deduction",
+            ),
         ),
         migrations.AddField(
-            model_name='staffdeduction',
-            name='staff',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='staff_deductions', to='staff.staff'),
+            model_name="staffdeduction",
+            name="staff",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="staff_deductions",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='staffdocuments',
-            name='staff',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='staff.staff'),
+            model_name="staffdocuments",
+            name="staff",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="documents",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='staffleaveapplication',
-            name='leave_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='leave_applications', to='staff.leavepolicy'),
+            model_name="staffleaveapplication",
+            name="leave_type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="leave_applications",
+                to="staff.leavepolicy",
+            ),
         ),
         migrations.AddField(
-            model_name='staffleaveapplication',
-            name='staff',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='leave_applications', to='staff.staff'),
+            model_name="staffleaveapplication",
+            name="staff",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="leave_applications",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='staffleave',
-            name='application',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='staff.staffleaveapplication'),
+            model_name="staffleave",
+            name="application",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="staff.staffleaveapplication",
+            ),
         ),
         migrations.AddField(
-            model_name='staffleaveentitlement',
-            name='leave_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='balances', to='staff.leavepolicy'),
+            model_name="staffleaveentitlement",
+            name="leave_type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="balances",
+                to="staff.leavepolicy",
+            ),
         ),
         migrations.AddField(
-            model_name='staffleaveentitlement',
-            name='staff',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='leave_balances', to='staff.staff'),
+            model_name="staffleaveentitlement",
+            name="staff",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="leave_balances",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='staffpaymentmethod',
-            name='staff',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='payment_methods', to='staff.staff'),
+            model_name="staffpaymentmethod",
+            name="staff",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="payment_methods",
+                to="staff.staff",
+            ),
         ),
         migrations.AddField(
-            model_name='staff',
-            name='position',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='staff.staffposition'),
+            model_name="staff",
+            name="position",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="staff.staffposition",
+            ),
         ),
         migrations.AddField(
-            model_name='staffstatutoryinfo',
-            name='staff',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='statutory_info', to='staff.staff'),
+            model_name="staffstatutoryinfo",
+            name="staff",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="statutory_info",
+                to="staff.staff",
+            ),
         ),
     ]

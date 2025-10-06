@@ -10,29 +10,42 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('core', '0001_initial'),
+        ("core", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='checkin',
-            name='recorded_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='checkinofficers', to=settings.AUTH_USER_MODEL),
+            model_name="checkin",
+            name="recorded_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="checkinofficers",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='checkin',
-            name='user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="checkin",
+            name="user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='rolepermission',
-            name='module',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.module'),
+            model_name="rolepermission",
+            name="module",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.module"
+            ),
         ),
         migrations.AddField(
-            model_name='rolepermission',
-            name='role',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.userrole'),
+            model_name="rolepermission",
+            name="role",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.userrole"
+            ),
         ),
     ]

@@ -1,4 +1,4 @@
-from apps.core.serializers import CampusListSerializer
+from apps.core.serializers import AcademicYearListSerializer, CampusListSerializer
 from apps.marketing.serializers import LeadListDetailSerializer
 from apps.schools.serializers import ProgrammeListSerializer
 from rest_framework import serializers
@@ -20,6 +20,7 @@ class IntakeCreateSerializer(serializers.ModelSerializer):
 
 
 class IntakeListDetailSerializer(serializers.ModelSerializer):
+    academic_year = AcademicYearListSerializer()
     class Meta:
         model = Intake
         fields = "__all__"
@@ -195,6 +196,8 @@ class StudentEnrollmentSerializer(serializers.Serializer):
     application_id = serializers.IntegerField(required=True)
     cohort_id = serializers.IntegerField(required=True)
     campus_id = serializers.IntegerField(required=True)
+    role = serializers.IntegerField(required=True)
+    registration_number = serializers.CharField(required=False)
 
     def validate(self, data):
 

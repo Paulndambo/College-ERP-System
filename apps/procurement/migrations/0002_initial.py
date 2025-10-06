@@ -10,120 +10,205 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('inventory', '0002_initial'),
-        ('procurement', '0001_initial'),
+        ("inventory", "0002_initial"),
+        ("procurement", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='goodsreceived',
-            name='received_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="goodsreceived",
+            name="received_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='purchaseitem',
-            name='category',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventory.category'),
+            model_name="purchaseitem",
+            name="category",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="inventory.category",
+            ),
         ),
         migrations.AddField(
-            model_name='purchaseitem',
-            name='unit',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='inventory.unitofmeasure'),
+            model_name="purchaseitem",
+            name="unit",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="inventory.unitofmeasure",
+            ),
         ),
         migrations.AddField(
-            model_name='purchaseitemreceipt',
-            name='goods_received',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='procurement.goodsreceived'),
+            model_name="purchaseitemreceipt",
+            name="goods_received",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="procurement.goodsreceived",
+            ),
         ),
         migrations.AddField(
-            model_name='purchaseitemreceipt',
-            name='purchase_item',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='procurement.purchaseitem'),
+            model_name="purchaseitemreceipt",
+            name="purchase_item",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="procurement.purchaseitem",
+            ),
         ),
         migrations.AddField(
-            model_name='purchaseorder',
-            name='created_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="purchaseorder",
+            name="created_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='purchaseitem',
-            name='purchase_order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='items', to='procurement.purchaseorder'),
+            model_name="purchaseitem",
+            name="purchase_order",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="items",
+                to="procurement.purchaseorder",
+            ),
         ),
         migrations.AddField(
-            model_name='goodsreceived',
-            name='purchase_order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='procurement.purchaseorder'),
+            model_name="goodsreceived",
+            name="purchase_order",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="procurement.purchaseorder",
+            ),
         ),
         migrations.AddField(
-            model_name='tender',
-            name='created_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="tender",
+            name="created_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='tenderapplication',
-            name='reviewed_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviewed_applications', to=settings.AUTH_USER_MODEL),
+            model_name="tenderapplication",
+            name="reviewed_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="reviewed_applications",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='tenderapplication',
-            name='tender',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='applications', to='procurement.tender'),
+            model_name="tenderapplication",
+            name="tender",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="applications",
+                to="procurement.tender",
+            ),
         ),
         migrations.AddField(
-            model_name='applicationdocument',
-            name='application',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='procurement.tenderapplication'),
+            model_name="applicationdocument",
+            name="application",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="documents",
+                to="procurement.tenderapplication",
+            ),
         ),
         migrations.AddField(
-            model_name='tenderaward',
-            name='created_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="tenderaward",
+            name="created_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='tenderaward',
-            name='tender',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='awards', to='procurement.tender'),
+            model_name="tenderaward",
+            name="tender",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="awards",
+                to="procurement.tender",
+            ),
         ),
         migrations.AddField(
-            model_name='tenderaward',
-            name='vendor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='awarded_tenders', to='procurement.vendor'),
+            model_name="tenderaward",
+            name="vendor",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="awarded_tenders",
+                to="procurement.vendor",
+            ),
         ),
         migrations.AddField(
-            model_name='purchaseorder',
-            name='vendor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='procurement.vendor'),
+            model_name="purchaseorder",
+            name="vendor",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="procurement.vendor"
+            ),
         ),
         migrations.AddField(
-            model_name='vendordocument',
-            name='source_application',
-            field=models.ForeignKey(blank=True, help_text='Application this document was copied from', null=True, on_delete=django.db.models.deletion.SET_NULL, to='procurement.tenderapplication'),
+            model_name="vendordocument",
+            name="source_application",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Application this document was copied from",
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="procurement.tenderapplication",
+            ),
         ),
         migrations.AddField(
-            model_name='vendordocument',
-            name='vendor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='documents', to='procurement.vendor'),
+            model_name="vendordocument",
+            name="vendor",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="documents",
+                to="procurement.vendor",
+            ),
         ),
         migrations.AddField(
-            model_name='vendorpayment',
-            name='paid_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="vendorpayment",
+            name="paid_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='vendorpayment',
-            name='tender_award',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='procurement.tenderaward'),
+            model_name="vendorpayment",
+            name="tender_award",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="procurement.tenderaward",
+            ),
         ),
         migrations.AddField(
-            model_name='vendorpaymentstatement',
-            name='tender_award',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='procurement.tenderaward'),
+            model_name="vendorpaymentstatement",
+            name="tender_award",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="procurement.tenderaward",
+            ),
         ),
         migrations.AddField(
-            model_name='vendorpaymentstatement',
-            name='vendor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='procurement.vendor'),
+            model_name="vendorpaymentstatement",
+            name="vendor",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="procurement.vendor"
+            ),
         ),
     ]

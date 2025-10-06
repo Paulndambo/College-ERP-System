@@ -10,29 +10,44 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('accounting', '0001_initial'),
+        ("accounting", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='journalentry',
-            name='created_by',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="journalentry",
+            name="created_by",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='journalentry',
-            name='reversed_entry',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='accounting.journalentry'),
+            model_name="journalentry",
+            name="reversed_entry",
+            field=models.OneToOneField(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="accounting.journalentry",
+            ),
         ),
         migrations.AddField(
-            model_name='transaction',
-            name='account',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='accounting.account'),
+            model_name="transaction",
+            name="account",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="accounting.account"
+            ),
         ),
         migrations.AddField(
-            model_name='transaction',
-            name='journal',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='transactions', to='accounting.journalentry'),
+            model_name="transaction",
+            name="journal",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="transactions",
+                to="accounting.journalentry",
+            ),
         ),
     ]
