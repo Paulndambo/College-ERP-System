@@ -1,4 +1,5 @@
 from apps.core.models import StudyYear
+from apps.core.serializers import StudyYearListSerializer
 from apps.schools.models import Course, ProgrammeCohort, Semester
 from apps.schools.serializers import (
     CourseListSerializer,
@@ -78,7 +79,7 @@ class ExamDataListSerializer(serializers.ModelSerializer):
     student = StudentListSerializer()
     semester = SemesterListSerializer()
     recorded_by = UserSerializer()
-
+    study_year = StudyYearListSerializer()
     class Meta:
         model = ExamData
         fields = [
@@ -93,6 +94,7 @@ class ExamDataListSerializer(serializers.ModelSerializer):
             "exam_marks",
             "total_marks",
             "grade",
+            "study_year",
         ]
 
 
