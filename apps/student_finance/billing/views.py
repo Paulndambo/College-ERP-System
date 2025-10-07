@@ -281,10 +281,16 @@ class FeeStatementReportsAPIView(APIView):
         semester_id = request.query_params.get("semester")
         academic_year = request.query_params.get("academic_year")  # optional filter
 
-        if not semester_id:
-            return Response({"error": "Semester is required"}, status=400)
+        if not (registration_number or cohort_id):
+            return Response(
+                {"error": "Provide either registration_number or cohort"},
+                status=400,
+            )
 
-        semester = get_object_or_404(Semester, id=semester_id)
+
+        semester = None
+        if semester_id:
+            semester = get_object_or_404(Semester, id=semester_id)
 
         if registration_number:
             return self.process_single_statement(registration_number, semester, academic_year)
@@ -293,7 +299,7 @@ class FeeStatementReportsAPIView(APIView):
             return self.process_bulk_statement(cohort_id, semester, academic_year)
 
         return Response(
-            {"error": "Provide either registration_number or cohort"}, status=400
+            {"error": "Provide either registration number or cohort and semester or academic year"}, status=400
         )
 
     def process_single_statement(self, registration_number, semester, academic_year):
@@ -305,7 +311,11 @@ class FeeStatementReportsAPIView(APIView):
                     status=404
                 )
 
-            qs = StudentFeeStatement.objects.filter(student=student, semester=semester)
+            qs = StudentFeeStatement.objects.filter(student=student)
+
+            if semester:
+                qs = qs.filter(semester=semester)
+
             if academic_year:
                 qs = qs.filter(semester__academic_year=academic_year)
 
@@ -319,6 +329,7 @@ class FeeStatementReportsAPIView(APIView):
             logger.error(f"Error fetching statement for {registration_number}: {e}")
             return Response({"error": "Error fetching student fee statement"}, status=500)
 
+
     def process_bulk_statement(self, cohort_id, semester, academic_year):
         try:
             students = Student.objects.filter(cohort_id=cohort_id)
@@ -327,11 +338,16 @@ class FeeStatementReportsAPIView(APIView):
 
             results = []
             for student in students:
-                qs = StudentFeeStatement.objects.filter(student=student, semester=semester)
+                qs = StudentFeeStatement.objects.filter(student=student)
+
+                if semester:
+                    qs = qs.filter(semester=semester)
+
                 if academic_year:
                     qs = qs.filter(semester__academic_year=academic_year)
 
                 qs = qs.order_by("-created_on")
+
                 if qs.exists():
                     student.fee_statements = qs
                     results.append(student)
