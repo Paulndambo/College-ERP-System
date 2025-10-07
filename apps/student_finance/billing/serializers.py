@@ -1,4 +1,4 @@
-# apps/student_finance/serializers.py
+from decimal import Decimal
 from rest_framework import serializers
 from apps.students.models import Student
 from apps.schools.models import ProgrammeCohort, Semester
@@ -63,7 +63,7 @@ class StudentFeeStatementsSerializer(serializers.ModelSerializer):
     statements = FeeStatementDetailSerializer(source="fee_statements", many=True)
     programme = serializers.StringRelatedField()
     cohort = serializers.StringRelatedField()
-
+    balance = serializers.SerializerMethodField()
     class Meta:
         model = Student
         fields = [
@@ -72,5 +72,28 @@ class StudentFeeStatementsSerializer(serializers.ModelSerializer):
             "name",
             "programme",
             "cohort",
+            "balance",
             "statements",
         ]
+        
+    def get_balance(self, obj):
+        """
+            Compute current balance from the student's statements.
+            If none, return "0.00"
+        """
+        fee_statements = getattr(obj, "fee_statements", [])
+        if not fee_statements:
+            return "0.00"
+
+        # Take the last statement balance, or compute manually
+        latest_balance = fee_statements.order_by("-created_on").first().balance
+        return str(latest_balance or Decimal("0.00"))
+        # manual computing
+        # def get_balance(self, obj):
+        #     fee_statements = getattr(obj, "fee_statements", [])
+        #     if not fee_statements:
+        #         return "0.00"
+
+        #     total_debit = sum(Decimal(fs.debit) for fs in fee_statements)
+        #     total_credit = sum(Decimal(fs.credit) for fs in fee_statements)
+        #     return str(total_debit - total_credit)
